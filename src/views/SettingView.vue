@@ -1,9 +1,12 @@
 <template>
     <div class="container">
-        <div>
-            <p>theme</p>
-            <button @click="toggleTheme">Toggle</button>
-            <v-icon size="large" color="green-darken-2" :icon="themeState"></v-icon>
+        <h1 class="setting-title">Settings</h1>
+        <div class="setting-container">
+            <div class="theme-mode">
+                <p>Theme:</p>
+                <v-btn @click="toggleTheme" :icon="themeState">
+                </v-btn>
+            </div>
         </div>
 
         <div class="pa-2 sign-out">
@@ -80,5 +83,17 @@ onMounted(() => {
 
 .sign-out {
     width: 10%;
+}
+
+.setting-container {
+    height: 100%;
+}
+
+.theme-mode {
+    font-size: larger;
+    display: flex;
+    align-items: center;
+    width: 12rem;
+    justify-content: space-between;
 }
 </style>

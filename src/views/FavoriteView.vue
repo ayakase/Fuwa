@@ -1,10 +1,12 @@
 <template>
     <div>
-        Favorite
+        <UploadWidget />
+        <img width="400" id="uploadedimage" src="" />
     </div>
 </template>
 
 <script setup>
+import UploadWidget from "../components/UploadWidget.vue";
 
 </script>
 

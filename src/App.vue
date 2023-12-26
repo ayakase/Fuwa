@@ -96,7 +96,6 @@ const handleSignOut = () => {
   });
 }
 onMounted(() => {
-  console.log(import.meta.env.VITE_HE)
   userStore.checkUser(auth.currentUser)
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
@@ -159,7 +158,7 @@ const toggleSecond = ref(false)
               @click="router.push('/messages')">
               <v-tooltip activator="parent" location="start">Message</v-tooltip>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-star" title="Favorite" value="starred">
+            <v-list-item prepend-icon="mdi-star" title="Favorite" value="starred" @click="router.push('/favorite')">
               <v-tooltip activator="parent" location="start">Favorite</v-tooltip>
             </v-list-item>
             <v-list-item prepend-icon="mdi-cog" title="Setting" value="setting" @click="router.push('/setting')">
@@ -172,7 +171,13 @@ const toggleSecond = ref(false)
             </v-list-item> -->
           </v-list>
 
-
+          <!-- <template v-slot:append>
+            <div class="pa-2">
+              <v-btn v-if="user" @click="handleSignOut()" class="" block>
+                Logout
+              </v-btn>
+            </div>
+          </template> -->
         </v-navigation-drawer>
         <!-- <div v-if="toggleSecond">
           <v-navigation-drawer>
@@ -181,7 +186,7 @@ const toggleSecond = ref(false)
                 @click="router.push('')"></v-list-item>
             </v-list>
           </v-navigation-drawer>
-        </div> -->
+      </div> -->
         <v-main class="main-container">
           <RouterView></RouterView>
         </v-main>

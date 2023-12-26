@@ -1,56 +1,66 @@
 <template>
     <div class="container">
-        <div>
-            <v-navigation-drawer @click="rail = false" class="box-view" :rail="rail">
-                <div class="message-top-bar">
-                    <v-btn icon="mdi-sort" variant="text"></v-btn>
-                    <v-btn v-if="!rail" variant="text" icon="mdi-chevron-left" @click.stop="rail = !rail"></v-btn>
-                </div>
-                <v-list>
-                    <v-list-item class="chat-box-container" v-if="boxes.length > 0" v-for="box in boxes" :key="box"
-                        :value="box.id">
-                        <div class="chat-box">
-                            <p>{{ box.title }}</p>
-                            <button class="delete-box-button" @click="deleteBox(box.title, box.id)"> <v-icon size="small"
-                                    icon="mdi-trash-can-outline"></v-icon>
-                            </button>
-                        </div>
-                    </v-list-item>
-                    <LoadingComponent v-else></LoadingComponent>
-                    <v-dialog width="500">
-                        <template v-slot:activator="{ props }">
-                            <v-btn class="add-box" v-bind="props">
-                                <span v-if="!rail">New Chat</span>
-                                <v-icon size="large" color="green-darken-2" icon="mdi-plus"></v-icon>
-                            </v-btn>
-                        </template>
+        <v-navigation-drawer class="box-view" :rail="rail">
+            <div class="message-top-bar">
+                <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn>
+                <v-btn v-if="!rail" variant="text" icon="mdi-chevron-left" @click="rail = !rail; console.log(rail)"></v-btn>
+                <v-btn v-if="rail" variant="text" icon="mdi-chevron-right" @click="rail = !rail; console.log(rail)"></v-btn>
+            </div>
+            <v-divider></v-divider>
+            <v-list>
+                <v-list-item :prepend-avatar="user.photoURL" class="chat-box-container" v-if="boxes.length > 0"
+                    v-for="box in boxes" :key="box" :value="box.id">
+                    <v-tooltip v-if="rail" activator="parent" location="end">{{ box.title }}</v-tooltip>
+                    <div class="chat-box">
+                        <p class="box-title" v-if="!rail">{{ box.title }}</p>
+                        <button class="delete-box-button" @click="deleteBox(box.title, box.id)"> <v-icon size="small"
+                                icon="mdi-trash-can-outline"></v-icon>
+                        </button>
+                    </div>
+                </v-list-item>
+                <LoadingComponent v-else></LoadingComponent>
+                <v-dialog width="500">
+                    <template v-slot:activator="{ props }">
+                        <v-btn class="add-box" v-bind="props">
+                            <span v-if="!rail">New Chat</span>
+                            <v-icon size="large" color="green-darken-2" icon="mdi-plus"></v-icon>
+                        </v-btn>
+                    </template>
 
-                        <template v-slot:default="{ isActive }">
-                            <v-card class="new-dialog">
-                                <v-card-title style="text-align: center;">New Chat Box</v-card-title>
-                                <v-text-field v-model="boxTitle" label="Box Name" required hide-details></v-text-field>
-                                <v-switch :label="publicState" v-model="state" inset></v-switch>
-                                <v-card-actions>
-                                    <v-spacer></v-spacer>
-                                    <v-btn text="Create new chat" @click="addBox();">
-                                    </v-btn>
-                                </v-card-actions>
-                            </v-card>
-                        </template>
-                    </v-dialog>
-                </v-list>
-            </v-navigation-drawer>
-            <div style="height: 100vh;">s</div>
-        </div>
+                    <template v-slot:default="{ isActive }">
+                        <v-card class="new-dialog">
+                            <v-card-title style="text-align: center;">New Chat Box</v-card-title>
+                            <v-text-field variant="underlined" v-model="boxTitle" label="Box Name" required
+                                hide-details></v-text-field>
+                            <v-text-field variant="underlined" v-model="boxPassword"
+                                label="Password (leave blank if you want to let people join freely)" required
+                                hide-details></v-text-field>
+                            <v-text-field variant="underlined" v-model="boxTitle" label="Box Name" required
+                                hide-details></v-text-field>
+
+                            <v-switch :label="publicState" v-model="state" inset></v-switch>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn text="Create new chat" @click="addBox();">
+                                </v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </template>
+                </v-dialog>
+            </v-list>
+            <!-- <div style="background-color: rebeccapurple;" @click="rail = false; console.log(rail)">ba</div> -->
+        </v-navigation-drawer>
+        <ChatBox></ChatBox>
     </div>
 </template>
 <!-- isActive.value = false -->
 <script setup >
 import { db } from '../firebaseConfig';
-import { collection, addDoc, doc, onSnapshot, query, deleteDoc, orderBy, where, Firestore, getDocs } from 'firebase/firestore';
+import { collection, addDoc, doc, onSnapshot, query, deleteDoc, orderBy, where, getDocs } from 'firebase/firestore';
 import { ref, watch, onMounted } from 'vue'
 import { useUserStore } from '../stores/userStore';
 import LoadingComponent from '../components/LoadingComponent.vue';
+import ChatBox from '../components/ChatBox.vue';
 const userStore = useUserStore()
 const user = ref()
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -65,8 +75,6 @@ async function retrieveDoc() {
     onSnapshot(listQuery, (snapshot) => {
         const boxesList = []
         snapshot.forEach((doc) => {
-            console.log(doc.data())
-            console.log(doc.data().id)
             boxesList.push({
                 id: doc.id,
                 title: doc.data().title
@@ -92,12 +100,11 @@ async function retrieveDoc() {
 // })
 onMounted(() => {
     onAuthStateChanged(auth, (firebaseUser) => {
-        console.log(firebaseUser.uid)
         user.value = firebaseUser
     })
     setTimeout(() => {
         retrieveDoc()
-    }, 1000);
+    }, 3000);
 
 
 })
@@ -110,6 +117,7 @@ function addBox() {
 
 async function addBoxToDb() {
     try {
+
         const userDocRef = doc(db, `users/${userStore.userId}`);
         const docRef = await addDoc(collection(db, "boxes"), {
             title: boxTitle.value,
@@ -187,5 +195,12 @@ watch(state, async (newValue, oldValue) => {
     flex-direction: row;
     width: 100%;
     justify-content: space-between;
+}
+
+.box-title {
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>
