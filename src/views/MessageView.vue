@@ -62,20 +62,6 @@ const { userId } = storeToRefs(userStore)
 const rail = ref(true)
 async function retrieveDoc() {
     const listQuery = query(collection(db, "boxes"), where('owner', '==', doc(db, `users/${userId.value}`)), orderBy('dateCreated', 'desc'))
-    const boxesList = []
-    const querySnapshot = await getDocs(listQuery)
-    querySnapshot.forEach((doc) => {
-        console.log(doc.data());
-        boxesList.push({
-            id: doc.id,
-            title: doc.data().title
-        });
-        boxes.value = boxesList
-
-    });
-}
-watch(userId, async (newValue, oldValue) => {
-    const listQuery = query(collection(db, "boxes"), where('owner', '==', doc(db, `users/${newValue}`)), orderBy('dateCreated', 'desc'))
     onSnapshot(listQuery, (snapshot) => {
         const boxesList = []
         snapshot.forEach((doc) => {
@@ -88,7 +74,22 @@ watch(userId, async (newValue, oldValue) => {
             boxes.value = boxesList
         });
     })
-})
+}
+// watch(userId, async (newValue, oldValue) => {
+//     const listQuery = query(collection(db, "boxes"), where('owner', '==', doc(db, `users/${newValue}`)), orderBy('dateCreated', 'desc'))
+//     onSnapshot(listQuery, (snapshot) => {
+//         const boxesList = []
+//         snapshot.forEach((doc) => {
+//             console.log(doc.data())
+//             console.log(doc.data().id)
+//             boxesList.push({
+//                 id: doc.id,
+//                 title: doc.data().title
+//             });
+//             boxes.value = boxesList
+//         });
+//     })
+// })
 onMounted(() => {
     onAuthStateChanged(auth, (firebaseUser) => {
         console.log(firebaseUser.uid)

@@ -172,13 +172,7 @@ const toggleSecond = ref(false)
             </v-list-item> -->
           </v-list>
 
-          <template v-slot:append>
-            <div class="pa-2">
-              <v-btn v-if="user" @click="handleSignOut()" class="" block>
-                Logout
-              </v-btn>
-            </div>
-          </template>
+
         </v-navigation-drawer>
         <!-- <div v-if="toggleSecond">
           <v-navigation-drawer>

@@ -5,17 +5,28 @@
             <button @click="toggleTheme">Toggle</button>
             <v-icon size="large" color="green-darken-2" :icon="themeState"></v-icon>
         </div>
+
+        <div class="pa-2 sign-out">
+            <v-btn color="error" v-if="user" @click="handleSignOut()" block>
+                Sign Out
+            </v-btn>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { computed } from 'vue';
 import { useTheme } from 'vuetify'
 import { useCookies } from "vue3-cookies";
 import { useToast } from 'vue-toast-notification';
+import { signOut, getAuth, onAuthStateChanged } from 'firebase/auth';
 import 'vue-toast-notification/dist/theme-sugar.css';
 const $toast = useToast();
+const auth = getAuth()
+import { useUserStore } from '../stores/userStore';
+const user = ref()
+const userStore = useUserStore()
 
 let { cookies } = useCookies()
 const theme = useTheme()
@@ -33,6 +44,15 @@ const themeState = computed(() => {
         return 'mdi-weather-sunny'
     }
 })
+const handleSignOut = () => {
+    signOut(auth).then(() => {
+        user.value = null
+        $toast.info('Signed Out');
+
+    }).catch((error) => {
+
+    });
+}
 onMounted(() => {
     const themeValue = cookies.get('theme');
     console.log(themeValue)
@@ -41,13 +61,24 @@ onMounted(() => {
         cookies.set('theme', 'light');
     }
     theme.global.name.value = cookies.get('theme')
+    onAuthStateChanged(auth, (firebaseUser) => {
+        console.log(firebaseUser.uid)
+        user.value = firebaseUser
+    })
 })
 </script>
 
 <style scoped>
 .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     height: 100%;
     width: 100%;
     padding: 2rem;
+}
+
+.sign-out {
+    width: 10%;
 }
 </style>

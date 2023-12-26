@@ -2,6 +2,7 @@
     <div class="container">
         Explore
     </div>
+    
 </template>
 
 <script setup>
