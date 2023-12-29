@@ -24,7 +24,7 @@ const signInWithGoogle = () => {
         .then((result) => {
             userStore.checkUser(result.user)
             console.log(userStore.user)
-            $toast.info('Logged in as ' + result.user.displayName);
+            $toast.success('Logged in as ' + result.user.displayName);
             router.push('/')
         }).catch((error) => {
             console.log(error);
