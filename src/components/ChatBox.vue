@@ -20,7 +20,7 @@
         <v-card class="message-received">
           {{ message }}
         </v-card>
-        <img :src="user.photoURL" class="avatar">
+        <!-- <img :src="user.photoURL" class="avatar"> -->
       </div>
       <div ref="bottomEl"></div>
     </div>

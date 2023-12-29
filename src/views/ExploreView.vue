@@ -3,11 +3,13 @@
         <v-text-field v-model="searchTerm" class="search-box" label="Search" prepend-icon="mdi-magnify" variant="underlined"
             @input="handleInput"></v-text-field>
         <div class="result-container">
-            <div v-if="resultBoxes">
-                <div v-for="box in resultBoxes" :key="box">
-                    {{ box.title }}
-                </div>
-            </div>
+            <v-card class="each-box" v-if="resultBoxes" v-for="box in resultBoxes" :title="box.title"
+                :text="box.description">
+                <v-card-actions>
+                    <v-btn>Join</v-btn>
+                </v-card-actions>
+            </v-card>
+
         </div>
     </div>
 </template>
@@ -62,6 +64,18 @@ onMounted(() => {
 }
 
 .result-container {
-    background-color: rebeccapurple;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.each-box {
+    width: 30%;
+    height: 15rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 </style>

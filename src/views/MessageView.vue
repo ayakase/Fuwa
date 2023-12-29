@@ -32,6 +32,8 @@
                             <v-card-title style="text-align: center;">New Chat Box</v-card-title>
                             <v-text-field variant="underlined" v-model="boxTitle" label="Box Name" required
                                 hide-details></v-text-field>
+                            <v-text-field variant="underlined" v-model="boxDescription" label="Box Description" required
+                                hide-details></v-text-field>
                             <v-text-field variant="underlined" v-model="boxPassword"
                                 label="Password (leave blank if you want to let people join freely)" required
                                 hide-details></v-text-field>
@@ -61,6 +63,10 @@ import { ref, watch, onMounted } from 'vue'
 import { useUserStore } from '../stores/userStore';
 import LoadingComponent from '../components/LoadingComponent.vue';
 import ChatBox from '../components/ChatBox.vue';
+import { useToast } from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+const $toast = useToast();
+
 const userStore = useUserStore()
 const user = ref()
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -122,11 +128,13 @@ async function addBoxToDb() {
         const docRef = await addDoc(collection(db, "boxes"), {
             title: boxTitle.value,
             owner: userDocRef,
+            members: [userDocRef],
+            description: boxDescription.value,
             isPublic: state.value,
             dateCreated: Date.now()
         });
         console.log("Document written with ID: ", docRef.id);
-
+        $toast.success("Created box chat " + boxTitle.value);
     }
     catch (e) {
         console.error("Error adding document: ", e);
@@ -137,6 +145,8 @@ async function deleteBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
         console.log("Document deleted");
         await deleteDoc(doc(db, "boxes", id));
+        $toast.info("Deleted box chat " + title);
+
     } else {
         console.log("Deletion cancelled");
     }
@@ -144,6 +154,7 @@ async function deleteBox(title, id) {
 const state = ref(false)
 const publicState = ref("private")
 const boxTitle = ref("")
+const boxDescription = ref("")
 watch(state, async (newValue, oldValue) => {
     if (newValue == true) {
         publicState.value = "Public"

@@ -17,10 +17,10 @@ let drawer = ref(true)
 const router = useRouter()
 const theme = useTheme()
 const auth = getAuth()
-const $toast = useToast();
 
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
+const $toast = useToast();
 
 const signInWithGoogle = () => {
   const provider = new GoogleAuthProvider()
@@ -121,7 +121,7 @@ const toggleSecond = ref(false)
   <div>
     <v-card>
       <v-layout>
-        <v-navigation-drawer :rail="rail" v-model="drawer" @click="rail = false">
+        <v-navigation-drawer v-if="user" :rail="rail" v-model="drawer" @click="rail = false">
           <v-list>
             <v-list-item v-if="!user">
               <v-menu location="end">

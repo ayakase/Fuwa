@@ -24,12 +24,14 @@ import { useTheme } from 'vuetify'
 import { useCookies } from "vue3-cookies";
 import { useToast } from 'vue-toast-notification';
 import { signOut, getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'vue-router'
 import 'vue-toast-notification/dist/theme-sugar.css';
 const $toast = useToast();
 const auth = getAuth()
 import { useUserStore } from '../stores/userStore';
 const user = ref()
 const userStore = useUserStore()
+const router = useRouter()
 
 let { cookies } = useCookies()
 const theme = useTheme()
@@ -51,9 +53,9 @@ const handleSignOut = () => {
     signOut(auth).then(() => {
         user.value = null
         $toast.info('Signed Out');
-
+        router.push('/login')
     }).catch((error) => {
-
+        console.log(error)
     });
 }
 onMounted(() => {
