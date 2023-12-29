@@ -73,4 +73,10 @@ const signInWithGoogle = () => {
     height: 10rem;
     width: 10rem;
 }
+
+@media only screen and (max-width: 800px) {
+    .login-bg {
+        display: none;
+    }
+}
 </style>
