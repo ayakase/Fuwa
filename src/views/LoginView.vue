@@ -46,7 +46,7 @@ const signInWithGoogle = () => {
 .login-btn {
     height: 3rem !important;
     font-size: large;
-    /* transform: translateY(-50px); */
+    transform: translateY(-100px);
 }
 
 .icon {
@@ -72,6 +72,8 @@ const signInWithGoogle = () => {
 .name-logo {
     height: 10rem;
     width: 10rem;
+    transform: translateY(-100px);
+
 }
 
 @media only screen and (max-width: 800px) {
