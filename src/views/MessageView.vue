@@ -131,6 +131,14 @@ async function addBoxToDb() {
             members: [userDocRef],
             description: boxDescription.value,
             isPublic: state.value,
+            messages: [
+                {
+                    content: "I created this Group!",
+                    timeSent: Date.now(),
+                    senderRef: userDocRef
+                },
+            ],
+            password: boxPassword.value,
             dateCreated: Date.now()
         });
         console.log("Document written with ID: ", docRef.id);
@@ -155,6 +163,7 @@ const state = ref(false)
 const publicState = ref("private")
 const boxTitle = ref("")
 const boxDescription = ref("")
+const boxPassword = ref("")
 watch(state, async (newValue, oldValue) => {
     if (newValue == true) {
         publicState.value = "Public"

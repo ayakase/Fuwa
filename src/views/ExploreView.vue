@@ -1,15 +1,16 @@
 <template>
     <div class="container">
+        <div v-if="userId"> {{ userId }}</div>
         <v-text-field v-model="searchTerm" class="search-box" label="Search" prepend-icon="mdi-magnify" variant="underlined"
             @input="handleInput"></v-text-field>
         <div class="result-container">
             <v-card class="each-box" v-if="resultBoxes" v-for="box in resultBoxes" :title="box.title"
                 :text="box.description">
                 <v-card-actions>
-                    <v-btn>Join</v-btn>
+                    <v-btn @click="joinBox(box.id)">Join</v-btn>
                 </v-card-actions>
             </v-card>
-
+            <div>{{ boxId }}</div>
         </div>
     </div>
 </template>
@@ -18,11 +19,16 @@
 import { ref, onMounted } from 'vue';
 import { getAuth, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut, signInWithPopup } from 'firebase/auth';
 import { db } from '../firebaseConfig';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, doc, getDocs, arrayUnion, query, where, updateDoc } from 'firebase/firestore';
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '../stores/userStore';
+
 const user = ref()
 const auth = getAuth()
 const searchTerm = ref("")
 const resultBoxes = ref([])
+const userStore = useUserStore()
+const { userId } = storeToRefs(userStore)
 async function fetchBoxes() {
     const response = []
     const querySnapshot = await getDocs(
@@ -35,10 +41,22 @@ async function fetchBoxes() {
         )
     );
     querySnapshot.forEach((doc) => {
-        response.push(doc.data());
+        response.push({
+            title: doc.data().title,
+            description: doc.data().description,
+            id: doc.id
+
+        });
     });
     console.log(response)
     resultBoxes.value = response
+}
+async function joinBox(id) {
+    const boxRef = doc(db, "boxes", id)
+    const userDocRef = doc(db, "users", userId.value);
+    await updateDoc(boxRef, {
+        members: arrayUnion(userDocRef)
+    });
 }
 let typingTimeout
 function handleInput() {
