@@ -13,17 +13,43 @@
 <script setup>
 import { useUserStore } from '../stores/userStore';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification';
+const auth = getAuth()
 const $toast = useToast();
 const router = useRouter()
 const userStore = useUserStore()
+async function addUserToDb(user) {
+    try {
+        const querySnapshot = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
+        console.log(querySnapshot)
+        if (!querySnapshot.empty) {
+            console.log("Email already exists in the database.");
+            return;
+        } else {
+            const docRef = await addDoc(collection(db, "users"), {
+                uid: user.uid,
+                displayName: user.displayName,
+                email: user.email,
+            });
+            console.log("Document written with ID: ", docRef.id);
+        }
+    }
+    catch (e) {
+        console.error("Error adding document: ", e);
+
+    }
+}
 const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider()
     signInWithPopup(getAuth(), provider)
         .then((result) => {
             userStore.checkUser(result.user)
             console.log(userStore.user)
+            addUserToDb(auth.currentUser)
             $toast.success('Logged in as ' + result.user.displayName);
             router.push('/')
         }).catch((error) => {
@@ -40,12 +66,14 @@ const signInWithGoogle = () => {
     align-items: center;
     width: 100%;
     height: 100%;
-    /* background-color: #202124; */
+    background-color: white;
 }
 
 .login-btn {
     height: 3rem !important;
     font-size: large;
+    background-color: white;
+    color: black;
 }
 
 .icon {
