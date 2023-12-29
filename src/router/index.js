@@ -5,6 +5,7 @@ import FavoriteView from '../views/FavoriteView.vue'
 import MessageView from '../views/MessageView.vue'
 import SettingView from '../views/SettingView.vue'
 import LoginView from '../views/LoginView.vue'
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut, signInWithPopup } from 'firebase/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
