@@ -95,11 +95,17 @@ const handleSignOut = () => {
 
   });
 }
+
 onMounted(() => {
-  userStore.checkUser(auth.currentUser)
+
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
     getUser(firebaseUser)
+    if (firebaseUser) {
+      console.log('yes');
+    } else {
+      console.log('no');
+    }
   });
   const themeValue = cookies.get('theme');
   console.log(themeValue)
