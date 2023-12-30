@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <div class="uw">
         <h3>Upload Widget Example</h3>
         <button v-on:click="open" id="upload_widget" class="cloudinary-button">
@@ -64,4 +64,19 @@ export default {
 };
 </script>
   
-  
+   -->
+   <template>
+    <div>
+   
+    </div>
+   </template>
+   
+   <script>
+    export default {
+        
+    }
+   </script>
+   
+   <style lang="scss" scoped>
+   
+   </style>
