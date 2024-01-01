@@ -19,8 +19,7 @@
         <v-card class="message-received">
           {{ message }}
         </v-card>
-        <div v-if="test">{{ test }}</div>
-
+        <div v-if="boxId">{{ boxId }}</div>
         <!-- <img :src="user.photoURL" class="avatar"> -->
       </div>
       <div ref="bottomEl"></div>

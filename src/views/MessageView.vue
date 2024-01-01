@@ -57,7 +57,6 @@
         <ChatBox :box-id="boxId" :test="test"></ChatBox>
     </div>
 </template>
-<!-- isActive.value = false -->
 <script setup >
 import { db } from '../firebaseConfig';
 import { collection, addDoc, doc, onSnapshot, query, deleteDoc, orderBy, where, getDocs } from 'firebase/firestore';
