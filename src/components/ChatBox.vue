@@ -33,7 +33,6 @@
     <EmojiPicker class="icon-board" v-if="toggleIcon" :native="true" @select="onSelectEmoji" />
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted, defineProps } from 'vue'
 import EmojiPicker from 'vue3-emoji-picker'
