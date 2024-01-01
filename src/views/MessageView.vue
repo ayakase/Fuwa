@@ -7,9 +7,11 @@
                 <v-btn v-if="rail" variant="text" icon="mdi-chevron-right" @click="rail = !rail; console.log(rail)"></v-btn>
             </div>
             <v-divider></v-divider>
+            <v-text-field v-model="test"></v-text-field>
+            <p>{{ test }}</p>
             <v-list>
-                <v-list-item :prepend-avatar="user.photoURL" class="chat-box-container" v-if="boxes.length > 0"
-                    v-for="box in boxes" :key="box" :value="box.id">
+                <v-list-item @click="selectBox(box.id)" :prepend-avatar="user.photoURL" class="chat-box-container"
+                    v-if="boxes.length > 0" v-for="box in boxes" :key="box" :value="box.id">
                     <v-tooltip v-if="rail" activator="parent" location="end">{{ box.title }}</v-tooltip>
                     <div class="chat-box">
                         <p class="box-title" v-if="!rail">{{ box.title }}</p>
@@ -52,7 +54,7 @@
             </v-list>
             <!-- <div style="background-color: rebeccapurple;" @click="rail = false; console.log(rail)">ba</div> -->
         </v-navigation-drawer>
-        <ChatBox></ChatBox>
+        <ChatBox :box-id="boxId" :test="test"></ChatBox>
     </div>
 </template>
 <!-- isActive.value = false -->
@@ -65,17 +67,22 @@ import LoadingComponent from '../components/LoadingComponent.vue';
 import ChatBox from '../components/ChatBox.vue';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { storeToRefs } from 'pinia'
 const $toast = useToast();
-
 const userStore = useUserStore()
 const user = ref()
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 const auth = getAuth()
-// const userId = ref()
 const boxes = ref([])
-import { storeToRefs } from 'pinia'
+const boxId = ref()
 const { userId } = storeToRefs(userStore)
 const rail = ref(true)
+const props = defineProps(['boxId', 'test'])
+const test = ref()
+function selectBox(id) {
+    boxId.value = id
+    console.log(boxId.value)
+}
 async function retrieveDoc() {
     const listQuery = query(collection(db, "boxes"), where('owner', '==', doc(db, `users/${userId.value}`)), orderBy('dateCreated', 'desc'))
     onSnapshot(listQuery, (snapshot) => {
@@ -123,26 +130,28 @@ function addBox() {
 
 async function addBoxToDb() {
     try {
-
         const userDocRef = doc(db, `users/${userStore.userId}`);
-        const docRef = await addDoc(collection(db, "boxes"), {
+        const newBox = await addDoc(collection(db, "boxes"), {
             title: boxTitle.value,
             owner: userDocRef,
             members: [userDocRef],
             description: boxDescription.value,
             isPublic: state.value,
-            messages: [
-                {
-                    content: "I created this Group!",
-                    timeSent: Date.now(),
-                    senderRef: userDocRef
-                },
-            ],
             password: boxPassword.value,
             dateCreated: Date.now()
         });
-        console.log("Document written with ID: ", docRef.id);
+
+        console.log("Document written with ID: ", newBox.id);
+        const boxDocRef = doc(db, `box/${newBox.id}`);
+        const newMessage = await addDoc(collection(db, "messages"), {
+            content: "I created this Group!",
+            timeSent: Date.now(),
+            senderRef: userDocRef,
+            boxRef: boxDocRef
+        })
+        console.log("Document written with ID: ", newMessage.id);
         $toast.success("Created box chat " + boxTitle.value);
+
     }
     catch (e) {
         console.error("Error adding document: ", e);

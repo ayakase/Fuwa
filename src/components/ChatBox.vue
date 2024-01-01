@@ -6,7 +6,6 @@
         <v-btn icon="mdi-magnify"></v-btn>
         <v-btn icon="mdi-dots-vertical"></v-btn>
       </div>
-
     </v-app-bar>
     <div v-if="user" class="message-container">
       <div class="each-message" v-for="x in 10">
@@ -20,6 +19,8 @@
         <v-card class="message-received">
           {{ message }}
         </v-card>
+        <div v-if="test">{{ test }}</div>
+
         <!-- <img :src="user.photoURL" class="avatar"> -->
       </div>
       <div ref="bottomEl"></div>
@@ -35,16 +36,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineProps } from 'vue'
 import EmojiPicker from 'vue3-emoji-picker'
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 const auth = getAuth()
 const user = ref()
 import 'vue3-emoji-picker/css'
+import { watch } from 'vue';
 const toggleIcon = ref(false)
 const messageContent = ref("")
 const sentMessages = ref(["hello"])
 const bottomEl = ref(null)
+const { boxId, test } = defineProps(['boxId', 'test']);
+watch(boxId, async (newValue, oldValue) => {
+  console.log(newValue)
+})
 function onSelectEmoji(emoji) {
   console.log(emoji.i)
   messageContent.value += emoji.i
@@ -70,7 +76,6 @@ onMounted(() => {
   setTimeout(() => {
     bottomEl.value.scrollIntoView({ behavior: 'smooth' })
   }, 1000);
-
 })
 </script>
 
