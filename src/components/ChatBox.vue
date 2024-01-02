@@ -95,7 +95,6 @@ async function sendMessage() {
   if (checkMessage.length === 0) {
     console.log("Empty Message");
   } else {
-    //send
     try {
       const userDocRef = doc(db, `users/${userStore.userId}`);
       const boxDocRef = doc(db, `box/${props.boxId}`);
@@ -114,6 +113,7 @@ async function sendMessage() {
     }
   }
 }
+
 onMounted(() => {
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
