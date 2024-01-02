@@ -20,6 +20,7 @@
           {{ message }}
         </v-card>
         <div v-if="boxId">{{ boxId }}</div>
+        <div v-if="test"> {{ test }}</div>
         <!-- <img :src="user.photoURL" class="avatar"> -->
       </div>
       <div ref="bottomEl"></div>
@@ -34,21 +35,21 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, defineProps } from 'vue'
 import EmojiPicker from 'vue3-emoji-picker'
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-const auth = getAuth()
-const user = ref()
 import 'vue3-emoji-picker/css'
 import { watch } from 'vue';
+import { ref, onMounted, defineProps, toRefs } from 'vue'
+const props = defineProps(['boxId', 'test']);
+const user = ref()
+const auth = getAuth()
 const toggleIcon = ref(false)
 const messageContent = ref("")
 const sentMessages = ref(["hello"])
 const bottomEl = ref(null)
-const { boxId, test } = defineProps(['boxId', 'test']);
-watch(boxId, async (newValue, oldValue) => {
-  console.log(newValue)
-})
+watch(() => props.boxId, (newBoxId, oldBoxId) => {
+  console.log(`${newBoxId}`);
+});
 function onSelectEmoji(emoji) {
   console.log(emoji.i)
   messageContent.value += emoji.i
@@ -68,9 +69,9 @@ function sendMessage() {
 }
 onMounted(() => {
   onAuthStateChanged(auth, (firebaseUser) => {
-    console.log(firebaseUser)
     user.value = firebaseUser
   })
+
   setTimeout(() => {
     bottomEl.value.scrollIntoView({ behavior: 'smooth' })
   }, 1000);

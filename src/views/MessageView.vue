@@ -3,8 +3,8 @@
         <v-navigation-drawer class="box-view" :rail="rail">
             <div class="message-top-bar">
                 <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn>
-                <v-btn v-if="!rail" variant="text" icon="mdi-chevron-left" @click="rail = !rail; console.log(rail)"></v-btn>
-                <v-btn v-if="rail" variant="text" icon="mdi-chevron-right" @click="rail = !rail; console.log(rail)"></v-btn>
+                <v-btn v-if="!rail" variant="text" icon="mdi-chevron-left" @click="rail = !rail"></v-btn>
+                <v-btn v-if="rail" variant="text" icon="mdi-chevron-right" @click="rail = !rail"></v-btn>
             </div>
             <v-divider></v-divider>
             <v-text-field v-model="test"></v-text-field>
@@ -54,7 +54,7 @@
             </v-list>
             <!-- <div style="background-color: rebeccapurple;" @click="rail = false; console.log(rail)">ba</div> -->
         </v-navigation-drawer>
-        <ChatBox :box-id="boxId" :test="test"></ChatBox>
+        <ChatBox :box-id="boxId" :test="test" v-if="boxId"></ChatBox>
     </div>
 </template>
 <script setup >
@@ -73,14 +73,13 @@ const userStore = useUserStore()
 const user = ref()
 const auth = getAuth()
 const boxes = ref([])
-const boxId = ref()
+const boxId = ref("")
 const { userId } = storeToRefs(userStore)
 const rail = ref(true)
 const props = defineProps(['boxId', 'test'])
 const test = ref()
 function selectBox(id) {
     boxId.value = id
-    console.log(boxId.value)
 }
 async function retrieveDoc() {
     const listQuery = query(collection(db, "boxes"), where('owner', '==', doc(db, `users/${userId.value}`)), orderBy('dateCreated', 'desc'))
