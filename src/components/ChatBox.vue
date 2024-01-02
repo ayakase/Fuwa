@@ -8,74 +8,140 @@
       </div>
     </v-app-bar>
     <div v-if="user" class="message-container">
-      <div class="each-message" v-for="x in 10">
-        <img :src="user.photoURL" class="avatar">
+      <div
+        v-if="messageArray"
+        class="each-message"
+        v-for="message in messageArray"
+      >
         <v-card class="message-received">
-          xin chao xin chao xin chao xin chao xin chao xin chao xin chao xin chao xin chao xin chao xin chao xin chao xin
-          chao xin chao
+          {{ message.content }}
+        </v-card>
+      </div>
+      <!-- <div class="each-message" v-for="x in 10">
+        <img :src="user.photoURL" class="avatar" />
+        <v-card class="message-received">
+          xin chao xin chao xin chao xin chao xin chao xin chao xin chao xin
+          chao xin chao xin chao xin chao xin chao xin chao xin chao
         </v-card>
       </div>
       <div class="each-message-sent" v-for="message in sentMessages">
         <v-card class="message-received">
           {{ message }}
         </v-card>
-        <div v-if="boxId">{{ boxId }}</div>
-        <div v-if="test"> {{ test }}</div>
-        <!-- <img :src="user.photoURL" class="avatar"> -->
-      </div>
+      </div> -->
       <div ref="bottomEl"></div>
     </div>
     <v-card class="send-container">
-      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="">
-      <v-btn @click="toggleIcon = !toggleIcon"><v-icon icon="mdi-emoticon-happy-outline"></v-icon>
+      <input
+        @keydown.enter="sendMessage()"
+        type="text"
+        class="message-box"
+        v-model="messageContent"
+        id=""
+      />
+      <v-btn @click="toggleIcon = !toggleIcon"
+        ><v-icon icon="mdi-emoticon-happy-outline"></v-icon>
       </v-btn>
       <v-btn @click="sendMessage">Send <v-icon icon="mdi-send"></v-icon></v-btn>
     </v-card>
-    <EmojiPicker class="icon-board" v-if="toggleIcon" :native="true" @select="onSelectEmoji" />
+    <EmojiPicker
+      class="icon-board"
+      v-if="toggleIcon"
+      :native="true"
+      @select="onSelectEmoji"
+    />
   </div>
 </template>
 <script setup>
-import EmojiPicker from 'vue3-emoji-picker'
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import 'vue3-emoji-picker/css'
-import { watch } from 'vue';
-import { ref, onMounted, defineProps, toRefs } from 'vue'
-const props = defineProps(['boxId', 'test']);
-const user = ref()
-const auth = getAuth()
-const toggleIcon = ref(false)
-const messageContent = ref("")
-const sentMessages = ref(["hello"])
-const bottomEl = ref(null)
-watch(() => props.boxId, (newBoxId, oldBoxId) => {
-  console.log(`${newBoxId}`);
-});
+import { db } from "../firebaseConfig";
+import {
+  collection,
+  addDoc,
+  doc,
+  onSnapshot,
+  query,
+  deleteDoc,
+  orderBy,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import EmojiPicker from "vue3-emoji-picker";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import "vue3-emoji-picker/css";
+import { watch } from "vue";
+import { ref, onMounted, toRefs } from "vue";
+import { useUserStore } from "../stores/userStore";
+const userStore = useUserStore();
+
+const props = defineProps(["boxId", "test"]);
+const user = ref();
+const auth = getAuth();
+const toggleIcon = ref(false);
+const messageContent = ref("");
+const sentMessages = ref(["hello"]);
+const bottomEl = ref(null);
+const messageArray = ref([]);
+watch(
+  () => props.boxId,
+  (newBoxId, oldBoxId) => {
+    const listQuery = query(
+      collection(db, "messages"),
+      where("boxRef", "==", doc(db, `box/${props.boxId}`)),
+      orderBy("timeSent", "asc")
+    );
+    onSnapshot(listQuery, (snapshot) => {
+      const messages = [];
+      snapshot.forEach((doc) => {
+        messages.push({
+          id: doc.id,
+          content: doc.data().content,
+        });
+
+        messageArray.value = messages;
+        console.log(messageArray.value);
+      });
+    });
+  }
+);
 function onSelectEmoji(emoji) {
-  console.log(emoji.i)
-  messageContent.value += emoji.i
+  console.log(emoji.i);
+  messageContent.value += emoji.i;
 }
-function sendMessage() {
-  let checkMessage = messageContent.value.trim()
+async function sendMessage() {
+  let checkMessage = messageContent.value.trim();
   if (checkMessage.length === 0) {
-    console.log("Empty Message")
+    console.log("Empty Message");
   } else {
-    sentMessages.value.push(messageContent.value)
-    toggleIcon.value = false
-    messageContent.value = ''
-    setTimeout(() => {
-      bottomEl.value.scrollIntoView({ behavior: 'smooth' })
-    }, 200);
+    //send
+    try {
+      const userDocRef = doc(db, `users/${userStore.userId}`);
+      const boxDocRef = doc(db, `box/${props.boxId}`);
+      const newMessage = await addDoc(collection(db, "messages"), {
+        content: messageContent.value,
+        timeSent: Date.now(),
+        senderRef: userDocRef,
+        boxRef: boxDocRef,
+      });
+      console.log("Document written with ID: ", newMessage.id);
+      toggleIcon.value = false;
+      messageContent.value = "";
+      setTimeout(() => {
+        bottomEl.value.scrollIntoView({ behavior: "smooth" });
+      }, 200);
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
 onMounted(() => {
   onAuthStateChanged(auth, (firebaseUser) => {
-    user.value = firebaseUser
-  })
+    user.value = firebaseUser;
+  });
 
   setTimeout(() => {
-    bottomEl.value.scrollIntoView({ behavior: 'smooth' })
+    bottomEl.value.scrollIntoView({ behavior: "smooth" });
   }, 1000);
-})
+});
 </script>
 
 <style scoped>
@@ -167,7 +233,6 @@ onMounted(() => {
 .avatar {
   height: 3rem;
   border-radius: 2rem;
-
 }
 
 .each-message-sent {
