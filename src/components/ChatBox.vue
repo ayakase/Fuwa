@@ -96,7 +96,6 @@ watch(
           id: doc.id,
           content: doc.data().content,
         });
-
         messageArray.value = messages;
         console.log(messageArray.value);
       });
