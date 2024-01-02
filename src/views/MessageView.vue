@@ -129,7 +129,7 @@ const auth = getAuth();
 const { userId } = storeToRefs(userStore);
 const rail = ref(true);
 const boxes = ref([]);
-const boxId  ref("");
+const boxId = ref("");
 const props = defineProps(["boxId", "test"]);
 const test = ref();
 function selectBox(id) {
