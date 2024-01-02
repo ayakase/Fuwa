@@ -8,11 +8,7 @@
       </div>
     </v-app-bar>
     <div v-if="user" class="message-container">
-      <div
-        v-if="messageArray"
-        class="each-message"
-        v-for="message in messageArray"
-      >
+      <div v-if="messageArray" class="each-message" v-for="message in messageArray">
         <v-card class="message-received">
           {{ message.content }}
         </v-card>
@@ -32,24 +28,12 @@
       <div ref="bottomEl"></div>
     </div>
     <v-card class="send-container">
-      <input
-        @keydown.enter="sendMessage()"
-        type="text"
-        class="message-box"
-        v-model="messageContent"
-        id=""
-      />
-      <v-btn @click="toggleIcon = !toggleIcon"
-        ><v-icon icon="mdi-emoticon-happy-outline"></v-icon>
+      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" />
+      <v-btn @click="toggleIcon = !toggleIcon"><v-icon icon="mdi-emoticon-happy-outline"></v-icon>
       </v-btn>
       <v-btn @click="sendMessage">Send <v-icon icon="mdi-send"></v-icon></v-btn>
     </v-card>
-    <EmojiPicker
-      class="icon-board"
-      v-if="toggleIcon"
-      :native="true"
-      @select="onSelectEmoji"
-    />
+    <EmojiPicker class="icon-board" v-if="toggleIcon" :native="true" @select="onSelectEmoji" />
   </div>
 </template>
 <script setup>
@@ -124,9 +108,7 @@ async function sendMessage() {
       console.log("Document written with ID: ", newMessage.id);
       toggleIcon.value = false;
       messageContent.value = "";
-      setTimeout(() => {
-        bottomEl.value.scrollIntoView({ behavior: "smooth" });
-      }, 200);
+      bottomEl.value.scrollIntoView({ behavior: "smooth" });
     } catch (e) {
       console.log(e);
     }
