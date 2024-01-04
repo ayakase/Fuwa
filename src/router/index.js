@@ -2,10 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import ExploreView from '../views/ExploreView.vue'
 import FavoriteView from '../views/FavoriteView.vue'
-import MessageView from '../views/MessageView.vue'
+import GroupsView from '../views/GroupsView.vue'
 import SettingView from '../views/SettingView.vue'
 import LoginView from '../views/LoginView.vue'
-import { getAuth, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut, signInWithPopup } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 const auth = getAuth()
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,9 +27,9 @@ const router = createRouter({
       }
     },
     {
-      path: '/messages',
-      name: 'messages',
-      component: MessageView,
+      path: '/groups',
+      name: 'groups',
+      component: GroupsView,
       meta: {
         requiresAuth: true,
       }
@@ -60,9 +60,20 @@ const router = createRouter({
     }
   ]
 })
-router.beforeEach((to, from, next) => {
+const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const removeListener = onAuthStateChanged(
+      getAuth(), (user) => {
+        removeListener()
+        resolve(user)
+      },
+      reject
+    )
+  })
+}
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (getAuth().currentUser) {
+    if (await getCurrentUser()) {
       next()
     } else {
       console.log('no auth ')

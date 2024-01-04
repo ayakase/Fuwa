@@ -20,7 +20,11 @@
                         </button>
                     </div>
                 </v-list-item>
+                <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You have not
+                    joined any
+                    chat</v-card-subtitle>
                 <LoadingComponent v-else></LoadingComponent>
+
                 <v-dialog width="500">
                     <template v-slot:activator="{ props }">
                         <v-btn class="add-box" v-bind="props">
@@ -89,6 +93,7 @@ const boxes = ref([]);
 const boxId = ref("");
 const props = defineProps(["boxId", "test"]);
 const test = ref();
+const hasBox = ref(true);
 function selectBox(id) {
     boxId.value = id;
 }
@@ -103,18 +108,24 @@ async function retrieveDoc() {
         where("members", "array-contains", doc(db, `users/${userId.value}`)),
         orderBy("dateCreated", "desc")
     )
-
-
     onSnapshot(listQuery, (snapshot) => {
         const boxesList = [];
-        snapshot.forEach((doc) => {
-            boxesList.push({
-                id: doc.id,
-                title: doc.data().title,
+        if (snapshot.docs.length > 0) {
+            snapshot.forEach((doc) => {
+                boxesList.push({
+                    id: doc.id,
+                    title: doc.data().title,
+                });
             });
             boxes.value = boxesList;
             boxId.value = boxes.value[0].id;
-        });
+
+            hasBox.value = true;
+        } else {
+            boxes.value = [];
+            hasBox.value = false;
+        }
+
     });
 }
 // watch(userId, async (newValue, oldValue) => {

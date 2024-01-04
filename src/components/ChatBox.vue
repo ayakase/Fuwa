@@ -12,6 +12,7 @@
         <v-card class="message-received">
           {{ message.content }}
         </v-card>
+        <v-card-subtitle>{{ convertTime(message.time) }}</v-card-subtitle>
       </div>
       <!-- <div class="each-message" v-for="x in 10">
         <img :src="user.photoURL" class="avatar" />
@@ -68,6 +69,7 @@ const messageArray = ref([]);
 watch(
   () => props.boxId,
   (newBoxId, oldBoxId) => {
+    console.log(newBoxId);
     const listQuery = query(
       collection(db, "messages"),
       where("boxRef", "==", doc(db, `box/${props.boxId}`)),
@@ -79,9 +81,10 @@ watch(
         messages.push({
           id: doc.id,
           content: doc.data().content,
+          time: doc.data().timeSent,
+
         });
         messageArray.value = messages;
-        console.log(messageArray.value);
       });
     });
   }
@@ -113,12 +116,31 @@ async function sendMessage() {
     }
   }
 }
-
+function convertTime(timestamp) {
+  const time = new Date(timestamp)
+  return time.toLocaleTimeString()
+}
 onMounted(() => {
+
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });
-
+  console.log(props.boxId);
+  const listQuery = query(
+    collection(db, "messages"),
+    where("boxRef", "==", doc(db, `box/${props.boxId}`)),
+    orderBy("timeSent", "asc")
+  );
+  onSnapshot(listQuery, (snapshot) => {
+    const messages = [];
+    snapshot.forEach((doc) => {
+      messages.push({
+        id: doc.id,
+        content: doc.data().content,
+      });
+      messageArray.value = messages;
+    });
+  });
   setTimeout(() => {
     bottomEl.value.scrollIntoView({ behavior: "smooth" });
   }, 1000);

@@ -1,12 +1,24 @@
 <template>
     <div class="container">
-        <h1 class="setting-title">Settings</h1>
+        <!-- <h1 class="setting-title">Settings</h1> -->
+
         <div class="setting-container">
-            <div class="theme-mode">
-                <p>Theme:</p>
-                <v-btn @click="toggleTheme" :icon="themeState">
-                </v-btn>
-            </div>
+            <v-card class="system-setting" variant="tonal">
+                <v-card-title style="padding: 0;font-size: 1.5rem;"> System settings</v-card-title>
+                <div class="theme-mode">
+                    <p>Theme:</p>
+                    <v-btn @click="toggleTheme" :icon="themeState">
+                    </v-btn>
+                </div>
+            </v-card>
+            <v-card class="profile-setting" variant="tonal">
+                <v-card-title style="padding: 0;font-size: 1.5rem;"> Profile settings</v-card-title>
+                <div class="theme-mode">
+                    <p>Theme:</p>
+                    <v-btn @click="toggleTheme" :icon="themeState">
+                    </v-btn>
+                </div>
+            </v-card>
         </div>
 
         <div class="pa-2 sign-out">
@@ -88,6 +100,9 @@ onMounted(() => {
 }
 
 .setting-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     height: 100%;
 }
 
@@ -95,7 +110,21 @@ onMounted(() => {
     font-size: larger;
     display: flex;
     align-items: center;
-    width: 12rem;
+    width: 10rem;
     justify-content: space-between;
+}
+
+.system-setting {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.profile-setting {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
 }
 </style>

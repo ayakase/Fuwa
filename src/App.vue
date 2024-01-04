@@ -137,9 +137,9 @@ const toggleSecond = ref(false)
             <v-list-item prepend-icon="mdi-earth" title="Explore" value="shared" @click="router.push('/explore')">
               <v-tooltip activator="parent" location="start">Explore</v-tooltip>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-message-processing-outline" title="Message" value="message"
-              @click="router.push('/messages')">
-              <v-tooltip activator="parent" location="start">Message</v-tooltip>
+            <v-list-item prepend-icon="mdi-message-processing-outline" title="Groups" value="message"
+              @click="router.push('/groups')">
+              <v-tooltip activator="parent" location="start">Groups</v-tooltip>
             </v-list-item>
             <v-list-item prepend-icon="mdi-star" title="Favorite" value="starred" @click="router.push('/favorite')">
               <v-tooltip activator="parent" location="start">Favorite</v-tooltip>
