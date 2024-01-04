@@ -13,19 +13,8 @@
           {{ message.content }}
         </v-card>
         <v-card-subtitle>{{ convertTime(message.time) }}</v-card-subtitle>
+        <p v-if="isSender(message.sender)">I sent</p>
       </div>
-      <!-- <div class="each-message" v-for="x in 10">
-        <img :src="user.photoURL" class="avatar" />
-        <v-card class="message-received">
-          xin chao xin chao xin chao xin chao xin chao xin chao xin chao xin
-          chao xin chao xin chao xin chao xin chao xin chao xin chao
-        </v-card>
-      </div>
-      <div class="each-message-sent" v-for="message in sentMessages">
-        <v-card class="message-received">
-          {{ message }}
-        </v-card>
-      </div> -->
       <div ref="bottomEl"></div>
     </div>
     <v-card class="send-container">
@@ -56,10 +45,13 @@ import "vue3-emoji-picker/css";
 import { watch } from "vue";
 import { ref, onMounted, toRefs } from "vue";
 import { useUserStore } from "../stores/userStore";
-const userStore = useUserStore();
+import { storeToRefs } from "pinia";
 
+const userStore = useUserStore();
 const props = defineProps(["boxId", "test"]);
 const user = ref();
+const { userId } = storeToRefs(userStore);
+
 const auth = getAuth();
 const toggleIcon = ref(false);
 const messageContent = ref("");
@@ -78,17 +70,22 @@ watch(
     onSnapshot(listQuery, (snapshot) => {
       const messages = [];
       snapshot.forEach((doc) => {
+        console.log(doc.data().timeSent);
         messages.push({
           id: doc.id,
           content: doc.data().content,
-          time: doc.data().timeSent,
-
+          sender: doc.data().senderRef,
+          time: doc.data().timeSent
         });
         messageArray.value = messages;
       });
     });
   }
 );
+function isSender(sender) {
+  console.log(`users/${userId.value}` == sender.path)
+  return (`users/${userId.value}` == sender.path)
+}
 function onSelectEmoji(emoji) {
   console.log(emoji.i);
   messageContent.value += emoji.i;
@@ -118,6 +115,7 @@ async function sendMessage() {
 }
 function convertTime(timestamp) {
   const time = new Date(timestamp)
+  console.log(timestamp)
   return time.toLocaleTimeString()
 }
 onMounted(() => {
@@ -137,6 +135,9 @@ onMounted(() => {
       messages.push({
         id: doc.id,
         content: doc.data().content,
+        time: doc.data().timeSent,
+        sender: doc.data().senderRef,
+
       });
       messageArray.value = messages;
     });

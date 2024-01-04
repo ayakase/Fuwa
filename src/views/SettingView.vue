@@ -64,8 +64,10 @@ const themeState = computed(() => {
 const handleSignOut = () => {
     signOut(auth).then(() => {
         user.value = null
-        $toast.info('Signed Out');
-        router.push('/login')
+        $toast.info('Signed Out, redirecting in 3s');
+        setTimeout(() => {
+            location.reload();
+        }, 3000);
     }).catch((error) => {
         console.log(error)
     });

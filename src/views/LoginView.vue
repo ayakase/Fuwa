@@ -34,6 +34,7 @@ async function addUserToDb(user) {
                 uid: user.uid,
                 displayName: user.displayName,
                 email: user.email,
+                avatar: user.photoURL
             });
             console.log("Document written with ID: ", docRef.id);
         }

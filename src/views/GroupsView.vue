@@ -15,7 +15,8 @@
                     }}</v-tooltip>
                     <div class="chat-box">
                         <p class="box-title" v-if="!rail">{{ box.title }}</p>
-                        <button class="delete-box-button" @click="deleteBox(box.title, box.id)">
+                        <button v-if="showDeleteBtn(box.owner)" class="delete-box-button"
+                            @click="deleteBox(box.title, box.id)">
                             <v-icon size="small" icon="mdi-trash-can-outline"></v-icon>
                         </button>
                     </div>
@@ -74,6 +75,7 @@ import {
     or,
     and,
     getDocs,
+
 } from "firebase/firestore";
 import { ref, watch, onMounted } from "vue";
 import { useUserStore } from "../stores/userStore";
@@ -115,6 +117,7 @@ async function retrieveDoc() {
                 boxesList.push({
                     id: doc.id,
                     title: doc.data().title,
+                    owner: doc.data().owner,
                 });
             });
             boxes.value = boxesList;
@@ -184,6 +187,12 @@ async function addBoxToDb() {
     } catch (e) {
         console.error("Error adding document: ", e);
     }
+}
+function showDeleteBtn(owner) {
+    // console.log(owner.path)
+    // console.log(`users/${userId.value}`)
+    console.log(`users/${userId.value}` == owner.path)
+    return (`users/${userId.value}` == owner.path)
 }
 async function deleteBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
