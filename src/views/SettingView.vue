@@ -74,14 +74,12 @@ const handleSignOut = () => {
 }
 onMounted(() => {
     const themeValue = cookies.get('theme');
-    console.log(themeValue)
     if (themeValue === null) {
         // If it doesn't exist, set its value to 'white'
         cookies.set('theme', 'light');
     }
     theme.global.name.value = cookies.get('theme')
     onAuthStateChanged(auth, (firebaseUser) => {
-        console.log(firebaseUser.uid)
         user.value = firebaseUser
     })
 })

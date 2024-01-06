@@ -25,9 +25,7 @@ const userStore = useUserStore()
 async function addUserToDb(user) {
     try {
         const querySnapshot = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
-        console.log(querySnapshot)
         if (!querySnapshot.empty) {
-            console.log("Email already exists in the database.");
             return;
         } else {
             const docRef = await addDoc(collection(db, "users"), {
@@ -36,7 +34,6 @@ async function addUserToDb(user) {
                 email: user.email,
                 avatar: user.photoURL
             });
-            console.log("Document written with ID: ", docRef.id);
         }
     }
     catch (e) {
@@ -44,13 +41,19 @@ async function addUserToDb(user) {
 
     }
 }
+async function getUser(user) {
+    const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+    querySnapshot.forEach((doc) => {
+        userStore.changeUserId(doc.id)
+    });
+}
 const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider()
     signInWithPopup(getAuth(), provider)
         .then((result) => {
             userStore.checkUser(result.user)
-            console.log(userStore.user)
             addUserToDb(auth.currentUser)
+            console.log(auth.currentUser)
             $toast.success('Logged in as ' + result.user.displayName);
             router.push('/')
         }).catch((error) => {

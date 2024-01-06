@@ -28,7 +28,6 @@ const signInWithGoogle = () => {
     .then((result) => {
       userStore.checkUser(result.user)
       user.value = result.user
-      console.log(auth.currentUser)
       addUserToDb(auth.currentUser)
       $toast.success("Logged in as " + auth.currentUser.displayName);
     }).catch((error) => {
@@ -39,9 +38,7 @@ const signInWithGoogle = () => {
 async function addUserToDb(user) {
   try {
     const querySnapshot = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
-    console.log(querySnapshot)
     if (!querySnapshot.empty) {
-      console.log("Email already exists in the database.");
       return;
     } else {
       const docRef = await addDoc(collection(db, "users"), {
@@ -49,7 +46,6 @@ async function addUserToDb(user) {
         displayName: user.displayName,
         email: user.email,
       });
-      console.log("Document written with ID: ", docRef.id);
     }
   }
   catch (e) {
@@ -60,6 +56,7 @@ async function addUserToDb(user) {
 async function getUser(user) {
   const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
   querySnapshot.forEach((doc) => {
+    console.log(doc.data())
     userStore.changeUserId(doc.id)
   });
 }
@@ -72,32 +69,27 @@ const handleSignOut = () => {
 
   });
 }
+onAuthStateChanged(auth, (firebaseUser) => {
+  user.value = firebaseUser;
+  console.log(firebaseUser)
+  getUser(firebaseUser)
+  // if (firebaseUser) {
+  //   console.log('yes');
+  // } else {
+  //   console.log('no');
+  // }
+});
+const themeValue = cookies.get('theme');
+if (themeValue === null) {
+  cookies.set('theme', 'light');
+}
+theme.global.name.value = cookies.get('theme')
 
 onMounted(() => {
 
-  onAuthStateChanged(auth, (firebaseUser) => {
-    user.value = firebaseUser;
-    getUser(firebaseUser)
-    if (firebaseUser) {
-      console.log('yes');
-    } else {
-      console.log('no');
-    }
-  });
-  const themeValue = cookies.get('theme');
-  console.log(themeValue)
-  if (themeValue === null) {
-    // If it doesn't exist, set its value to 'white'
-    cookies.set('theme', 'light');
-  }
-  theme.global.name.value = cookies.get('theme')
+
 })
 
-
-// function toggleAll() {
-//   rail.value = true
-//   toggleSecond.value = false
-// }
 const toggleSecond = ref(false)
 </script>
 <template>

@@ -9,11 +9,12 @@
     </v-app-bar>
     <div v-if="user" class="message-container">
       <div v-if="messageArray" class="each-message" v-for="message in messageArray">
-        <v-card class="message-received">
+        <v-card-subtitle v-if="isSender(message.sender)" style="margin-left: auto;">{{ convertTime(message.time)
+        }}</v-card-subtitle>
+        <v-card :class="messageType(message.sender)">
           {{ message.content }}
         </v-card>
-        <v-card-subtitle>{{ convertTime(message.time) }}</v-card-subtitle>
-        <p v-if="isSender(message.sender)">I sent</p>
+        <v-card-subtitle v-if="!isSender(message.sender)">{{ convertTime(message.time) }}</v-card-subtitle>
       </div>
       <div ref="bottomEl"></div>
     </div>
@@ -61,7 +62,6 @@ const messageArray = ref([]);
 watch(
   () => props.boxId,
   (newBoxId, oldBoxId) => {
-    console.log(newBoxId);
     const listQuery = query(
       collection(db, "messages"),
       where("boxRef", "==", doc(db, `box/${props.boxId}`)),
@@ -70,7 +70,6 @@ watch(
     onSnapshot(listQuery, (snapshot) => {
       const messages = [];
       snapshot.forEach((doc) => {
-        console.log(doc.data().timeSent);
         messages.push({
           id: doc.id,
           content: doc.data().content,
@@ -83,17 +82,21 @@ watch(
   }
 );
 function isSender(sender) {
-  console.log(`users/${userId.value}` == sender.path)
   return (`users/${userId.value}` == sender.path)
 }
+function messageType(sender) {
+  if (sender.path == `users/${userId.value}`) {
+    return 'sender-message';
+  } else {
+    return 'received-message';
+  }
+}
 function onSelectEmoji(emoji) {
-  console.log(emoji.i);
   messageContent.value += emoji.i;
 }
 async function sendMessage() {
   let checkMessage = messageContent.value.trim();
   if (checkMessage.length === 0) {
-    console.log("Empty Message");
   } else {
     try {
       const userDocRef = doc(db, `users/${userStore.userId}`);
@@ -104,7 +107,6 @@ async function sendMessage() {
         senderRef: userDocRef,
         boxRef: boxDocRef,
       });
-      console.log("Document written with ID: ", newMessage.id);
       toggleIcon.value = false;
       messageContent.value = "";
       bottomEl.value.scrollIntoView({ behavior: "smooth" });
@@ -115,15 +117,14 @@ async function sendMessage() {
 }
 function convertTime(timestamp) {
   const time = new Date(timestamp)
-  console.log(timestamp)
   return time.toLocaleTimeString()
 }
+
 onMounted(() => {
 
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });
-  console.log(props.boxId);
   const listQuery = query(
     collection(db, "messages"),
     where("boxRef", "==", doc(db, `box/${props.boxId}`)),
@@ -219,31 +220,31 @@ onMounted(() => {
   /* z-index: 99; */
 }
 
-.message-received {
+.each-message {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+
+}
+
+.received-message {
   max-width: 50%;
   padding: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.each-message {
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-  align-items: center;
-  gap: 1rem;
+.sender-message {
+  max-width: 50%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.avatar {
+
+.sender .avatar {
   height: 3rem;
   border-radius: 2rem;
-}
-
-.each-message-sent {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1rem;
 }
 </style>

@@ -10,7 +10,6 @@
                     <v-btn @click="joinBox(box.id)">Join</v-btn>
                 </v-card-actions>
             </v-card>
-            <div>{{ boxId }}</div>
         </div>
     </div>
 </template>
@@ -48,7 +47,6 @@ async function fetchBoxes() {
 
         });
     });
-    console.log(response)
     resultBoxes.value = response
 }
 async function joinBox(id) {

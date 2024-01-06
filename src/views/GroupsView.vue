@@ -156,8 +156,6 @@ onMounted(() => {
 });
 const toggleBox = ref(true);
 function addBox() {
-    console.log(boxTitle.value);
-    console.log(state.value);
     addBoxToDb();
 }
 
@@ -174,7 +172,6 @@ async function addBoxToDb() {
             dateCreated: Date.now(),
         });
 
-        console.log("Document written with ID: ", newBox.id);
         const boxDocRef = doc(db, `box/${newBox.id}`);
         const newMessage = await addDoc(collection(db, "messages"), {
             content: "I created this Group!",
@@ -182,7 +179,6 @@ async function addBoxToDb() {
             senderRef: userDocRef,
             boxRef: boxDocRef,
         });
-        console.log("Document written with ID: ", newMessage.id);
         $toast.success("Created box chat " + boxTitle.value);
     } catch (e) {
         console.error("Error adding document: ", e);
@@ -191,12 +187,10 @@ async function addBoxToDb() {
 function showDeleteBtn(owner) {
     // console.log(owner.path)
     // console.log(`users/${userId.value}`)
-    console.log(`users/${userId.value}` == owner.path)
     return (`users/${userId.value}` == owner.path)
 }
 async function deleteBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
-        console.log("Document deleted");
         await deleteDoc(doc(db, "boxes", id));
         $toast.info("Deleted box chat " + title);
     } else {
