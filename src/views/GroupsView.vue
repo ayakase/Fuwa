@@ -94,6 +94,7 @@ const rail = ref(true);
 const boxes = ref([]);
 const boxId = ref("");
 const boxName = ref("");
+const boxMembers = ref([]);
 const test = ref();
 const hasBox = ref(true);
 function selectBox(id, title) {
@@ -126,6 +127,7 @@ async function retrieveDoc() {
             boxes.value = boxesList;
             boxId.value = boxes.value[0].id;
             boxName.value = boxes.value[0].title;
+            boxMembers.value = boxes.value[0].members
             hasBox.value = true;
         } else {
             boxes.value = [];
@@ -177,10 +179,11 @@ async function addBoxToDb() {
 
         const boxDocRef = doc(db, `box/${newBox.id}`);
         const newMessage = await addDoc(collection(db, "messages"), {
-            content: "I created this Group!",
+            content: user.value.displayName + " created this Group ",
             timeSent: Date.now(),
             senderRef: userDocRef,
             boxRef: boxDocRef,
+            systemMessage: true,
         });
         $toast.success("Created box chat " + boxTitle.value);
     } catch (e) {

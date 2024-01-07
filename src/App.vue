@@ -35,28 +35,30 @@ const signInWithGoogle = () => {
     });
 }
 
-async function addUserToDb(user) {
-  try {
-    const querySnapshot = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
-    if (!querySnapshot.empty) {
-      return;
-    } else {
-      const docRef = await addDoc(collection(db, "users"), {
-        uid: user.uid,
-        displayName: user.displayName,
-        email: user.email,
-      });
-    }
-  }
-  catch (e) {
-    console.error("Error adding document: ", e);
+// async function addUserToDb(user) {
+//   try {
+//     const querySnapshot = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
+//     if (!querySnapshot.empty) {
+//       return;
+//     } else {
+//       const docRef = await addDoc(collection(db, "users"), {
+//         uid: user.uid,
+//         displayName: user.displayName,
+//         email: user.email,
+//       });
+//     }
+//   }
+//   catch (e) {
+//     console.error("Error adding document: ", e);
 
-  }
-}
+//   }
+// }
+const userInfo = ref()
 async function getUser(user) {
   const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
   querySnapshot.forEach((doc) => {
-    console.log(doc.data())
+    userInfo.value = doc.data();
+    userStore.changeUserInfo(userInfo.value);
     userStore.changeUserId(doc.id)
   });
 }
@@ -116,7 +118,8 @@ const toggleSecond = ref(false)
                 </v-list>
               </v-menu>
             </v-list-item>
-            <v-list-item :prepend-avatar="user.photoURL" v-if="user" :title="user.displayName" :subtitle="user.email">
+            <v-list-item v-if="userInfo" :prepend-avatar="userInfo.avatar" :title="userInfo.displayName"
+              :subtitle="user.email">
               <template v-slot:append>
                 <v-btn variant="text" icon="mdi-chevron-left" @click.stop="rail = !rail"></v-btn>
               </template>

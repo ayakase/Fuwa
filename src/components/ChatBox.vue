@@ -11,9 +11,13 @@
     </v-app-bar>
     <div v-if="user" class="message-container">
       <div v-if="messageArray" class="each-message" v-for="message in messageArray">
-        <v-card-subtitle v-if="isSender(message.sender)" style="margin-left: auto;">{{ convertTime(message.time)
+        <v-avatar class="avatar" v-if="!isSender(message.sender) && message.systemMessage == false"
+          :image="user.photoURL"></v-avatar>
+        <v-card-subtitle v-if="isSender(message.sender) && message.systemMessage == false" style="margin-left: auto;">{{
+          convertTime(message.time)
         }}</v-card-subtitle>
-        <v-menu transition="scale-transition" :location="start" v-if="isSender(message.sender)">
+        <v-menu transition="scale-transition" location="start"
+          v-if="isSender(message.sender) && message.systemMessage == false">
           <template v-slot:activator="{ props }">
             <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
           </template>
@@ -28,10 +32,11 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <v-card :class="messageType(message.sender)">
-          {{ message.content }}
+        <v-card :class="messageType(message.sender, message.systemMessage)">
+          {{ message.content }} <span v-if="message.systemMessage == true"> at {{ convertTime(message.time) }}</span>
         </v-card>
-        <v-card-subtitle v-if="!isSender(message.sender)">{{ convertTime(message.time) }}</v-card-subtitle>
+        <v-card-subtitle v-if="!isSender(message.sender)">{{ convertTime(message.time)
+        }}</v-card-subtitle>
       </div>
       <div ref="bottomEl"></div>
     </div>
@@ -104,7 +109,8 @@ watch(
           id: doc.id,
           content: doc.data().content,
           sender: doc.data().senderRef,
-          time: doc.data().timeSent
+          time: doc.data().timeSent,
+          systemMessage: doc.data().systemMessage
         });
         messageArray.value = messages;
       });
@@ -115,8 +121,10 @@ watch(
 function isSender(sender) {
   return (`users/${userId.value}` == sender.path)
 }
-function messageType(sender) {
-  if (sender.path == `users/${userId.value}`) {
+function messageType(sender, isSystemMessage) {
+  if (isSystemMessage == true) {
+    return 'system-message';
+  } else if (sender.path == `users/${userId.value}` && isSystemMessage == false) {
     return 'sender-message';
   } else {
     return 'received-message';
@@ -137,6 +145,8 @@ async function sendMessage() {
         timeSent: Date.now(),
         senderRef: userDocRef,
         boxRef: boxDocRef,
+        systemMessage: false,
+
       });
       toggleIcon.value = false;
       messageContent.value = "";
@@ -154,9 +164,11 @@ async function deleteMessage(id) {
   }
 }
 function convertTime(timestamp) {
-  const time = new Date(timestamp)
-  return time.toLocaleTimeString()
+  const dateTime = new Date(timestamp);
+  const options = { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+  return dateTime.toLocaleString('en-GB', options);
 }
+
 
 onMounted(() => {
   console.log(props.boxName)
@@ -176,7 +188,7 @@ onMounted(() => {
         content: doc.data().content,
         time: doc.data().timeSent,
         sender: doc.data().senderRef,
-
+        systemMessage: doc.data().systemMessage
       });
       messageArray.value = messages;
     });
@@ -283,9 +295,14 @@ onMounted(() => {
 
 }
 
+.system-message {
+  padding: 0.5rem;
+  margin: auto;
+  padding: auto;
+}
 
-.sender .avatar {
-  height: 3rem;
+.avatar {
+  background-color: rebeccapurple;
   border-radius: 2rem;
 }
 

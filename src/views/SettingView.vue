@@ -13,15 +13,25 @@
             </v-card>
             <v-card class="profile-setting" variant="tonal">
                 <v-card-title style="padding: 0;font-size: 1.5rem;"> Profile settings</v-card-title>
-                <div class="theme-mode">
-                    <p>Theme:</p>
-                    <v-btn @click="toggleTheme" :icon="themeState">
-                    </v-btn>
+                <div v-if="userStore.userInfo">
+                    <div class="each-profile-setting">
+                        <div>
+                            Email:
+                        </div>
+                        <v-text-field :model-value="userInfo.email" variant="underlined" disabled></v-text-field>
+                    </div>
+                    <div class="each-profile-setting">
+                        <div>
+                            Display Name:
+                        </div>
+                        <v-text-field :model-value="userInfo.displayName" variant="underlined"></v-text-field>
+
+                    </div>
                 </div>
             </v-card>
         </div>
 
-        <div class="pa-2 sign-out">
+        <div class="pa-2 sign-out">dd
             <v-btn color="error" v-if="user" @click="handleSignOut()" block>
                 Sign Out
             </v-btn>
@@ -37,6 +47,8 @@ import { useCookies } from "vue3-cookies";
 import { useToast } from 'vue-toast-notification';
 import { signOut, getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router'
+import { storeToRefs } from "pinia";
+
 import 'vue-toast-notification/dist/theme-sugar.css';
 const $toast = useToast();
 const auth = getAuth()
@@ -44,6 +56,8 @@ import { useUserStore } from '../stores/userStore';
 const user = ref()
 const userStore = useUserStore()
 const router = useRouter()
+const { userInfo } = storeToRefs(userStore);
+const { userId } = storeToRefs(userStore);
 
 let { cookies } = useCookies()
 const theme = useTheme()
@@ -73,6 +87,7 @@ const handleSignOut = () => {
     });
 }
 onMounted(() => {
+
     const themeValue = cookies.get('theme');
     if (themeValue === null) {
         // If it doesn't exist, set its value to 'white'
@@ -126,5 +141,13 @@ onMounted(() => {
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
+}
+
+.each-profile-setting {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    font-size: larger;
 }
 </style>
