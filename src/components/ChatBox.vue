@@ -35,7 +35,7 @@
         <v-card :class="messageType(message.sender, message.systemMessage)">
           {{ message.content }} <span v-if="message.systemMessage == true"> at {{ convertTime(message.time) }}</span>
         </v-card>
-        <v-card-subtitle v-if="!isSender(message.sender)">{{ convertTime(message.time)
+        <v-card-subtitle v-if="!isSender(message.sender) && message.systemMessage == false">{{ convertTime(message.time)
         }}</v-card-subtitle>
       </div>
       <div ref="bottomEl"></div>
