@@ -8,8 +8,8 @@
             </div>
             <v-divider></v-divider>
             <v-list>
-                <v-list-item @click="selectBox(box.id)" :prepend-avatar="user.photoURL" class="chat-box-container"
-                    v-if="boxes.length > 0" v-for="box in boxes" :key="box" :value="box.id">
+                <v-list-item @click="selectBox(box.id, box.title)" :prepend-avatar="user.photoURL"
+                    class="chat-box-container" v-if="boxes.length > 0" v-for="box in boxes" :key="box" :value="box.id">
                     <v-tooltip v-if="rail" activator="parent" location="end">{{
                         box.title
                     }}</v-tooltip>
@@ -58,7 +58,7 @@
             </v-list>
             <!-- <div style="background-color: rebeccapurple;" @click="rail = false; console.log(rail)">ba</div> -->
         </v-navigation-drawer>
-        <ChatBox :box-id="boxId" :test="test" v-if="boxId"></ChatBox>
+        <ChatBox :box-id="boxId" :box-name="boxName" :test="test" v-if="boxId"></ChatBox>
     </div>
 </template>
 <script setup>
@@ -93,11 +93,12 @@ const { userId } = storeToRefs(userStore);
 const rail = ref(true);
 const boxes = ref([]);
 const boxId = ref("");
-const props = defineProps(["boxId", "test"]);
+const boxName = ref("");
 const test = ref();
 const hasBox = ref(true);
-function selectBox(id) {
+function selectBox(id, title) {
     boxId.value = id;
+    boxName.value = title;
 }
 async function retrieveDoc() {
     // const listQuery = query(collection(db, "boxes"),
@@ -114,15 +115,17 @@ async function retrieveDoc() {
         const boxesList = [];
         if (snapshot.docs.length > 0) {
             snapshot.forEach((doc) => {
+                console.log(doc.data().members)
                 boxesList.push({
                     id: doc.id,
                     title: doc.data().title,
                     owner: doc.data().owner,
+                    members: doc.data().members
                 });
             });
             boxes.value = boxesList;
             boxId.value = boxes.value[0].id;
-
+            boxName.value = boxes.value[0].title;
             hasBox.value = true;
         } else {
             boxes.value = [];

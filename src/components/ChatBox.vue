@@ -2,15 +2,32 @@
   <div class="container">
     <v-app-bar :elevation="2" density="compact">
       <div class="top-bar">
-        <v-btn icon="mdi-star"></v-btn>
-        <v-btn icon="mdi-magnify"></v-btn>
-        <v-btn icon="mdi-dots-vertical"></v-btn>
+        <v-card-title class="box-name">{{ props.boxName }}</v-card-title>
+        <div><v-btn icon="mdi-star"></v-btn>
+          <v-btn icon="mdi-magnify"></v-btn>
+          <v-btn icon="mdi-dots-vertical" @click="showSetting = !showSetting"></v-btn>
+        </div>
       </div>
     </v-app-bar>
     <div v-if="user" class="message-container">
       <div v-if="messageArray" class="each-message" v-for="message in messageArray">
         <v-card-subtitle v-if="isSender(message.sender)" style="margin-left: auto;">{{ convertTime(message.time)
         }}</v-card-subtitle>
+        <v-menu transition="scale-transition" :location="start" v-if="isSender(message.sender)">
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
+          </template>
+
+          <v-list>
+            <v-list-item class="message-option" @click="deleteMessage(message.id)">
+              <v-list-item-title>Delete Message</v-list-item-title>
+            </v-list-item>
+            <v-list-item class="message-option">
+              <v-list-item-title>Edit Message</v-list-item-title>
+
+            </v-list-item>
+          </v-list>
+        </v-menu>
         <v-card :class="messageType(message.sender)">
           {{ message.content }}
         </v-card>
@@ -25,6 +42,19 @@
       <v-btn @click="sendMessage">Send <v-icon icon="mdi-send"></v-icon></v-btn>
     </v-card>
     <EmojiPicker class="icon-board" v-if="toggleIcon" :native="true" @select="onSelectEmoji" />
+    <v-navigation-drawer location="right" v-if="showSetting">
+      <template v-slot:prepend>
+        <v-list-item lines="two" prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg" title="Jane Smith"
+          subtitle="Logged in"></v-list-item>
+      </template>
+      <v-divider></v-divider>
+
+      <v-list density="compact" nav>
+        <v-list-item prepend-icon="mdi-home-city" title="Home" value="home"></v-list-item>
+        <v-list-item prepend-icon="mdi-account" title="My Account" value="account"></v-list-item>
+        <v-list-item prepend-icon="mdi-account-group-outline" title="Users" value="users"></v-list-item>
+      </v-list>
+    </v-navigation-drawer>
   </div>
 </template>
 <script setup>
@@ -49,10 +79,10 @@ import { useUserStore } from "../stores/userStore";
 import { storeToRefs } from "pinia";
 
 const userStore = useUserStore();
-const props = defineProps(["boxId", "test"]);
+const props = defineProps(["boxId", "test", "boxName"]);
 const user = ref();
 const { userId } = storeToRefs(userStore);
-
+const showSetting = ref(false)
 const auth = getAuth();
 const toggleIcon = ref(false);
 const messageContent = ref("");
@@ -81,6 +111,7 @@ watch(
     });
   }
 );
+
 function isSender(sender) {
   return (`users/${userId.value}` == sender.path)
 }
@@ -115,13 +146,20 @@ async function sendMessage() {
     }
   }
 }
+async function deleteMessage(id) {
+  if (confirm("Delete message") == true) {
+    await deleteDoc(doc(db, "messages", id));
+  } else {
+    console.log("Deletion cancelled");
+  }
+}
 function convertTime(timestamp) {
   const time = new Date(timestamp)
   return time.toLocaleTimeString()
 }
 
 onMounted(() => {
-
+  console.log(props.boxName)
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });
@@ -170,7 +208,7 @@ onMounted(() => {
   width: 100%;
   display: flex !important;
   flex-direction: row !important;
-  justify-content: flex-end !important;
+  justify-content: space-between;
 }
 
 /* width */
@@ -186,13 +224,13 @@ onMounted(() => {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #13bead;
+  background: #68b16b;
   border-radius: 2px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #b30000;
+  background: #579359;
 }
 
 .send-container {
@@ -233,6 +271,7 @@ onMounted(() => {
   padding: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  background-color: #68b16b;
 }
 
 .sender-message {
@@ -240,11 +279,31 @@ onMounted(() => {
   padding: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  background-color: #68b16b;
+
 }
 
 
 .sender .avatar {
   height: 3rem;
   border-radius: 2rem;
+}
+
+.box-name {
+  margin-right: auto;
+}
+
+.message-operation {
+  color: rgb(92, 92, 92);
+  border-radius: 1rem;
+}
+
+.message-operation:hover {
+  background-color: rgb(130, 130, 130);
+}
+
+.message-option:hover {
+  background-color: rgb(131, 131, 131);
+  cursor: pointer;
 }
 </style>
