@@ -8,7 +8,7 @@ import { computed } from 'vue';
 import { getAuth, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut, signInWithPopup } from 'firebase/auth';
 import { useUserStore } from './stores/userStore';
 import { db } from './firebaseConfig';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { doc, collection, addDoc, setDoc, getDocs, query, where } from 'firebase/firestore';
 const userStore = useUserStore()
 let { cookies } = useCookies()
 const user = ref()
@@ -86,10 +86,36 @@ if (themeValue === null) {
   cookies.set('theme', 'light');
 }
 theme.global.name.value = cookies.get('theme')
-
+async function addData() {
+  const citiesRef = collection(db, "cities");
+  await setDoc(doc(citiesRef, "SF"), {
+    name: "San Francisco", state: "CA", country: "USA",
+    capital: false, population: 860000,
+    regions: ["west_coast", "norcal"]
+  });
+  await setDoc(doc(citiesRef, "LA"), {
+    name: "Los Angeles", state: "CA", country: "USA",
+    capital: false, population: 3900000,
+    regions: ["west_coast", "socal"]
+  });
+  await setDoc(doc(citiesRef, "DC"), {
+    name: "Washington, D.C.", state: null, country: "USA",
+    capital: true, population: 680000,
+    regions: ["east_coast"]
+  });
+  await setDoc(doc(citiesRef, "TOK"), {
+    name: "Tokyo", state: null, country: "Japan",
+    capital: true, population: 9000000,
+    regions: ["kanto", "honshu"]
+  });
+  await setDoc(doc(citiesRef, "BJ"), {
+    name: "Beijing", state: null, country: "China",
+    capital: true, population: 21500000,
+    regions: ["jingjinji", "hebei"]
+  });
+}
 onMounted(() => {
-
-
+  addData()
 })
 
 const toggleSecond = ref(false)

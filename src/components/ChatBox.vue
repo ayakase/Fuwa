@@ -10,6 +10,7 @@
       </div>
     </v-app-bar>
     <div v-if="user" class="message-container">
+
       <div v-if="messageArray" class="each-message" v-for="message in messageArray">
         <v-avatar class="avatar" v-if="!isSender(message.sender) && message.systemMessage == false"
           :image="user.photoURL"></v-avatar>
@@ -21,7 +22,6 @@
           <template v-slot:activator="{ props }">
             <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
           </template>
-
           <v-list>
             <v-list-item class="message-option" @click="deleteMessage(message.id)">
               <v-list-item-title>Delete Message</v-list-item-title>
@@ -32,7 +32,7 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <v-card :class="messageType(message.sender, message.systemMessage)">
+        <v-card :class="messageType(message.sender, message.systemMessage)" :variant="variantType(message.systemMessage)">
           {{ message.content }} <span v-if="message.systemMessage == true"> at {{ convertTime(message.time) }}</span>
         </v-card>
         <v-card-subtitle v-if="!isSender(message.sender) && message.systemMessage == false">{{ convertTime(message.time)
@@ -84,7 +84,7 @@ import { useUserStore } from "../stores/userStore";
 import { storeToRefs } from "pinia";
 
 const userStore = useUserStore();
-const props = defineProps(["boxId", "test", "boxName"]);
+const props = defineProps(["boxId", "test", "boxName", "boxMembers"]);
 const user = ref();
 const { userId } = storeToRefs(userStore);
 const showSetting = ref(false)
@@ -130,6 +130,14 @@ function messageType(sender, isSystemMessage) {
     return 'received-message';
   }
 }
+function variantType(isSystemMessage) {
+  if (isSystemMessage == true) {
+    return 'plain'
+  } else {
+    return 'elevated'
+  }
+}
+
 function onSelectEmoji(emoji) {
   messageContent.value += emoji.i;
 }
@@ -156,6 +164,7 @@ async function sendMessage() {
     }
   }
 }
+
 async function deleteMessage(id) {
   if (confirm("Delete message") == true) {
     await deleteDoc(doc(db, "messages", id));
@@ -169,9 +178,15 @@ function convertTime(timestamp) {
   return dateTime.toLocaleString('en-GB', options);
 }
 
-
+// async function fetchMembers() {
+//   const members = await getDocs();
+//   console.log(props.boxMembers[0]);
+// }
 onMounted(() => {
-  console.log(props.boxName)
+  // props.boxMembers.forEach(element => {
+  //   console.log(element.path)
+  // });
+  // fetchMembers()
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });
@@ -191,6 +206,7 @@ onMounted(() => {
         systemMessage: doc.data().systemMessage
       });
       messageArray.value = messages;
+
     });
   });
   setTimeout(() => {
@@ -302,7 +318,6 @@ onMounted(() => {
 }
 
 .avatar {
-  background-color: rebeccapurple;
   border-radius: 2rem;
 }
 

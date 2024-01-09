@@ -1,37 +1,38 @@
 <template>
     <div class="container">
         <!-- <h1 class="setting-title">Settings</h1> -->
-
+        <v-card-title style="padding: 0;font-size: 1.5rem;"> System settings</v-card-title>
         <div class="setting-container">
             <v-card class="system-setting" variant="tonal">
-                <v-card-title style="padding: 0;font-size: 1.5rem;"> System settings</v-card-title>
                 <div class="theme-mode">
                     <p>Theme:</p>
                     <v-btn @click="toggleTheme" :icon="themeState">
                     </v-btn>
                 </div>
             </v-card>
-            <v-card class="profile-setting" variant="tonal">
-                <v-card-title style="padding: 0;font-size: 1.5rem;"> Profile settings</v-card-title>
-                <div v-if="userStore.userInfo">
-                    <div class="each-profile-setting">
-                        <div>
-                            Email:
-                        </div>
-                        <v-text-field :model-value="userInfo.email" variant="underlined" disabled></v-text-field>
-                    </div>
-                    <div class="each-profile-setting">
-                        <div>
-                            Display Name:
-                        </div>
-                        <v-text-field :model-value="userInfo.displayName" variant="underlined"></v-text-field>
+            <v-card-title style="padding: 0;font-size: 1.5rem;"> Profile settings</v-card-title>
 
-                    </div>
+            <v-card class="profile-setting" variant="tonal" v-if="userStore.userInfo">
+                <div class="email-setting">
+                    Email:
+                </div>
+                <v-text-field class="email-field" :model-value="userInfo.email" variant="underlined"
+                    disabled></v-text-field>
+                <div class="name-setting">
+                    Display Name:
+                </div>
+                <v-text-field class="name-field" :model-value="userInfo.displayName" variant="underlined"></v-text-field>
+                <div class="avatar-setting">
+                    Avatar:
+                </div>
+                <div class="avatar-field" style="display: flex;flex-direction: column;gap: 1rem;">
+                    <img v-if="userInfo.avatar" :src="userInfo.avatar" style="width: 10rem;height: 10rem;">
+                    <v-btn style="background-color: green;color: white;width: 10rem;">Change avatar</v-btn>
                 </div>
             </v-card>
         </div>
 
-        <div class="pa-2 sign-out">dd
+        <div class="pa-2 sign-out">
             <v-btn color="error" v-if="user" @click="handleSignOut()" block>
                 Sign Out
             </v-btn>
@@ -136,18 +137,53 @@ onMounted(() => {
     padding: 1rem;
 }
 
-.profile-setting {
+/* .profile-setting {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
+} */
+.profile-setting {
+    display: grid;
+    grid-template-columns: 10% 50%;
+    grid-template-rows: 20% 20% 50%;
+    padding: 1rem;
 }
 
-.each-profile-setting {
+.email-setting {
+    grid-column: 1/2;
+    grid-row: 1/2;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 1rem;
-    font-size: larger;
+
+}
+
+.email-field {
+    grid-column: 2/3;
+    grid-row: 1/2;
+}
+
+.name-setting {
+    display: flex;
+    align-items: center;
+    grid-row: 2/3;
+    grid-column: 1/2;
+}
+
+.name-field {
+    grid-row: 2/3;
+    grid-column: 2/3;
+}
+
+.avatar-setting {
+    display: flex;
+    align-items: center;
+    grid-row: 3/4;
+    grid-column: 1/2;
+}
+
+.avatar-field {
+    grid-row: 3/4;
+    grid-column: 2/3;
 }
 </style>

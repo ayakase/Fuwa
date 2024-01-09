@@ -58,7 +58,7 @@
             </v-list>
             <!-- <div style="background-color: rebeccapurple;" @click="rail = false; console.log(rail)">ba</div> -->
         </v-navigation-drawer>
-        <ChatBox :box-id="boxId" :box-name="boxName" :test="test" v-if="boxId"></ChatBox>
+        <ChatBox :box-id="boxId" :box-name="boxName" :box-members="boxMembers" :test="test" v-if="boxId"></ChatBox>
     </div>
 </template>
 <script setup>
@@ -72,9 +72,6 @@ import {
     deleteDoc,
     orderBy,
     where,
-    or,
-    and,
-    getDocs,
 
 } from "firebase/firestore";
 import { ref, watch, onMounted } from "vue";
@@ -155,9 +152,14 @@ onMounted(() => {
     onAuthStateChanged(auth, (firebaseUser) => {
         user.value = firebaseUser;
     });
-    setTimeout(() => {
-        retrieveDoc();
-    }, 3000);
+    watch(
+        () => userId.value,
+        (newUserId, oldUserId) => {
+            console.log(newUserId)
+            retrieveDoc();
+
+        }
+    );
 });
 const toggleBox = ref(true);
 function addBox() {
