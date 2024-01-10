@@ -148,18 +148,20 @@ async function retrieveDoc() {
 //         });
 //     })
 // })
+watch(
+    () => userId.value,
+    (newUserId, oldUserId) => {
+        console.log(newUserId)
+        retrieveDoc();
+    },
+    { immediate: true }
+
+);
 onMounted(() => {
     onAuthStateChanged(auth, (firebaseUser) => {
         user.value = firebaseUser;
     });
-    watch(
-        () => userId.value,
-        (newUserId, oldUserId) => {
-            console.log(newUserId)
-            retrieveDoc();
 
-        }
-    );
 });
 const toggleBox = ref(true);
 function addBox() {
