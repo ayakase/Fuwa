@@ -154,7 +154,7 @@ async function sendMessage() {
         senderRef: userDocRef,
         boxRef: boxDocRef,
         systemMessage: false,
-
+        
       });
       toggleIcon.value = false;
       messageContent.value = "";

@@ -19,6 +19,10 @@
                             @click="deleteBox(box.title, box.id)">
                             <v-icon size="small" icon="mdi-trash-can-outline"></v-icon>
                         </button>
+                        <button v-if="showLeaveBtn(box.owner)" class="delete-box-button"
+                            @click="leaveBox(box.title, box.id)">
+                            <v-icon size="small" icon="mdi-exit-to-app"></v-icon>
+                        </button>
                     </div>
                 </v-list-item>
                 <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You have not
@@ -195,9 +199,10 @@ async function addBoxToDb() {
     }
 }
 function showDeleteBtn(owner) {
-    // console.log(owner.path)
-    // console.log(`users/${userId.value}`)
     return (`users/${userId.value}` == owner.path)
+}
+function showLeaveBtn(owner) {
+    return !(`users/${userId.value}` == owner.path)
 }
 async function deleteBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
