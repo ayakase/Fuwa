@@ -57,7 +57,15 @@
       <v-list density="compact" nav>
         <v-list-item prepend-icon="mdi-home-city" title="Home" value="home"></v-list-item>
         <v-list-item prepend-icon="mdi-account" title="My Account" value="account"></v-list-item>
-        <v-list-item prepend-icon="mdi-account-group-outline" title="Users" value="users"></v-list-item>
+        <v-list-item prepend-icon="mdi-account-group-outline" @click="toggleMember = !toggleMember" title="Members"
+          value="members">
+        </v-list-item>
+        <v-list-item v-if="toggleMember" v-for="member in memberArray" :key="member" :prepend-avatar="member.avatar">
+          <div>
+            {{ member.displayName }}
+          </div>
+        </v-list-item>
+
       </v-list>
     </v-navigation-drawer>
   </div>
@@ -73,7 +81,8 @@ import {
   deleteDoc,
   orderBy,
   where,
-  getDocs,
+  getDoc,
+  DocumentReference,
 } from "firebase/firestore";
 import EmojiPicker from "vue3-emoji-picker";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -94,6 +103,7 @@ const messageContent = ref("");
 const sentMessages = ref(["hello"]);
 const bottomEl = ref(null);
 const messageArray = ref([]);
+const toggleMember = ref(false);
 watch(
   () => props.boxId,
   (newBoxId, oldBoxId) => {
@@ -154,7 +164,6 @@ async function sendMessage() {
         senderRef: userDocRef,
         boxRef: boxDocRef,
         systemMessage: false,
-        
       });
       toggleIcon.value = false;
       messageContent.value = "";
@@ -177,16 +186,28 @@ function convertTime(timestamp) {
   const options = { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
   return dateTime.toLocaleString('en-GB', options);
 }
+const memberArray = ref()
+async function fetchMembers() {
+  const userRefArray = props.boxMembers
+  try {
+    const userDocs = await Promise.all(userRefArray.map(ref => getDoc(ref)));
+    const members = userDocs.map(doc => {
+      if (doc.exists()) {
+        return doc.data();
+      } else {
+        return null;
+      }
+    });
 
-// async function fetchMembers() {
-//   const members = await getDocs();
-//   console.log(props.boxMembers[0]);
-// }
+    console.log('Users:', members);
+    memberArray.value = members
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+}
 onMounted(() => {
-  // props.boxMembers.forEach(element => {
-  //   console.log(element.path)
-  // });
-  // fetchMembers()
+
+  fetchMembers()
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });

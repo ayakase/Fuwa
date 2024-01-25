@@ -73,7 +73,6 @@ const handleSignOut = () => {
 }
 onAuthStateChanged(auth, (firebaseUser) => {
   user.value = firebaseUser;
-  console.log(firebaseUser)
   getUser(firebaseUser)
   // if (firebaseUser) {
   //   console.log('yes');
@@ -114,6 +113,7 @@ async function addData() {
     regions: ["jingjinji", "hebei"]
   });
 }
+const bgImage = "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D"
 onMounted(() => {
   addData()
 })
@@ -124,7 +124,8 @@ const toggleSecond = ref(false)
   <div>
     <v-card>
       <v-layout>
-        <v-navigation-drawer v-if="user" :rail="rail" v-model="drawer" @click="rail = false">
+        <v-navigation-drawer v-if="user" :rail="rail" v-model="drawer" @click="rail = false" mobile-break-point=1000
+          :image="bgImage">
           <v-list>
             <v-list-item v-if="!user">
               <v-menu location="end">
@@ -133,7 +134,6 @@ const toggleSecond = ref(false)
                     Login
                   </v-btn>
                 </template>
-
                 <v-list>
                   <v-list-item>
                     <v-btn @click="signInWithGoogle">Sign In With Google</v-btn>

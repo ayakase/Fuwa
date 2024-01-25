@@ -76,7 +76,6 @@ import {
     deleteDoc,
     orderBy,
     where,
-
 } from "firebase/firestore";
 import { ref, watch, onMounted } from "vue";
 import { useUserStore } from "../stores/userStore";
@@ -117,7 +116,7 @@ async function retrieveDoc() {
         const boxesList = [];
         if (snapshot.docs.length > 0) {
             snapshot.forEach((doc) => {
-                console.log(doc.data().members)
+                // console.log(doc.data().members)
                 boxesList.push({
                     id: doc.id,
                     title: doc.data().title,
