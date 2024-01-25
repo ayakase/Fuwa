@@ -13,7 +13,7 @@
 
       <div v-if="messageArray" class="each-message" v-for="message in messageArray">
         <v-avatar class="avatar" v-if="!isSender(message.sender) && message.systemMessage == false"
-          :image="user.photoURL"></v-avatar>
+          :image="avatarMap(message.sender)"></v-avatar>
         <v-card-subtitle v-if="isSender(message.sender) && message.systemMessage == false" style="margin-left: auto;">{{
           convertTime(message.time)
         }}</v-card-subtitle>
@@ -60,7 +60,7 @@
         <v-list-item prepend-icon="mdi-account-group-outline" @click="toggleMember = !toggleMember" title="Members"
           value="members">
         </v-list-item>
-        <v-list-item v-if="toggleMember" v-for="member in memberArray" :key="member" :prepend-avatar="member.avatar">
+        <v-list-item v-for="member in memberArray" :key="member" :prepend-avatar="member.avatar">
           <div>
             {{ member.displayName }}
           </div>
@@ -147,7 +147,9 @@ function variantType(isSystemMessage) {
     return 'elevated'
   }
 }
+function mapMembers() {
 
+}
 function onSelectEmoji(emoji) {
   messageContent.value += emoji.i;
 }
@@ -187,24 +189,43 @@ function convertTime(timestamp) {
   return dateTime.toLocaleString('en-GB', options);
 }
 const memberArray = ref()
+const memberMapArray = ref()
 async function fetchMembers() {
   const userRefArray = props.boxMembers
   try {
     const userDocs = await Promise.all(userRefArray.map(ref => getDoc(ref)));
-    const members = userDocs.map(doc => {
+    memberArray.value = userDocs.map(doc => {
       if (doc.exists()) {
         return doc.data();
       } else {
         return null;
       }
     });
-
-    console.log('Users:', members);
-    memberArray.value = members
+    memberMapArray.value = userDocs
   } catch (error) {
     console.error('Error fetching users:', error);
   }
 }
+function avatarMap(member) {
+  try {
+    const matchingMember = memberMapArray.value.find(element => member.path.includes(element.id));
+    if (matchingMember) {
+      return matchingMember.data().avatar;
+    }
+    return null;
+  } catch (error) {
+    return null
+  }
+}
+// function avatarMap(member) {
+//   for (const element of memberMapArray.value) {
+//     if (member.path.includes(element.id)) {
+//       return element.data().avatar;
+//     }
+//   }
+//   return "nothing";
+// }
+
 onMounted(() => {
 
   fetchMembers()
@@ -227,8 +248,8 @@ onMounted(() => {
         systemMessage: doc.data().systemMessage
       });
       messageArray.value = messages;
-
     });
+    // console.log(messageArray.value);
   });
   setTimeout(() => {
     bottomEl.value.scrollIntoView({ behavior: "smooth" });
