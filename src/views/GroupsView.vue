@@ -8,7 +8,7 @@
             </div>
             <v-divider></v-divider>
             <v-list>
-                <v-list-item @click="selectBox(box.id, box.title)" :prepend-avatar="user.photoURL"
+                <v-list-item @click="selectBox(box.id, box.title, box.members)" :prepend-avatar="user.photoURL"
                     class="chat-box-container" v-if="boxes.length > 0" v-for="box in boxes" :key="box" :value="box.id">
                     <v-tooltip v-if="rail" activator="parent" location="end">{{
                         box.title
@@ -97,9 +97,10 @@ const boxName = ref("");
 const boxMembers = ref([]);
 const test = ref();
 const hasBox = ref(true);
-function selectBox(id, title) {
+function selectBox(id, title, members) {
     boxId.value = id;
     boxName.value = title;
+    boxMembers.value = members;
 }
 async function retrieveDoc() {
     // const listQuery = query(collection(db, "boxes"),

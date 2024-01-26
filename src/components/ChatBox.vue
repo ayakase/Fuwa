@@ -10,38 +10,44 @@
       </div>
     </v-app-bar>
     <div v-if="user" class="message-container">
+      <div v-for="message in messageArray">
+        <v-card-subtitle style="padding: 0;font-size: small;"
+          v-if="!isSender(message.sender) && message.systemMessage == false">
+          {{ nameMap(message.sender) }}
+        </v-card-subtitle>
+        <div v-if="messageArray" class="each-message">
+          <v-avatar class="avatar" v-if="!isSender(message.sender) && message.systemMessage == false"
+            :image="avatarMap(message.sender)"></v-avatar>
+          <v-card-subtitle v-if="isSender(message.sender) && message.systemMessage == false" style="margin-left: auto;">{{
+            convertTime(message.time)
+          }}</v-card-subtitle>
+          <v-menu transition="scale-transition" location="start"
+            v-if="isSender(message.sender) && message.systemMessage == false">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
+            </template>
+            <v-list>
+              <v-list-item class="message-option" @click="deleteMessage(message.id)">
+                <v-list-item-title>Delete Message</v-list-item-title>
+              </v-list-item>
+              <v-list-item class="message-option">
+                <v-list-item-title>Edit Message</v-list-item-title>
 
-      <div v-if="messageArray" class="each-message" v-for="message in messageArray">
-        <v-avatar class="avatar" v-if="!isSender(message.sender) && message.systemMessage == false"
-          :image="avatarMap(message.sender)"></v-avatar>
-        <v-card-subtitle v-if="isSender(message.sender) && message.systemMessage == false" style="margin-left: auto;">{{
-          convertTime(message.time)
-        }}</v-card-subtitle>
-        <v-menu transition="scale-transition" location="start"
-          v-if="isSender(message.sender) && message.systemMessage == false">
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
-          </template>
-          <v-list>
-            <v-list-item class="message-option" @click="deleteMessage(message.id)">
-              <v-list-item-title>Delete Message</v-list-item-title>
-            </v-list-item>
-            <v-list-item class="message-option">
-              <v-list-item-title>Edit Message</v-list-item-title>
-
-            </v-list-item>
-          </v-list>
-        </v-menu>
-        <v-card :class="messageType(message.sender, message.systemMessage)" :variant="variantType(message.systemMessage)">
-          {{ message.content }} <span v-if="message.systemMessage == true"> at {{ convertTime(message.time) }}</span>
-        </v-card>
-        <v-card-subtitle v-if="!isSender(message.sender) && message.systemMessage == false">{{ convertTime(message.time)
-        }}</v-card-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <v-card :class="messageType(message.sender, message.systemMessage)"
+            :variant="variantType(message.systemMessage)">
+            {{ message.content }} <span v-if="message.systemMessage == true"> at {{ convertTime(message.time) }}</span>
+          </v-card>
+          <v-card-subtitle v-if="!isSender(message.sender) && message.systemMessage == false">{{ convertTime(message.time)
+          }}</v-card-subtitle>
+        </div>
       </div>
       <div ref="bottomEl"></div>
     </div>
     <v-card class="send-container">
-      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" />
+      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" autofocus />
       <v-btn @click="toggleIcon = !toggleIcon"><v-icon icon="mdi-emoticon-happy-outline"></v-icon>
       </v-btn>
       <v-btn @click="sendMessage">Send <v-icon icon="mdi-send"></v-icon></v-btn>
@@ -124,10 +130,14 @@ watch(
         });
         messageArray.value = messages;
       });
+      fetchMembers()
+
+      setTimeout(() => {
+        bottomEl.value.scrollIntoView({ behavior: "smooth" });
+      }, 1000);
     });
   }
 );
-
 function isSender(sender) {
   return (`users/${userId.value}` == sender.path)
 }
@@ -169,7 +179,9 @@ async function sendMessage() {
       });
       toggleIcon.value = false;
       messageContent.value = "";
-      bottomEl.value.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        bottomEl.value.scrollIntoView({ behavior: "smooth" });
+      }, 1000);
     } catch (e) {
       console.log(e);
     }
@@ -191,6 +203,7 @@ function convertTime(timestamp) {
 const memberArray = ref()
 const memberMapArray = ref()
 async function fetchMembers() {
+  memberArray.value = null
   const userRefArray = props.boxMembers
   try {
     const userDocs = await Promise.all(userRefArray.map(ref => getDoc(ref)));
@@ -208,13 +221,25 @@ async function fetchMembers() {
 }
 function avatarMap(member) {
   try {
+    console.log(memberArray.value);
     const matchingMember = memberMapArray.value.find(element => member.path.includes(element.id));
     if (matchingMember) {
       return matchingMember.data().avatar;
     }
     return null;
   } catch (error) {
-    return null
+    console.error(error)
+  }
+}
+function nameMap(member) {
+  try {
+    const matchingMember = memberMapArray.value.find(element => member.path.includes(element.id));
+    if (matchingMember) {
+      return matchingMember.data().displayName;
+    }
+    return null;
+  } catch (error) {
+    console.error(error)
   }
 }
 // function avatarMap(member) {
@@ -249,11 +274,12 @@ onMounted(() => {
       });
       messageArray.value = messages;
     });
+    setTimeout(() => {
+      bottomEl.value.scrollIntoView({ behavior: "smooth" });
+    }, 1000);
     // console.log(messageArray.value);
   });
-  setTimeout(() => {
-    bottomEl.value.scrollIntoView({ behavior: "smooth" });
-  }, 1000);
+
 });
 </script>
 

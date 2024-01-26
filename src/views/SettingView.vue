@@ -21,7 +21,12 @@
                 <div class="name-setting">
                     Display Name:
                 </div>
-                <v-text-field class="name-field" :model-value="userInfo.displayName" variant="underlined"></v-text-field>
+                <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
+                    <v-text-field class="name-field" v-model="userInfo.displayName" variant="underlined"></v-text-field>
+                    <v-btn style="background-color: green;color: white;" @click="saveName">Save</v-btn>
+
+                </div>
+
                 <div class="avatar-setting">
                     Avatar:
                 </div>
@@ -49,6 +54,8 @@ import { useToast } from 'vue-toast-notification';
 import { signOut, getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router'
 import { storeToRefs } from "pinia";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
 import 'vue-toast-notification/dist/theme-sugar.css';
 const $toast = useToast();
@@ -59,7 +66,6 @@ const userStore = useUserStore()
 const router = useRouter()
 const { userInfo } = storeToRefs(userStore);
 const { userId } = storeToRefs(userStore);
-
 let { cookies } = useCookies()
 const theme = useTheme()
 function toggleTheme() {
@@ -76,6 +82,18 @@ const themeState = computed(() => {
         return 'mdi-weather-sunny'
     }
 })
+async function saveName() {
+    if (userInfo.value.displayName.length < 2) {
+        console.log("Too short")
+    } else {
+        console.log(userInfo.value.displayName)
+        const userRef = doc(db, "users", userId.value)
+        await updateDoc(userRef, {
+            displayName: userInfo.value.displayName
+        })
+    }
+}
+
 const handleSignOut = () => {
     signOut(auth).then(() => {
         user.value = null

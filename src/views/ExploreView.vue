@@ -55,6 +55,13 @@ async function joinBox(id) {
     await updateDoc(boxRef, {
         members: arrayUnion(userDocRef)
     });
+    const newMessage = await addDoc(collection(db, "messages"), {
+        content: user.value.displayName + " joined this Group ",
+        timeSent: Date.now(),
+        senderRef: userDocRef,
+        boxRef: boxDocRef,
+        systemMessage: true,
+    });
 }
 let typingTimeout
 function handleInput() {
