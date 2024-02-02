@@ -5,6 +5,7 @@ import FavoriteView from '../views/FavoriteView.vue'
 import GroupsView from '../views/GroupsView.vue'
 import SettingView from '../views/SettingView.vue'
 import LoginView from '../views/LoginView.vue'
+import InviteView from '../views/InviteView.vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 const auth = getAuth()
 const router = createRouter({
@@ -54,6 +55,14 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+      // meta: {
+      //   requiresAuth: false,
+      // }
+    },
+    {
+      path: '/invite/:id',
+      name: 'invite',
+      component: InviteView,
       // meta: {
       //   requiresAuth: false,
       // }

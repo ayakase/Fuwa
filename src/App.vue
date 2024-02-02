@@ -85,37 +85,9 @@ if (themeValue === null) {
   cookies.set('theme', 'light');
 }
 theme.global.name.value = cookies.get('theme')
-async function addData() {
-  const citiesRef = collection(db, "cities");
-  await setDoc(doc(citiesRef, "SF"), {
-    name: "San Francisco", state: "CA", country: "USA",
-    capital: false, population: 860000,
-    regions: ["west_coast", "norcal"]
-  });
-  await setDoc(doc(citiesRef, "LA"), {
-    name: "Los Angeles", state: "CA", country: "USA",
-    capital: false, population: 3900000,
-    regions: ["west_coast", "socal"]
-  });
-  await setDoc(doc(citiesRef, "DC"), {
-    name: "Washington, D.C.", state: null, country: "USA",
-    capital: true, population: 680000,
-    regions: ["east_coast"]
-  });
-  await setDoc(doc(citiesRef, "TOK"), {
-    name: "Tokyo", state: null, country: "Japan",
-    capital: true, population: 9000000,
-    regions: ["kanto", "honshu"]
-  });
-  await setDoc(doc(citiesRef, "BJ"), {
-    name: "Beijing", state: null, country: "China",
-    capital: true, population: 21500000,
-    regions: ["jingjinji", "hebei"]
-  });
-}
+
 const bgImage = "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D"
 onMounted(() => {
-  addData()
 })
 
 const toggleSecond = ref(false)

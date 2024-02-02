@@ -32,17 +32,25 @@
               </v-list-item>
               <v-list-item class="message-option">
                 <v-list-item-title>Edit Message</v-list-item-title>
-
               </v-list-item>
             </v-list>
           </v-menu>
           <v-card :class="messageType(message.sender, message.systemMessage)"
             :variant="variantType(message.systemMessage)">
-            {{ message.content }} <span v-if="message.systemMessage == true"> at {{ convertTime(message.time) }}</span>
+            <!-- <span> {{ message.content }}</span> -->
+            <span>
+              <v-img style="width: 30vw;"
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"></v-img>
+            </span>
+            <span v-if="message.systemMessage == true"> at {{ convertTime(message.time) }}</span>
           </v-card>
+
           <v-card-subtitle v-if="!isSender(message.sender) && message.systemMessage == false">{{ convertTime(message.time)
           }}</v-card-subtitle>
         </div>
+      </div>
+      <div>
+
       </div>
       <div ref="bottomEl"></div>
     </div>
@@ -132,9 +140,7 @@ watch(
       });
       fetchMembers()
 
-      setTimeout(() => {
-        bottomEl.value.scrollIntoView({ behavior: "smooth" });
-      }, 1000);
+      bottomEl.value.scrollIntoView({ behavior: "smooth" });
     });
   }
 );
@@ -221,7 +227,6 @@ async function fetchMembers() {
 }
 function avatarMap(member) {
   try {
-    console.log(memberArray.value);
     const matchingMember = memberMapArray.value.find(element => member.path.includes(element.id));
     if (matchingMember) {
       return matchingMember.data().avatar;
@@ -274,9 +279,7 @@ onMounted(() => {
       });
       messageArray.value = messages;
     });
-    setTimeout(() => {
-      bottomEl.value.scrollIntoView({ behavior: "smooth" });
-    }, 1000);
+    bottomEl.value.scrollIntoView({ behavior: "smooth" });
     // console.log(messageArray.value);
   });
 

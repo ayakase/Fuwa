@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <div v-if="userId"> {{ userId }}</div>
+        <!-- <div v-if="userId"> {{ userId }}</div> -->
         <v-text-field v-model="searchTerm" class="search-box" label="Search" prepend-icon="mdi-magnify" variant="underlined"
             @input="handleInput"></v-text-field>
         <div class="result-container">
@@ -80,13 +80,18 @@ onMounted(() => {
 .container {
     padding: 2rem;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .search-box {
     width: 30%;
+    max-height: 5rem;
 }
 
 .result-container {
+    width: 100%;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;

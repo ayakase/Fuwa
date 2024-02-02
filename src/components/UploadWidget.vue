@@ -1,9 +1,41 @@
 <template>
+    <div>
+        a
+    </div>
+</template>
+
+<script setup>
+
+</script>
+
+<style  scoped></style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <template>
     <div class="uw">
         <h3>Upload Widget Example</h3>
         <button v-on:click="open" id="upload_widget" class="cloudinary-button">
             Upload files
-        </button>
+        </button>htmo
     </div>
 </template>
   
@@ -38,4 +70,4 @@ export default {
 };
 </script>
   
-  
+   -->

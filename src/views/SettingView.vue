@@ -9,6 +9,13 @@
                     <v-btn @click="toggleTheme" :icon="themeState">
                     </v-btn>
                 </div>
+                <div class="image-themes">
+                    <v-card class="each-them" v-for="item in imageThemes" title="Card title" text="" variant="tonal">
+                        <v-img :src="item.image">
+
+                        </v-img>
+                    </v-card>
+                </div>
             </v-card>
             <v-card-title style="padding: 0;font-size: 1.5rem;"> Profile settings</v-card-title>
 
@@ -82,15 +89,45 @@ const themeState = computed(() => {
         return 'mdi-weather-sunny'
     }
 })
+const imageThemes = [
+    {
+        id: 1,
+        image: "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D",
+        themeMode: ""
+    },
+    {
+        id: 2,
+        image: "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D",
+        themeMode: ""
+    },
+    {
+        id: 3,
+        image: "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D",
+        themeMode: ""
+    },
+    {
+        id: 4,
+        image: "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D",
+        themeMode: ""
+    },
+    {
+        id: 5,
+        image: "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D",
+        themeMode: ""
+    },
+
+]
 async function saveName() {
-    if (userInfo.value.displayName.length < 2) {
-        console.log("Too short")
+    if (userInfo.value.displayName.length < 2 || userInfo.value.displayName.length > 30) {
+        $toast.error("Display name must have more than 2 characters and less than 30 characters");
     } else {
         console.log(userInfo.value.displayName)
         const userRef = doc(db, "users", userId.value)
         await updateDoc(userRef, {
             displayName: userInfo.value.displayName
         })
+        $toast.success("Successfully changed your display name");
+
     }
 }
 
@@ -203,5 +240,11 @@ onMounted(() => {
 .avatar-field {
     grid-row: 3/4;
     grid-column: 2/3;
+}
+
+.image-themes {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
 }
 </style>
