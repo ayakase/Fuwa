@@ -6,6 +6,7 @@ import GroupsView from '../views/GroupsView.vue'
 import SettingView from '../views/SettingView.vue'
 import LoginView from '../views/LoginView.vue'
 import InviteView from '../views/InviteView.vue'
+import ChatBotView from '@/views/ChatBotView.vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 const auth = getAuth()
 const router = createRouter({
@@ -47,6 +48,14 @@ const router = createRouter({
       path: '/setting',
       name: 'setting',
       component: SettingView,
+      meta: {
+        requiresAuth: true,
+      }
+    },
+    {
+      path: '/chat-bot',
+      name: 'chatbot',
+      component: ChatBotView,
       meta: {
         requiresAuth: true,
       }

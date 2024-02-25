@@ -127,15 +127,19 @@ const toggleSecond = ref(false)
           <v-list v-if="user" density="compact" nav>
             <v-list-item prepend-icon="mdi-home" title="Home" value="home" @click="router.push('/')">
               <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
-            <v-list-item prepend-icon="mdi-earth" title="Explore" value="shared" @click="router.push('/explore')">
-              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
+            <v-list-item prepend-icon="mdi-star" title="Favorite" value="starred" @click="router.push('/favorite')">
+              <v-tooltip activator="parent" location="start">Favorite</v-tooltip>
             </v-list-item>
             <v-list-item prepend-icon="mdi-message-processing-outline" title="Groups" value="message"
               @click="router.push('/groups')">
               <v-tooltip activator="parent" location="start">Groups</v-tooltip>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-star" title="Favorite" value="starred" @click="router.push('/favorite')">
-              <v-tooltip activator="parent" location="start">Favorite</v-tooltip>
+            <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="setting"
+              @click="router.push('/chat-bot')">
+              <v-tooltip activator="parent" location="start">Setting</v-tooltip>
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-earth" title="Explore" value="shared" @click="router.push('/explore')">
+              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
             </v-list-item>
             <v-list-item prepend-icon="mdi-cog" title="Setting" value="setting" @click="router.push('/setting')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>

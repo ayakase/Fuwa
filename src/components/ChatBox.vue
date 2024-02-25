@@ -37,10 +37,10 @@
           </v-menu>
           <v-card :class="messageType(message.sender, message.systemMessage)"
             :variant="variantType(message.systemMessage)">
-            <!-- <span> {{ message.content }}</span> -->
+            <span> {{ message.content }}</span>
             <span>
-              <v-img style="width: 30vw;"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"></v-img>
+              <!-- <v-img style="width: 30vw;"
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"></v-img> -->
             </span>
             <span v-if="message.systemMessage == true"> at {{ convertTime(message.time) }}</span>
           </v-card>
