@@ -1,29 +1,43 @@
-# fuwa
+# Fuwa - A Real-Time Chat App
 
-This template should help get you started developing with Vue 3 in Vite.
+<!-- ![App Preview]() -->
 
-## Recommended IDE Setup
+## Overview
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+This is a serverless real-time chat application built with Vite, Vue 3, Firestore 10, Vuetify, and Cloudinary. It provides a seamless and interactive chatting experience with real-time updates.
 
-## Customize configuration
+## Features
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+- **Real-Time Chatting:** Experience instant messaging with real-time updates.
+- **User Authentication:** Login via Google 0Auth, secure your chat with user authentication.
+- **Image Sharing:** Share images effortlessly using Cloudinary integration.
+- **Responsive Design:** Enjoy a consistent experience across various devices.
 
-## Project Setup
+## Technologies Used
 
-```sh
+| Technology   | Description                                       |
+| ------------ | ------------------------------------------------- |
+| Vite         | Frontend build tool and development server        |
+| Vue 3        | JavaScript framework for building user interfaces |
+| Firestore 10 | Cloud-hosted NoSQL database                       |
+| Vuetify      | Material Design component library for Vue         |
+| Cloudinary   | Cloud-based image and video management platform   |
+| Gemini API   |                                                   |
+
+## Getting Started
+
+Follow these steps to set up and run the project locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/ayakase/Fuwa.git
+
+# Navigate to the project directory
+cd Fuwa
+
+# Install dependencies
 npm install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# Start the development server
 npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
 ```

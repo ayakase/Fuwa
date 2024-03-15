@@ -19,7 +19,7 @@
                             @click="deleteBox(box.title, box.id)">
                             <v-icon size="small" icon="mdi-trash-can-outline"></v-icon>
                         </button>
-                        <button v-if="showLeaveBtn(box.owner)" class="delete-box-button"
+                        <button v-if="showLeaveBtn(box.owner)" class="leave-box-button"
                             @click="leaveBox(box.title, box.id)">
                             <v-icon size="small" icon="mdi-exit-to-app"></v-icon>
                         </button>
@@ -76,6 +76,8 @@ import {
     deleteDoc,
     orderBy,
     where,
+    updateDoc,
+    arrayRemove,
 } from "firebase/firestore";
 import { ref, watch, onMounted } from "vue";
 import { useUserStore } from "../stores/userStore";
@@ -90,6 +92,7 @@ const userStore = useUserStore();
 const user = ref();
 const auth = getAuth();
 const { userId } = storeToRefs(userStore);
+const { userInfo } = storeToRefs(userStore);
 const rail = ref(true);
 const boxes = ref([]);
 const boxId = ref("");
@@ -187,7 +190,7 @@ async function addBoxToDb() {
 
         const boxDocRef = doc(db, `box/${newBox.id}`);
         const newMessage = await addDoc(collection(db, "messages"), {
-            content: user.value.displayName + " created this Group ",
+            content: userInfo.value.displayName + " created this Group ",
             timeSent: Date.now(),
             senderRef: userDocRef,
             boxRef: boxDocRef,
@@ -208,6 +211,17 @@ async function deleteBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
         await deleteDoc(doc(db, "boxes", id));
         $toast.info("Deleted box chat " + title);
+    } else {
+        console.log("Deletion cancelled");
+    }
+}
+async function leaveBox(title, id) {
+    if (confirm("Delete box: " + title + " ?") == true) {
+        console.log(title, userId.value)
+        await updateDoc(doc(db, "boxes", id), {
+            members: arrayRemove(doc(db, "users", userId.value))
+        })
+        $toast.info("Left " + title);
     } else {
         console.log("Deletion cancelled");
     }
@@ -252,12 +266,12 @@ watch(state, async (newValue, oldValue) => {
     justify-content: space-between;
 }
 
-.delete-box-button {
+.delete-box-button, .leave-box-button {
     border-radius: 0.2rem;
     width: 1.5rem;
 }
 
-.delete-box-button:hover {
+.delete-box-button:hover, .leave-box-button:hover {
     color: rgb(255, 54, 54);
 }
 

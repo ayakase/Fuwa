@@ -134,7 +134,7 @@ const toggleSecond = ref(false)
               @click="router.push('/groups')">
               <v-tooltip activator="parent" location="start">Groups</v-tooltip>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="setting"
+            <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
               @click="router.push('/chat-bot')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item>

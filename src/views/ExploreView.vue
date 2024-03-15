@@ -28,6 +28,8 @@ const searchTerm = ref("")
 const resultBoxes = ref([])
 const userStore = useUserStore()
 const { userId } = storeToRefs(userStore)
+const { userInfo } = storeToRefs(userStore);
+
 async function fetchBoxes() {
     const response = []
     const querySnapshot = await getDocs(
@@ -56,10 +58,10 @@ async function joinBox(id) {
         members: arrayUnion(userDocRef)
     });
     const newMessage = await addDoc(collection(db, "messages"), {
-        content: user.value.displayName + " joined this Group ",
+        content: userInfo.value.displayName + " joined this Group ",
         timeSent: Date.now(),
         senderRef: userDocRef,
-        boxRef: boxDocRef,
+        boxRef: doc(db, `box/${id}`),
         systemMessage: true,
     });
 }
