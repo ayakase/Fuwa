@@ -56,6 +56,8 @@
     </div>
     <v-card class="send-container">
       <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" autofocus />
+      <v-btn ><v-icon icon="mdi-image"></v-icon>
+      </v-btn>
       <v-btn @click="toggleIcon = !toggleIcon"><v-icon icon="mdi-emoticon-happy-outline"></v-icon>
       </v-btn>
       <v-btn @click="sendMessage">Send <v-icon icon="mdi-send"></v-icon></v-btn>
@@ -337,6 +339,7 @@ onMounted(() => {
   width: 100%;
   padding: 0.4rem;
   display: flex;
+  gap: 0.2rem;
   align-items: center;
   box-sizing: border-box;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;

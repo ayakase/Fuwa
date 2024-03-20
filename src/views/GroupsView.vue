@@ -218,6 +218,14 @@ async function deleteBox(title, id) {
 async function leaveBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
         console.log(title, userId.value)
+        const userDocRef = doc(db, `users/${userStore.userId}`);
+        const newMessage = await addDoc(collection(db, "messages"), {
+            content: userInfo.value.displayName + " left this Group ",
+            timeSent: Date.now(),
+            senderRef: userDocRef,
+            boxRef: doc(db, `box/${id}`),
+            systemMessage: true,
+        });
         await updateDoc(doc(db, "boxes", id), {
             members: arrayRemove(doc(db, "users", userId.value))
         })
