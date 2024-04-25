@@ -32,7 +32,9 @@ async function addUserToDb(user) {
                 uid: user.uid,
                 displayName: user.displayName,
                 email: user.email,
-                avatar: user.photoURL
+                avatar: user.photoURL,
+                about: '',
+                boxes: [],
             });
         }
     }
@@ -44,6 +46,8 @@ async function addUserToDb(user) {
 async function getUser(user) {
     const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
     querySnapshot.forEach((doc) => {
+        userInfo.value = doc.data();
+        userStore.changeUserInfo(userInfo.value);
         userStore.changeUserId(doc.id)
     });
 }

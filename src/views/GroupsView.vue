@@ -8,11 +8,12 @@
             </div>
             <v-divider></v-divider>
             <v-list>
-                <v-list-item @click="selectBox(box.id, box.title, box.members)" :prepend-avatar="user.photoURL"
-                    class="chat-box-container" v-if="boxes.length > 0" v-for="box in boxes" :key="box" :value="box.id">
+                <v-list-item @click="selectBox(box.id, box.title, box.members, box.existed)"
+                    :prepend-avatar="user.photoURL" class="chat-box-container" v-if="boxes.length > 0"
+                    v-for="box in boxes" :key="box" :value="box.id">
                     <v-tooltip v-if="rail" activator="parent" location="end">{{
-                        box.title
-                    }}</v-tooltip>
+            box.title
+        }}</v-tooltip>
                     <div class="chat-box">
                         <p class="box-title" v-if="!rail">{{ box.title }}</p>
                         <button v-if="showDeleteBtn(box.owner)" class="delete-box-button"
@@ -25,7 +26,8 @@
                         </button>
                     </div>
                 </v-list-item>
-                <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You have not
+                <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You have
+                    not
                     joined any
                     chat</v-card-subtitle>
                 <LoadingComponent v-else></LoadingComponent>
@@ -48,21 +50,22 @@
                             <v-text-field variant="underlined" v-model="boxPassword"
                                 label="Password (leave blank if you want to let people join freely)" required
                                 hide-details></v-text-field>
-                            <v-text-field variant="underlined" v-model="boxTitle" label="Box Name" required
+                            <v-text-field variant="underlined" v-model="boxInviteId" label="Invite ID" required
                                 hide-details></v-text-field>
 
                             <v-switch :label="publicState" v-model="state" inset></v-switch>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn text="Create new chat" @click="addBox()"> </v-btn>
+                                <v-btn text="Create new chat" @click="addBoxToDb()"> </v-btn>
                             </v-card-actions>
                         </v-card>
                     </template>
                 </v-dialog>
             </v-list>
-            <!-- <div style="background-color: rebeccapurple;" @click="rail = false; console.log(rail)">ba</div> -->
         </v-navigation-drawer>
-        <ChatBox :box-id="boxId" :box-name="boxName" :box-members="boxMembers" :test="test" v-if="boxId"></ChatBox>
+        <ChatBox :box-id="boxId" :box-name="boxName" :existed-members="existedMembers" :box-members="boxMembers"
+            :test="test" v-if="boxId"></ChatBox>
+        <NoBox v-else></NoBox>
     </div>
 </template>
 <script setup>
@@ -71,6 +74,7 @@ import {
     collection,
     addDoc,
     doc,
+    getDoc,
     onSnapshot,
     query,
     deleteDoc,
@@ -78,15 +82,18 @@ import {
     where,
     updateDoc,
     arrayRemove,
+    arrayUnion,
 } from "firebase/firestore";
 import { ref, watch, onMounted } from "vue";
 import { useUserStore } from "../stores/userStore";
 import LoadingComponent from "../components/LoadingComponent.vue";
+import NoBox from "../components/NoBox.vue";
 import ChatBox from "../components/ChatBox.vue";
 import { useToast } from "vue-toast-notification";
 import "vue-toast-notification/dist/theme-sugar.css";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { storeToRefs } from "pinia";
+import { thumbnail } from "@cloudinary/url-gen/actions/resize";
 const $toast = useToast();
 const userStore = useUserStore();
 const user = ref();
@@ -98,47 +105,70 @@ const boxes = ref([]);
 const boxId = ref("");
 const boxName = ref("");
 const boxMembers = ref([]);
+const existedMembers = ref([]);
+const boxInviteId = ref("");
+const boxThumbnail = ref("");
 const test = ref();
 const hasBox = ref(true);
-function selectBox(id, title, members) {
+function selectBox(id, title, members, existed) {
     boxId.value = id;
     boxName.value = title;
     boxMembers.value = members;
+    existedMembers.value = existed;
 }
-async function retrieveDoc() {
-    // const listQuery = query(collection(db, "boxes"),
-    //     or(
-    //         where("owner", "==", doc(db, `users/${userId.value}`)),
-    //         where("members", "array-contains", doc(db, `users/${userId.value}`))
-    //     )
-    // );
-    const listQuery = query(collection(db, "boxes"),
-        where("members", "array-contains", doc(db, `users/${userId.value}`)),
-        orderBy("dateCreated", "desc")
-    )
-    onSnapshot(listQuery, (snapshot) => {
-        const boxesList = [];
-        if (snapshot.docs.length > 0) {
-            snapshot.forEach((doc) => {
-                // console.log(doc.data().members)
-                boxesList.push({
-                    id: doc.id,
-                    title: doc.data().title,
-                    owner: doc.data().owner,
-                    members: doc.data().members
-                });
-            });
-            boxes.value = boxesList;
-            boxId.value = boxes.value[0].id;
-            boxName.value = boxes.value[0].title;
-            boxMembers.value = boxes.value[0].members
-            hasBox.value = true;
-        } else {
-            boxes.value = [];
-            hasBox.value = false;
-        }
+async function fetchBoxes() {
+    let boxRefArray = userInfo.value.boxes
+    if (boxRefArray && boxRefArray.length > 0) {
+        try {
+            const boxesDocs = await Promise.all(boxRefArray.map(ref => getDoc(ref)));
+            boxes.value = boxesDocs.map(doc => {
+                if (doc.exists()) {
+                    const data = { ...doc.data(), id: doc.id };
+                    return data;
+                } else {
+                    return null;
+                }
+            }).filter(item => item !== null)
+            if (boxes.value.length > 0) {
+                hasBox.value = true;
+            } else {
+                hasBox.value = false;
+            }
 
-    });
+
+        } catch (e) {
+            console.log(e)
+        }
+    } else {
+        boxes.value = [];
+    }
+    // const listQuery = query(collection(db, "boxes"),
+    //     where("members", "array-contains", doc(db, "users", userId.value)),
+    //     orderBy("dateCreated", "desc")
+    // )
+    // onSnapshot(listQuery, (snapshot) => {
+    //     const boxesList = [];
+    //     if (snapshot.docs.length > 0) {
+    //         snapshot.forEach((doc) => {
+    //             // console.log(doc.data().members)
+    //             boxesList.push({
+    //                 id: doc.id,
+    //                 title: doc.data().title,
+    //                 owner: doc.data().owner,
+    //                 members: doc.data().members
+    //             });
+    //         });
+    //         boxes.value = boxesList;
+    //         boxId.value = boxes.value[0].id;
+    //         boxName.value = boxes.value[0].title;
+    //         boxMembers.value = boxes.value[0].members
+    //         hasBox.value = true;
+    //     } else {
+    //         boxes.value = [];
+    //         hasBox.value = false;
+    //     }
+
+    // });
 }
 // watch(userId, async (newValue, oldValue) => {
 //     const listQuery = query(collection(db, "boxes"), where('owner', '==', doc(db, `users/${newValue}`)), orderBy('dateCreated', 'desc'))
@@ -158,8 +188,7 @@ async function retrieveDoc() {
 watch(
     () => userId.value,
     (newUserId, oldUserId) => {
-        console.log(newUserId)
-        retrieveDoc();
+        fetchBoxes();
     },
     { immediate: true }
 
@@ -171,32 +200,37 @@ onMounted(() => {
 
 });
 const toggleBox = ref(true);
-function addBox() {
-    addBoxToDb();
-}
 
 async function addBoxToDb() {
     try {
-        const userDocRef = doc(db, `users/${userStore.userId}`);
+        const userDocRef = doc(db, 'users', userStore.userId);
         const newBox = await addDoc(collection(db, "boxes"), {
             title: boxTitle.value,
             owner: userDocRef,
             members: [userDocRef],
+            existed: [userDocRef],
             description: boxDescription.value,
             isPublic: state.value,
             password: boxPassword.value,
+            invite: boxInviteId.value,
+            thumbnail: boxThumbnail.value,
             dateCreated: Date.now(),
         });
-
-        const boxDocRef = doc(db, `box/${newBox.id}`);
-        const newMessage = await addDoc(collection(db, "messages"), {
+        const boxDocRef = doc(db, "boxes", newBox.id);
+        await updateDoc(userDocRef, {
+            boxes: arrayUnion(boxDocRef)
+        })
+        const messageCollectionRef = collection(boxDocRef, "messages");
+        const newMessage = await addDoc(messageCollectionRef, {
             content: userInfo.value.displayName + " created this Group ",
             timeSent: Date.now(),
             senderRef: userDocRef,
-            boxRef: boxDocRef,
             systemMessage: true,
         });
         $toast.success("Created box chat " + boxTitle.value);
+        setTimeout(() => {
+            fetchBoxes()
+        }, 3000);
     } catch (e) {
         console.error("Error adding document: ", e);
     }
@@ -209,7 +243,14 @@ function showLeaveBtn(owner) {
 }
 async function deleteBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
-        await deleteDoc(doc(db, "boxes", id));
+        try {
+            await deleteDoc(doc(db, "boxes", id));
+            await updateDoc(doc(db, "users", userId.value), {
+                boxes: arrayRemove(doc(db, "boxes", id))
+            })
+        } catch (e) {
+            console.error(e.message)
+        }
         $toast.info("Deleted box chat " + title);
     } else {
         console.log("Deletion cancelled");
@@ -217,18 +258,22 @@ async function deleteBox(title, id) {
 }
 async function leaveBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
-        console.log(title, userId.value)
         const userDocRef = doc(db, `users/${userStore.userId}`);
-        const newMessage = await addDoc(collection(db, "messages"), {
-            content: userInfo.value.displayName + " left this Group ",
-            timeSent: Date.now(),
-            senderRef: userDocRef,
-            boxRef: doc(db, `box/${id}`),
-            systemMessage: true,
-        });
+        const boxDocRef = doc(db, "boxes", id);
+        const messageCollectionRef = collection(boxDocRef, "messages");
+
+        await updateDoc(doc(db, "users", userId.value), {
+            boxes: arrayRemove(doc(db, "boxes", id))
+        })
         await updateDoc(doc(db, "boxes", id), {
             members: arrayRemove(doc(db, "users", userId.value))
         })
+        const newMessage = await addDoc(messageCollectionRef, {
+            content: userInfo.value.displayName + " left this Group ",
+            timeSent: Date.now(),
+            senderRef: userDocRef,
+            systemMessage: true,
+        });
         $toast.info("Left " + title);
     } else {
         console.log("Deletion cancelled");
@@ -274,12 +319,14 @@ watch(state, async (newValue, oldValue) => {
     justify-content: space-between;
 }
 
-.delete-box-button, .leave-box-button {
+.delete-box-button,
+.leave-box-button {
     border-radius: 0.2rem;
     width: 1.5rem;
 }
 
-.delete-box-button:hover, .leave-box-button:hover {
+.delete-box-button:hover,
+.leave-box-button:hover {
     color: rgb(255, 54, 54);
 }
 

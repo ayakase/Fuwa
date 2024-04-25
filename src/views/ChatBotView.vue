@@ -31,8 +31,8 @@
             <v-list density="compact" nav>
                 <v-list-item prepend-icon="mdi-home-city" title="Home" value="home"></v-list-item>
                 <v-list-item prepend-icon="mdi-account" title="My Account" value="account"></v-list-item>
-                <v-list-item prepend-icon="mdi-account-group-outline" @click="toggleMember = !toggleMember" title="Members"
-                    value="members">
+                <v-list-item prepend-icon="mdi-account-group-outline" @click="toggleMember = !toggleMember"
+                    title="Members" value="members">
                 </v-list-item>
                 <v-list-item v-for="member in memberArray" :key="member" :prepend-avatar="member.avatar">
                     <div>
@@ -96,15 +96,8 @@ function askBot() {
 }
 async function callApi(prompt) {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContentStream(prompt);
-    let text = '';
-    for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        console.log(chunkText);
-        // text += chunkText;
-        botAnswer.value += chunkText;
-    }
-    // botAnswer.value = text;
+    const result = await model.generateContent(prompt);
+    botAnswer.value = result.response.text()
 }
 </script>
 

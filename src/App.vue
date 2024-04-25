@@ -1,4 +1,4 @@
-<script setup >
+<script setup>
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { ref } from 'vue';
@@ -55,12 +55,14 @@ const signInWithGoogle = () => {
 // }
 const userInfo = ref()
 async function getUser(user) {
-  const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
-  querySnapshot.forEach((doc) => {
-    userInfo.value = doc.data();
-    userStore.changeUserInfo(userInfo.value);
-    userStore.changeUserId(doc.id)
-  });
+  if (user) {
+    const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+    querySnapshot.forEach((doc) => {
+      userInfo.value = doc.data();
+      userStore.changeUserInfo(userInfo.value);
+      userStore.changeUserId(doc.id)
+    });
+  }
 }
 const handleSignOut = () => {
   signOut(auth).then(() => {
@@ -82,7 +84,7 @@ onAuthStateChanged(auth, (firebaseUser) => {
 });
 const themeValue = cookies.get('theme');
 if (themeValue === null) {
-  cookies.set('theme', 'light');
+  cookies.set('theme', 'light', 60 * 60 * 24 * 30);
 }
 theme.global.name.value = cookies.get('theme')
 
@@ -125,25 +127,28 @@ const toggleSecond = ref(false)
           </v-list>
           <v-divider></v-divider>
           <v-list v-if="user" density="compact" nav>
-            <v-list-item prepend-icon="mdi-home" title="Home" value="home" @click="router.push('/')">
-              <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
-            <v-list-item prepend-icon="mdi-star" title="Favorite" value="starred" @click="router.push('/favorite')">
-              <v-tooltip activator="parent" location="start">Favorite</v-tooltip>
+            <v-list-item prepend-icon="mdi-earth" title="Explore" value="shared" @click="router.push('/explore')">
+              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
             </v-list-item>
             <v-list-item prepend-icon="mdi-message-processing-outline" title="Groups" value="message"
               @click="router.push('/groups')">
               <v-tooltip activator="parent" location="start">Groups</v-tooltip>
             </v-list-item>
+            <v-list-item prepend-icon="mdi-inbox" title="Inbox" value="message" @click="router.push('/inbox')">
+              <v-tooltip activator="parent" location="start">Inbox</v-tooltip>
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-home" title="Home" value="home" @click="router.push('/')">
+              <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
             <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
               @click="router.push('/chat-bot')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-earth" title="Explore" value="shared" @click="router.push('/explore')">
-              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
-            </v-list-item>
             <v-list-item prepend-icon="mdi-cog" title="Setting" value="setting" @click="router.push('/setting')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item>
+            <p>
+              {{ $t('message.hello') }}
+            </p>
             <!-- <v-switch color="orange" label="Switch" v-model="state" @click="toggleTheme">
           </v-switch> -->
             <!-- <v-list-item @click="toggleTheme" title="Dark Mode" :prepend-icon="themeState" value="mode">

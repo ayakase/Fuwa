@@ -31,9 +31,14 @@
                 <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
                     <v-text-field class="name-field" v-model="userInfo.displayName" variant="underlined"></v-text-field>
                     <v-btn style="background-color: green;color: white;" @click="saveName">Save</v-btn>
-
                 </div>
-
+                <div class="about-setting">
+                    About Me:
+                </div>
+                <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
+                    <v-text-field class="name-field" v-model="userInfo.about" variant="underlined"></v-text-field>
+                    <v-btn style="background-color: green;color: white;" @click="saveAbout">Save</v-btn>
+                </div>
                 <div class="avatar-setting">
                     Avatar:
                 </div>
@@ -78,7 +83,7 @@ const theme = useTheme()
 function toggleTheme() {
     theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
     $toast.info("Theme changed to " + theme.global.name.value);
-    cookies.set('theme', theme.global.name.value)
+    cookies.set('theme', theme.global.name.value, 60 * 60 * 24 * 30)
 
 }
 const themeState = computed(() => {
@@ -127,10 +132,20 @@ async function saveName() {
             displayName: userInfo.value.displayName
         })
         $toast.success("Successfully changed your display name");
-
     }
 }
-
+async function saveAbout() {
+    if (userInfo.value.about.length < 2 || userInfo.value.about.length > 30) {
+        $toast.error("Display name must have more than 2 characters and less than 30 characters");
+    } else {
+        console.log(userInfo.value.about)
+        const userRef = doc(db, "users", userId.value)
+        await updateDoc(userRef, {
+            about: userInfo.value.about
+        })
+        $toast.success("Successfully changed your about profile");
+    }
+}
 const handleSignOut = () => {
     signOut(auth).then(() => {
         user.value = null
@@ -143,11 +158,9 @@ const handleSignOut = () => {
     });
 }
 onMounted(() => {
-
     const themeValue = cookies.get('theme');
     if (themeValue === null) {
-        // If it doesn't exist, set its value to 'white'
-        cookies.set('theme', 'light');
+        cookies.set('theme', 'light', 60 * 60 * 24 * 30);
     }
     theme.global.name.value = cookies.get('theme')
     onAuthStateChanged(auth, (firebaseUser) => {
@@ -199,9 +212,8 @@ onMounted(() => {
     padding: 1rem;
 } */
 .profile-setting {
-    display: grid;
-    grid-template-columns: 10% 50%;
-    grid-template-rows: 20% 20% 50%;
+    display: flex;
+    flex-direction: column;
     padding: 1rem;
 }
 

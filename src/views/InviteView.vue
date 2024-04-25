@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        
+        {{ inviteId }}
     </div>
 </template>
 
@@ -14,4 +14,4 @@ onMounted(() => {
 })
 </script>
 
-<style  scoped></style>
+<style scoped></style>
