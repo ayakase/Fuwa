@@ -3,16 +3,15 @@
         <v-text-field v-model="searchTerm" class="search-box" label="Search" prepend-icon="mdi-magnify"
             variant="underlined" @input="handleInput"></v-text-field>
         <div class="result-container">
-            <v-card class="each-box" v-if="resultBoxes" v-for="box in resultBoxes" :title="box.title"
-                :text="box.description">
+            <v-card image="https://cdn.vuetifyjs.com/docs/images/cards/dark-beach.jpg" class="each-box"
+                v-if="resultBoxes" v-for="box in resultBoxes" :title="box.title" :text="box.description">
+                <v-card-text> {{ countMembers(box.members) }}</v-card-text>
                 <v-card-actions>
                     <v-btn @click="joinBox(box.id)">Join</v-btn>
                 </v-card-actions>
             </v-card>
         </div>
-        <div v-for="item in resultBoxes" :key="item.id">
-            {{ item }}
-        </div>
+
     </div>
 </template>
 
@@ -57,9 +56,8 @@ async function fetchBoxes() {
         .documents()
         .search(search)
         .then(function (searchResults) {
-            console.log(searchResults.hits)
+            // console.log(searchResults.hits)
             searchResults.hits.forEach(result => {
-                console.log(result.document)
                 resultArray.push(result.document)
             });
             resultBoxes.value = resultArray
@@ -100,7 +98,7 @@ async function joinBox(id) {
             content: userInfo.value.displayName + " joined this Group ",
             timeSent: Date.now(),
             senderRef: userDocRef,
-            systemMessage: true,
+            messageType: 'system',
         });
     } catch (e) {
         console.error(e);
@@ -112,6 +110,9 @@ function handleInput() {
     typingTimeout = setTimeout(() => {
         fetchBoxes();
     }, 200);
+}
+function countMembers(members) {
+    return members.length
 }
 onMounted(() => {
     fetchBoxes()
@@ -138,7 +139,7 @@ onMounted(() => {
 .result-container {
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 2rem;
 }
 

@@ -1,53 +1,81 @@
 <template>
-  <div class="container">
+  <div class="container" ref="bgContainer">
     <v-app-bar :elevation="2" density="compact">
       <div class="top-bar">
         <v-card-title class="box-name">{{ props.boxName }}</v-card-title>
-        <v-btn @click="loadMoreMessages()">Load More</v-btn>
-
-        <div><v-btn icon="mdi-star"></v-btn>
-          <v-btn icon="mdi-magnify"></v-btn>
+        <div>
           <v-btn icon="mdi-dots-vertical" @click="showSetting = !showSetting"></v-btn>
         </div>
       </div>
     </v-app-bar>
-    <div v-if="user" class="message-container">
+    <div v-if="user" class="message-container" @scroll="handleScroll()" ref="messageContainer">
+      <div
+        style="position:absolute; display:flex; flex-direction: row; justify-content:center;width:100%; top: 1rem;z-index: 99;">
+        <Transition name="slide-fade-bottom">
+          <v-btn v-show="showLoadMore" @click="loadMoreMessages()" prepend-icon="mdi-elevator-up"> Load More Message
+          </v-btn>
+        </Transition>
+      </div>
       <div v-for="message in messageArray">
         <v-card-subtitle style="padding: 0;font-size: small;"
-          v-if="!isSender(message.sender) && message.systemMessage == false">
+          v-if="!isSender(message.sender) && message.messageType !== 'system' && message.messageType !== 'bot'">
           {{ nameMap(message.sender) }}
         </v-card-subtitle>
+        <v-card-subtitle style="padding: 0;font-size: small;" v-if="message.messageType == 'bot'">
+          Gemini Bot
+        </v-card-subtitle>
         <div v-if="messageArray" class="each-message">
-          <v-avatar class="avatar" v-if="!isSender(message.sender) && message.systemMessage == false"
+          <v-avatar class="avatar"
+            v-if="!isSender(message.sender) && message.messageType !== 'system' && message.messageType !== 'bot'"
             :image="avatarMap(message.sender)"></v-avatar>
-          <v-card-subtitle v-if="isSender(message.sender) && message.systemMessage == false"
+          <v-avatar class="avatar" v-if="message.messageType == 'bot'"
+            image="https://i.imgur.com/horI1zX.png"></v-avatar>
+          <v-card-subtitle
+            v-if="isSender(message.sender) && message.messageType !== 'system' && message.messageType !== 'bot'"
             style="margin-left: auto;">{{
       convertTime(message.time)
     }}</v-card-subtitle>
           <v-menu transition="scale-transition" location="start"
-            v-if="isSender(message.sender) && message.systemMessage == false">
+            v-if="isSender(message.sender) && message.messageType !== 'system' && message.messageType !== 'bot'">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
             </template>
             <v-list>
               <v-list-item class="message-option" @click="deleteMessage(message.id)">
-                <v-list-item-title>Delete Message</v-list-item-title>
+                <v-list-item-title>Unsend Message</v-list-item-title>
               </v-list-item>
               <v-list-item class="message-option">
-                <v-list-item-title>Edit Message</v-list-item-title>
+                <v-list-item-title>Copy Message</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
-          <v-card style="display:flex;" :class="messageType(message.sender, message.systemMessage)"
-            :variant="variantType(message.systemMessage)">
+          <div v-if="message.messageType !== 'system' && (!isSender(message.sender) || message.messageType == 'bot')"
+            class="triangle-left"></div>
+          <v-card style="display:flex;" :class="messageType(message.sender, message.messageType, message.botMessage)"
+            :variant="variantType(message.messageType)">
             <span v-html="parseMarkdown(message.content)"> </span>
-            <!-- <span>{{ parseMarkdown(message.content) }}</span> -->
             <span>
             </span>
-            <span v-if="message.systemMessage == true">&nbsp;at {{ convertTime(message.time) }}</span>
+            <span v-if="message.messageType == 'system'">&nbsp;at {{ convertTime(message.time) }}</span>
           </v-card>
-
-          <v-card-subtitle v-if="!isSender(message.sender) && message.systemMessage == false">{{
+          <div v-if="message.messageType !== 'system' && isSender(message.sender) && message.messageType !== 'bot'"
+            class="triangle-right"></div>
+          <v-menu transition="scale-transition" location="start"
+            v-if="isSender(message.sender) && message.messageType !== 'system' && message.messageType == 'bot'">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
+            </template>
+            <v-list>
+              <v-list-item class="message-option" @click="deleteMessage(message.id)">
+                <v-list-item-title>Unsend Message</v-list-item-title>
+              </v-list-item>
+              <v-list-item class="message-option">
+                <v-list-item-title>Copy Message</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <v-card-subtitle
+            v-if="(!isSender(message.sender) && message.messageType == 'common') || message.messageType == 'bot'">{{
       convertTime(message.time)
     }}</v-card-subtitle>
         </div>
@@ -56,22 +84,18 @@
 
       </div>
       <BotLoading v-if="showLoading"></BotLoading>
-
-      <div ref="bottomEl"></div>
+      <div ref="bottomEl" style="height: .5rem;">
+      </div>
     </div>
-
     <v-card class="send-container">
       <Transition name="slide-fade">
         <div v-if="displayBot" style="width: 3rem;display:flex; justify-content: center;">
           <v-icon icon="mdi-robot-outline"></v-icon>
         </div>
       </Transition>
-
       <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" autofocus />
-
       <v-btn @click="toggleImageSelect = !toggleImageSelect"><v-icon icon="mdi-image"></v-icon>
       </v-btn>
-
       <v-btn @click="toggleIcon = !toggleIcon"><v-icon icon="mdi-emoticon-happy-outline"></v-icon>
       </v-btn>
       <v-btn @click="sendMessage"><v-icon style="transform: rotate(270deg);" icon="mdi-send"></v-icon></v-btn>
@@ -97,26 +121,26 @@
       </div>
     </Transition>
     <v-navigation-drawer location="right" v-if="showSetting">
-      <template v-slot:prepend>
-        <v-list-item lines="two" prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg" title="Jane Smith"
-          subtitle="Logged in"></v-list-item>
-      </template>
+
       <v-divider></v-divider>
 
       <v-list density="compact" nav>
         <v-list-item prepend-icon="mdi-home-city" title="Home" value="home"></v-list-item>
         <v-list-item prepend-icon="mdi-account" title="My Account" value="account"></v-list-item>
+        <v-divider></v-divider>
         <v-list-item prepend-icon="mdi-account-group-outline" @click="toggleMember = !toggleMember" title="Members"
           value="members">
         </v-list-item>
-        <v-list-item v-for="member in memberArray" :key="member" :prepend-avatar="member.avatar">
-          <div>
-            {{ member.displayName }}
-          </div>
-        </v-list-item>
-
+        <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id" :name="member.displayName"
+          :avatar="member.avatar"></UserProfile>
       </v-list>
     </v-navigation-drawer>
+    <div class="scroll-bottom">
+      <Transition name="slide-fade-bottom">
+        <v-btn  v-show="showScrollDown" icon="mdi-arrow-down" @click="scrollToBottom()"></v-btn>
+      </Transition>
+    </div>
+
   </div>
 
 </template>
@@ -134,7 +158,6 @@ import {
   where,
   limit,
   getDoc,
-  DocumentReference,
 } from "firebase/firestore";
 import EmojiPicker from "vue3-emoji-picker";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -145,11 +168,15 @@ import { useUserStore } from "../stores/userStore";
 import { storeToRefs } from "pinia";
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import BotLoading from "../components/BotLoading.vue";
-
+import { useToast } from 'vue-toast-notification';
+import UserProfile from "../components/UserProfile.vue";
 import MarkdownIt from 'markdown-it';
+import { useCookies } from "vue3-cookies";
+let { cookies } = useCookies()
+
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API);
 const userStore = useUserStore();
-const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers"]);
+const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin"]);
 const user = ref();
 const { userId } = storeToRefs(userStore);
 const showSetting = ref(false)
@@ -161,6 +188,8 @@ const bottomEl = ref(null);
 const messageArray = ref([]);
 const toggleMember = ref(false);
 const toggleImageSelect = ref(false);
+const toast = useToast();
+
 const parseMarkdown = (content) => {
   const md = new MarkdownIt();
   return md.render(content);
@@ -168,24 +197,26 @@ const parseMarkdown = (content) => {
 function isSender(sender) {
   return (`users/${userId.value}` == sender.path)
 }
-function messageType(sender, isSystemMessage) {
-  if (isSystemMessage == true) {
+function messageType(sender, type) {
+  if (type == 'system') {
     return 'system-message';
-  } else if (sender.path == `users/${userId.value}` && isSystemMessage == false) {
+  } else if (type == 'bot') {
+    return 'received-message';
+  } else if (type == 'common' && sender.path == `users/${userId.value}` && type !== 'system') {
     return 'sender-message';
   } else {
     return 'received-message';
   }
 }
-function variantType(isSystemMessage) {
-  if (isSystemMessage == true) {
+
+function variantType(type) {
+  if (type == 'system') {
     return 'plain'
   } else {
-    return 'elevated'
+    return 'flat'
   }
 }
-function mapMembers() {
-}
+
 function onSelectEmoji(emoji) {
   messageContent.value += emoji.i;
 }
@@ -208,18 +239,18 @@ async function sendMessage() {
         content: messageContent.value,
         timeSent: Date.now(),
         senderRef: userDocRef,
-        systemMessage: false,
+        messageType: 'common',
       });
-      if (messageContent.value.toLowerCase().includes('/bot')) {
+      if (messageContent.value.toLowerCase().includes('@bot')) {
         showLoading.value = true;
-        let prompt = messageContent.value.replace('/bot', '')
+        let prompt = messageContent.value.replace('@bot', '')
         messageContent.value = "";
         const aiRes = await callApi(prompt)
         await addDoc(messageCollectionRef, {
-          content: `🤖💬: ${aiRes}`,
+          content: aiRes,
           timeSent: Date.now(),
           senderRef: userDocRef,
-          systemMessage: false,
+          messageType: 'bot',
         });
       }
       messageContent.value = "";
@@ -236,6 +267,7 @@ async function deleteMessage(id) {
     const boxDocRef = doc(db, "boxes", props.boxId);
     const messageRef = doc(boxDocRef, "messages", id);
     await deleteDoc(messageRef);
+    toast.info('Message unsent');
   } else {
     console.log("Deletion cancelled");
   }
@@ -254,7 +286,8 @@ async function fetchMembers() {
     const userDocs = await Promise.all(userRefArray.map(ref => getDoc(ref)));
     memberArray.value = userDocs.map(doc => {
       if (doc.exists()) {
-        return doc.data();
+        const data = { ...doc.data(), id: doc.id };
+        return data;
       } else {
         return null;
       }
@@ -268,7 +301,6 @@ const existedMembers = ref()
 const existedMapArray = ref()
 async function fetchExisted() {
   existedMembers.value = null
-  console.log(props)
   const existedRefArray = props.existedMembers
   try {
     const userDocs = await Promise.all(existedRefArray.map(ref => getDoc(ref)));
@@ -323,58 +355,99 @@ function processImg(event) {
   thumbnailImg.value = event.target.files[0];
 }
 function sendImg() {
-  console.log(thumbnailImg.value);
-  console.log(thumbnailSrc.value);
+  // console.log(thumbnailImg.value);
+  // console.log(thumbnailSrc.value);
 }
-let currentListener = ref(null);
 const displayBot = ref(false)
 watch(() => messageContent.value, (newValue, oldValue) => {
-  if (newValue.includes('/bot')) {
+  if (newValue.includes('@bot')) {
     displayBot.value = true;
   } else {
     displayBot.value = false;
   }
 })
+let currentListener = ref(null);
 
+
+const defaultLimit = 15;
+let currentLimit = defaultLimit;
+
+let currenBoxId = ref('')
+function loadMoreMessages() {
+  currentLimit += defaultLimit; // Increase the limit by defaultLimit
+  getMessage(currenBoxId.value)
+}
+function getMessage(id) {
+  if (currentListener.value) {
+    (currentListener.value)();
+    currentListener.value = null;
+  }
+  currenBoxId.value = id
+  const listQuery = query(
+    collection(db, "boxes", id, 'messages'),
+    orderBy("timeSent", "desc"),
+    limit(currentLimit)
+  );
+  currentListener.value = onSnapshot(listQuery, (snapshot) => {
+    const messages = [];
+    snapshot.forEach((doc) => {
+      messages.push({
+        id: doc.id,
+        content: doc.data().content,
+        sender: doc.data().senderRef,
+        time: doc.data().timeSent,
+        messageType: doc.data().messageType
+      });
+    });
+    messageArray.value = messages.reverse();
+    setTimeout(() => {
+      if (scrolledToBottom.value) {
+        scrollToBottom()
+      }
+    }, 500);
+  });
+}
+const showScrollDown = ref(false)
+const showLoadMore = ref(false)
+const scrolledToBottom = ref(true)
+const messageContainer = ref()
+function handleScroll() {
+  if (messageContainer.value.scrollTop < 200) {
+    showLoadMore.value = true
+  } else {
+    showLoadMore.value = false
+  }
+  // console.log(messageContainer.value.offsetHeight + messageContainer.value.scrollTop)
+  // console.log(messageContainer.value.scrollHeight);
+  // console.log(messageContainer.value.offsetHeight + messageContainer.value.scrollTop - messageContainer.value.scrollHeight >= -200)
+  if (messageContainer.value.offsetHeight + messageContainer.value.scrollTop - messageContainer.value.scrollHeight >= -200) {
+    scrolledToBottom.value = true
+    showScrollDown.value = false
+  } else {
+    scrolledToBottom.value = false
+    showScrollDown.value = true
+
+  }
+}
+function scrollToBottom() {
+  bottomEl.value?.scrollIntoView({ behavior: "smooth" });
+
+}
 watch(
   () => props.boxId,
   (newBoxId, oldBoxId) => {
-    if (currentListener.value) {
-      (currentListener.value)();
-      currentListener.value = null;
-    }
-
-    const listQuery = query(
-      collection(db, "boxes", newBoxId, 'messages'),
-      orderBy("timeSent", "desc"),
-      limit(15)
-    );
-
-    currentListener.value = onSnapshot(listQuery, (snapshot) => {
-      const messages = [];
-      snapshot.forEach((doc) => {
-        messages.push({
-          id: doc.id,
-          content: doc.data().content,
-          sender: doc.data().senderRef,
-          time: doc.data().timeSent,
-          systemMessage: doc.data().systemMessage
-        });
-      });
-      messageArray.value = messages.reverse();
-      setTimeout(() => {
-        bottomEl.value?.scrollIntoView({ behavior: "smooth" });
-      }, 500);
-    });
+    getMessage(newBoxId)
     fetchMembers();
     fetchExisted();
   },
   { immediate: true }
 );
+const bgContainer = ref(null)
 onMounted(() => {
-  console.log(props.existedMembers)
   fetchMembers();
   fetchExisted();
+  bgContainer.value.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${cookies.get('bgImage')})`
+  console.log(bgContainer.value.style)
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });
@@ -383,8 +456,6 @@ onMounted(() => {
     // where("boxRef", "==", doc(db, `box/${props.boxId}`)),
     orderBy("timeSent", "asc")
   )
-  console.log(props.boxId)
-
 });
 </script>
 
@@ -400,6 +471,9 @@ p {
   flex-direction: column;
   justify-content: space-between;
   position: relative;
+  background-size: cover;
+  /* filter: brightness(50%); */
+
 }
 
 .message-container {
@@ -416,6 +490,7 @@ p {
   display: flex !important;
   flex-direction: row !important;
   justify-content: space-between;
+  align-items: center
 }
 
 /* width */
@@ -431,13 +506,13 @@ p {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #68b16b;
+  background: gray;
   border-radius: 2px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #579359;
+  /* background: #579359; */
 }
 
 .send-container {
@@ -480,24 +555,22 @@ p {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 1rem;
-
 }
 
 .received-message {
-  max-width: 50%;
+  max-width: 70%;
   padding: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
-  background-color: #68b16b;
+  background-color: var(--main-color);
 }
 
 .sender-message {
-  max-width: 50%;
+  max-width: 70%;
   padding: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
-  background-color: #68b16b;
+  background-color: var(--main-color);
 
 }
 
@@ -557,5 +630,37 @@ p {
 .slide-fade-bottom-leave-to {
   transform: translateY(40px);
   opacity: 0;
+}
+
+.each-member:hover {
+  cursor: pointer;
+  transition: all .2s linear;
+  background-color: #68b16ab5;
+}
+
+.triangle-left {
+  margin-left: .5rem;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid var(--main-color);
+}
+
+.triangle-right {
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid var(--main-color);
+}
+
+.scroll-bottom {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  bottom: 4rem;
+  width: 100%;
 }
 </style>

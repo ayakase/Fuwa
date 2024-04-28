@@ -94,7 +94,6 @@ router.beforeEach(async (to, from, next) => {
     if (await getCurrentUser()) {
       next()
     } else {
-      console.log('no auth ')
       next("/login")
     }
   } else {

@@ -2,13 +2,13 @@
     <div class="container">
         <v-navigation-drawer class="box-view" :rail="rail">
             <div class="message-top-bar">
-                <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn>
+                <!-- <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn> -->
                 <v-btn v-if="!rail" variant="text" icon="mdi-chevron-left" @click="rail = !rail"></v-btn>
                 <v-btn v-if="rail" variant="text" icon="mdi-chevron-right" @click="rail = !rail"></v-btn>
             </div>
             <v-divider></v-divider>
-            <v-list>
-                <v-list-item @click="selectBox(box.id, box.title, box.members, box.existed)"
+            <v-list @click="rail = false">
+                <v-list-item @click="selectBox(box.id, box.title, box.members, box.existed, box.owner)"
                     :prepend-avatar="user.photoURL" class="chat-box-container" v-if="boxes.length > 0"
                     v-for="box in boxes" :key="box" :value="box.id">
                     <v-tooltip v-if="rail" activator="parent" location="end">{{
@@ -64,7 +64,7 @@
             </v-list>
         </v-navigation-drawer>
         <ChatBox :box-id="boxId" :box-name="boxName" :existed-members="existedMembers" :box-members="boxMembers"
-            :test="test" v-if="boxId"></ChatBox>
+            v-if="boxId" :isAdmin="isAdmin"></ChatBox>
         <NoBox v-else></NoBox>
     </div>
 </template>
@@ -84,7 +84,7 @@ import {
     arrayRemove,
     arrayUnion,
 } from "firebase/firestore";
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { useUserStore } from "../stores/userStore";
 import LoadingComponent from "../components/LoadingComponent.vue";
 import NoBox from "../components/NoBox.vue";
@@ -108,13 +108,16 @@ const boxMembers = ref([]);
 const existedMembers = ref([]);
 const boxInviteId = ref("");
 const boxThumbnail = ref("");
+const boxOwner = ref();
 const test = ref();
 const hasBox = ref(true);
-function selectBox(id, title, members, existed) {
+const isAdmin = ref(false)
+function selectBox(id, title, members, existed, owner) {
     boxId.value = id;
     boxName.value = title;
     boxMembers.value = members;
     existedMembers.value = existed;
+    isAdmin.value = `users/${userId.value}` == owner.path
 }
 async function fetchBoxes() {
     let boxRefArray = userInfo.value.boxes
@@ -225,7 +228,7 @@ async function addBoxToDb() {
             content: userInfo.value.displayName + " created this Group ",
             timeSent: Date.now(),
             senderRef: userDocRef,
-            systemMessage: true,
+            messageType: 'system',
         });
         $toast.success("Created box chat " + boxTitle.value);
         setTimeout(() => {
@@ -235,6 +238,7 @@ async function addBoxToDb() {
         console.error("Error adding document: ", e);
     }
 }
+
 function showDeleteBtn(owner) {
     return (`users/${userId.value}` == owner.path)
 }
@@ -272,7 +276,8 @@ async function leaveBox(title, id) {
             content: userInfo.value.displayName + " left this Group ",
             timeSent: Date.now(),
             senderRef: userDocRef,
-            systemMessage: true,
+            messageType: 'system',
+
         });
         $toast.info("Left " + title);
     } else {

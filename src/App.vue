@@ -34,7 +34,9 @@ const signInWithGoogle = () => {
       console.log(error);
     });
 }
-
+function changeSideBar() {
+  bgImage.value = cookies.get('bgImage')
+}
 // async function addUserToDb(user) {
 //   try {
 //     const querySnapshot = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
@@ -88,8 +90,10 @@ if (themeValue === null) {
 }
 theme.global.name.value = cookies.get('theme')
 
-const bgImage = "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D"
+let bgImage = ref(cookies.get('bgImage'))
+const colorCode = ref(cookies.get('main-color'))
 onMounted(() => {
+  document.documentElement.style.setProperty('--main-color', colorCode.value);
 })
 
 const toggleSecond = ref(false)
@@ -98,7 +102,7 @@ const toggleSecond = ref(false)
   <div>
     <v-card>
       <v-layout>
-        <v-navigation-drawer v-if="user" :rail="rail" v-model="drawer" @click="rail = false" mobile-break-point=1000
+        <v-navigation-drawer v-if="user" :rail="rail" v-model="drawer" @click="rail = false" mobile-breakpoint="xs"
           :image="bgImage">
           <v-list>
             <v-list-item v-if="!user">
@@ -127,6 +131,8 @@ const toggleSecond = ref(false)
           </v-list>
           <v-divider></v-divider>
           <v-list v-if="user" density="compact" nav>
+            <v-list-item prepend-icon="mdi-home" title="Home" value="home" @click="router.push('/')">
+              <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
             <v-list-item prepend-icon="mdi-earth" title="Explore" value="shared" @click="router.push('/explore')">
               <v-tooltip activator="parent" location="start">Explore</v-tooltip>
             </v-list-item>
@@ -137,18 +143,16 @@ const toggleSecond = ref(false)
             <v-list-item prepend-icon="mdi-inbox" title="Inbox" value="message" @click="router.push('/inbox')">
               <v-tooltip activator="parent" location="start">Inbox</v-tooltip>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-home" title="Home" value="home" @click="router.push('/')">
-              <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
-            <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
+            <!-- <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
               @click="router.push('/chat-bot')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
-            </v-list-item>
+            </v-list-item> -->
             <v-list-item prepend-icon="mdi-cog" title="Setting" value="setting" @click="router.push('/setting')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item>
-            <p>
+            <!-- <p>
               {{ $t('message.hello') }}
-            </p>
+            </p> -->
             <!-- <v-switch color="orange" label="Switch" v-model="state" @click="toggleTheme">
           </v-switch> -->
             <!-- <v-list-item @click="toggleTheme" title="Dark Mode" :prepend-icon="themeState" value="mode">
@@ -173,7 +177,7 @@ const toggleSecond = ref(false)
           </v-navigation-drawer>
       </div> -->
         <v-main class="main-container">
-          <RouterView></RouterView>
+          <RouterView @changeBg="changeSideBar"></RouterView>
         </v-main>
       </v-layout>
     </v-card>

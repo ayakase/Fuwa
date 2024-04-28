@@ -19,7 +19,7 @@ import { db } from '../firebaseConfig';
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification';
 const auth = getAuth()
-const $toast = useToast();
+const toast = useToast();
 const router = useRouter()
 const userStore = useUserStore()
 async function addUserToDb(user) {
@@ -57,8 +57,8 @@ const signInWithGoogle = () => {
         .then((result) => {
             userStore.checkUser(result.user)
             addUserToDb(auth.currentUser)
-            console.log(auth.currentUser)
-            $toast.success('Logged in as ' + result.user.displayName);
+            // console.log(auth.currentUser)
+            toast.success('Logged in as ' + result.user.displayName);
             router.push('/')
         }).catch((error) => {
             console.log(error);

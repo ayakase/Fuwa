@@ -20,6 +20,7 @@
     "typesense": "^1.8.2",
     "vue": "^3.3.10",
     "vue-i18n": "^9.13.1",
+    "vue-intersection-observer": "^0.1.9",
     "vue-router": "^4.2.5",
     "vue-toast-notification": "^3.1.2",
     "vue3-cookies": "^1.0.6",
