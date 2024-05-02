@@ -35,6 +35,7 @@ async function addUserToDb(user) {
                 avatar: user.photoURL,
                 about: '',
                 boxes: [],
+                cid: '',
             });
         }
     }
@@ -58,7 +59,9 @@ const signInWithGoogle = () => {
             userStore.checkUser(result.user)
             addUserToDb(auth.currentUser)
             // console.log(auth.currentUser)
-            toast.success('Logged in as ' + result.user.displayName);
+            toast.success('Logged in as ' + result.user.displayName, {
+      position: 'top-right'
+    });
             router.push('/')
         }).catch((error) => {
             console.log(error);

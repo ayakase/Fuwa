@@ -1,5 +1,5 @@
 <script setup>
-import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import { useTheme } from 'vuetify'
 import { ref } from 'vue';
 import { onMounted } from 'vue';
@@ -15,6 +15,7 @@ const user = ref()
 let rail = ref(true)
 let drawer = ref(true)
 const router = useRouter()
+const route = useRoute();
 const theme = useTheme()
 const auth = getAuth()
 
@@ -29,7 +30,9 @@ const signInWithGoogle = () => {
       userStore.checkUser(result.user)
       user.value = result.user
       addUserToDb(auth.currentUser)
-      $toast.success("Logged in as " + auth.currentUser.displayName);
+      $toast.success("Logged in as " + auth.currentUser.displayName, {
+        position: 'top-right'
+      });
     }).catch((error) => {
       console.log(error);
     });
@@ -69,7 +72,9 @@ async function getUser(user) {
 const handleSignOut = () => {
   signOut(auth).then(() => {
     user.value = null
-    $toast.info('Signed Out');
+    $toast.info('Signed Out', {
+      position: 'top-right'
+    });
 
   }).catch((error) => {
 
@@ -86,7 +91,7 @@ onAuthStateChanged(auth, (firebaseUser) => {
 });
 const themeValue = cookies.get('theme');
 if (themeValue === null) {
-  cookies.set('theme', 'light', 60 * 60 * 24 * 30);
+  cookies.set('theme', 'dark', 60 * 60 * 24 * 30);
 }
 theme.global.name.value = cookies.get('theme')
 
@@ -102,8 +107,8 @@ const toggleSecond = ref(false)
   <div>
     <v-card>
       <v-layout>
-        <v-navigation-drawer v-if="user" :rail="rail" v-model="drawer" @click="rail = false" mobile-breakpoint="xs"
-          :image="bgImage">
+        <v-navigation-drawer v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" @click="rail = false"
+          mobile-breakpoint="xs" :image="bgImage">
           <v-list>
             <v-list-item v-if="!user">
               <v-menu location="end">
@@ -125,29 +130,31 @@ const toggleSecond = ref(false)
             <v-list-item v-if="userInfo" :prepend-avatar="userInfo.avatar" :title="userInfo.displayName"
               :subtitle="user.email">
               <template v-slot:append>
-                <v-btn variant="text" icon="mdi-chevron-left" @click.stop="rail = !rail"></v-btn>
+                <v-btn variant="text" icon="fa-solid fa-chevron-left" @click.stop="rail = !rail"></v-btn>
               </template>
             </v-list-item>
           </v-list>
           <v-divider></v-divider>
           <v-list v-if="user" density="compact" nav>
-            <v-list-item prepend-icon="mdi-home" title="Home" value="home" @click="router.push('/')">
+            <v-list-item prepend-icon="fa-solid fa-home" title="Home" value="home" @click="router.push('/')">
               <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
-            <v-list-item prepend-icon="mdi-earth" title="Explore" value="shared" @click="router.push('/explore')">
-              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
-            </v-list-item>
-            <v-list-item prepend-icon="mdi-message-processing-outline" title="Groups" value="message"
+              <v-list-item prepend-icon="fa-regular fa-message" title="Groups" value="message"
               @click="router.push('/groups')">
               <v-tooltip activator="parent" location="start">Groups</v-tooltip>
             </v-list-item>
-            <v-list-item prepend-icon="mdi-inbox" title="Inbox" value="message" @click="router.push('/inbox')">
+            <v-list-item prepend-icon="fa-solid fa-inbox" title="Inbox" value="inbox" @click="router.push('/inbox')">
               <v-tooltip activator="parent" location="start">Inbox</v-tooltip>
+            </v-list-item>
+            <v-list-item prepend-icon="fa-solid fa-earth-americas" title="Explore" value="shared"
+              @click="router.push('/explore')">
+              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
             </v-list-item>
             <!-- <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
               @click="router.push('/chat-bot')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item> -->
-            <v-list-item prepend-icon="mdi-cog" title="Setting" value="setting" @click="router.push('/setting')">
+            <v-list-item prepend-icon="fa-solid fa-gear" title="Setting" value="setting"
+              @click="router.push('/setting')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item>
             <!-- <p>

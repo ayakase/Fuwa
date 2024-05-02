@@ -2,7 +2,12 @@
     <v-dialog max-width="500">
         <template v-slot:activator="{ props: activatorProps }">
             <v-list-item :prepend-avatar="props.avatar" v-bind="activatorProps" color="surface-variasdaant">
-                {{ props.name }}
+                <p>
+                    {{ props.name }}
+                </p>
+                <p>
+                    {{ props.cid }}
+                </p>
             </v-list-item>
         </template>
 
@@ -18,12 +23,13 @@
                 <v-card-text style="font-size: larger;">
                     {{ memberInfo.about }}
                 </v-card-text>
-                <v-divider style="width: 100%;"></v-divider>
-                <v-card-actions style="width: 100%;margin-top: 1rem;">
+                <!-- <v-text-field clearable label="Leave them a message" variant="outlined"
+                    style="width: 100%;"></v-text-field> -->
+                <v-card-actions style="width: 100%">
                     <div style="width: 100%;display: flex; justify-content: space-between;">
                         <v-btn text=" Close" @click="isActive.value = false"></v-btn>
-                        <v-btn style="background-color: #68b16b" @click="isActive.value = false">
-                            Inbox &nbsp; <v-icon icon="mdi-send-outline"></v-icon>
+                        <v-btn style="background-color: var(--main-color)" @click="isActive.value = false">
+                            Inbox &nbsp; <v-icon icon="fa-regular fa-paper-plane"></v-icon>
                         </v-btn>
                     </div>
                 </v-card-actions>
@@ -34,7 +40,7 @@
 </template>
 
 <script setup>
-const props = defineProps(["id", "name", "avatar"]);
+const props = defineProps(["id", "name", "avatar", "cid"]);
 import { db } from "../firebaseConfig";
 import { getDoc, doc } from 'firebase/firestore';
 import { ref, onMounted } from 'vue';
@@ -59,8 +65,8 @@ onMounted(() => {
 }
 
 .avatar {
-    width: 15rem;
+    width: 10rem;
     border-radius: 50rem;
-    border: 4px solid gray;
+    border: 4px solid var(--main-color);
 }
 </style>

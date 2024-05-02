@@ -4,15 +4,25 @@
       <div class="top-bar">
         <v-card-title class="box-name">{{ props.boxName }}</v-card-title>
         <div>
-          <v-btn icon="mdi-dots-vertical" @click="showSetting = !showSetting"></v-btn>
+          <!-- <router-link to="/video-call" target="_blank">
+            <v-icon icon="mdi-phone"></v-icon>
+          </router-link> -->
+          <!-- <router-link :to="'/video-call/' + props.boxId" target="_blank">
+            <v-icon icon="fa-solid fa-video"></v-icon>
+          </router-link> -->
+          <!-- <v-btn icon="mdi-phone" @click="router.push('/video-call')" target="_blank">
+          </v-btn> -->
+          <!-- <v-btn icon="mdi-webcam" @click="showSetting = !showSetting"></v-btn> -->
+          <v-btn icon="fa-solid fa-bars" @click="showSetting = !showSetting"></v-btn>
         </div>
       </div>
     </v-app-bar>
     <div v-if="user" class="message-container" @scroll="handleScroll()" ref="messageContainer">
       <div
-        style="position:absolute; display:flex; flex-direction: row; justify-content:center;width:100%; top: 1rem;z-index: 99;">
+        style="position:absolute; display:flex; flex-direction: row; justify-content:center;width:100%; top: 1rem;z-index: 999;">
         <Transition name="slide-fade-bottom">
-          <v-btn v-show="showLoadMore" @click="loadMoreMessages()" prepend-icon="mdi-elevator-up"> Load More Message
+          <v-btn v-show="showLoadMore" @click="loadMoreMessages()" prepend-icon="fa-solid fa-angles-up"> Load More
+            Message
           </v-btn>
         </Transition>
       </div>
@@ -38,7 +48,8 @@
           <v-menu transition="scale-transition" location="start"
             v-if="isSender(message.sender) && message.messageType !== 'system' && message.messageType !== 'bot'">
             <template v-slot:activator="{ props }">
-              <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
+              <v-icon v-bind="props" class="message-operation" size="small"
+                icon="fa-solid fa-ellipsis-vertical"></v-icon>
             </template>
             <v-list>
               <v-list-item class="message-option" @click="deleteMessage(message.id)">
@@ -53,7 +64,8 @@
             class="triangle-left"></div>
           <v-card style="display:flex;" :class="messageType(message.sender, message.messageType, message.botMessage)"
             :variant="variantType(message.messageType)">
-            <span v-html="parseMarkdown(message.content)"> </span>
+            <span v-if="message.messageType !== 'image'" v-html="parseMarkdown(message.content)"> </span>
+            <img style="max-width: 100%;" v-if="message.messageType == 'image'" :src="message.content">
             <span>
             </span>
             <span v-if="message.messageType == 'system'">&nbsp;at {{ convertTime(message.time) }}</span>
@@ -63,7 +75,8 @@
           <v-menu transition="scale-transition" location="start"
             v-if="isSender(message.sender) && message.messageType !== 'system' && message.messageType == 'bot'">
             <template v-slot:activator="{ props }">
-              <v-icon v-bind="props" class="message-operation" size="small" icon="mdi-dots-vertical"></v-icon>
+              <v-icon v-bind="props" class="message-operation" size="small"
+                icon="fa-solid fa-ellipsis-vertical"></v-icon>
             </template>
             <v-list>
               <v-list-item class="message-option" @click="deleteMessage(message.id)">
@@ -90,61 +103,66 @@
     <v-card class="send-container">
       <Transition name="slide-fade">
         <div v-if="displayBot" style="width: 3rem;display:flex; justify-content: center;">
-          <v-icon icon="mdi-robot-outline"></v-icon>
+          <v-icon icon="fa-solid fa-robot fa-bounce"></v-icon>
         </div>
       </Transition>
-      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" autofocus />
-      <v-btn @click="toggleImageSelect = !toggleImageSelect"><v-icon icon="mdi-image"></v-icon>
+      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" />
+      <v-btn style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
+          icon="fa-regular fa-image"></v-icon>
       </v-btn>
-      <v-btn @click="toggleIcon = !toggleIcon"><v-icon icon="mdi-emoticon-happy-outline"></v-icon>
+      <v-btn style="color: var(--main-color)" @click="toggleIcon = !toggleIcon"><v-icon
+          icon="fa-regular fa-face-smile"></v-icon>
       </v-btn>
-      <v-btn @click="sendMessage"><v-icon style="transform: rotate(270deg);" icon="mdi-send"></v-icon></v-btn>
+      <v-btn style="color: var(--main-color)" @click="sendMessage"><v-icon size="large"
+          icon="fa-solid fa-paper-plane"></v-icon></v-btn>
     </v-card>
     <Transition name="slide-fade-bottom">
       <EmojiPicker class="icon-board" v-show="toggleIcon" :native="true" @select="onSelectEmoji" />
     </Transition>
     <Transition name="slide-fade-bottom">
-      <div class="image-send-board" v-if="toggleImageSelect">
+      <v-card class="image-send-board" v-if="toggleImageSelect" variant="flat">
+        <div style=" display: flex; width: 100%; justify-content: space-between;">
+          <v-btn style="background-color: red;" @click="thumbnailImg = ''; thumbnailSrc = ''; toggleImageSelect = false
+      ">
+            <v-icon icon="fa-solid fa-x"></v-icon>
+          </v-btn>
+          <v-btn :loading='imgUploading' style="background-color: green;" @click="sendImg()">
+            <v-icon icon="fa-solid fa-cloud-arrow-up"></v-icon>
+          </v-btn>
+        </div>
         <!-- <input class="img-input" accept="image/*" type="file" id="formFile" @change="processImg" /> -->
         <v-file-input class="img-input" id="formFile" @change="processImg" label="Image"
-          variant="solo-filled"></v-file-input>
-        <div style="width: 20rem; margin-top: 1rem">
+          accept="image/png, image/jpeg, image/jpg, image/gif" variant="solo-filled"
+          prepend-icon="fa-solid fa-paperclip"></v-file-input>
+        <div style="width: 20rem;">
           <img :src="thumbnailSrc" alt="" style="width: 100%" />
         </div>
-        <div style="display: flex; width: 100%; justify-content: space-between;">
-          <v-btn style="background-color: red;" @click="thumbnailImg = ''; thumbnailSrc = ''">
-            <v-icon icon="mdi-close-circle"></v-icon>
-          </v-btn>
-          <v-btn style="background-color: green;" @click="sendImg()"><v-icon icon="mdi-cloud-upload"></v-icon>
-          </v-btn>
-        </div>
-      </div>
+      </v-card>
     </Transition>
     <v-navigation-drawer location="right" v-if="showSetting">
 
       <v-divider></v-divider>
 
       <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-home-city" title="Home" value="home"></v-list-item>
+        <GroupInfo :box-id="props.boxId" :box-name="props.boxName" v-if="props.boxId" :isAdmin="props.isAdmin"
+          :description="props.description"></GroupInfo>
         <v-list-item prepend-icon="mdi-account" title="My Account" value="account"></v-list-item>
         <v-divider></v-divider>
-        <v-list-item prepend-icon="mdi-account-group-outline" @click="toggleMember = !toggleMember" title="Members"
-          value="members">
+        <v-list-item prepend-icon="fa-solid fa-user-group" @click="toggleMember = !toggleMember" title="Members"
+          value="members" :append-icon="expandIcon()">
         </v-list-item>
         <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id" :name="member.displayName"
-          :avatar="member.avatar"></UserProfile>
+          :cid="member.cid" :avatar="member.avatar"></UserProfile>
       </v-list>
     </v-navigation-drawer>
     <div class="scroll-bottom">
       <Transition name="slide-fade-bottom">
-        <v-btn  v-show="showScrollDown" icon="mdi-arrow-down" @click="scrollToBottom()"></v-btn>
+        <v-btn v-show="showScrollDown" style="font-size:small;" icon="fa-solid fa-arrow-down-long"
+          @click="scrollToBottom()"></v-btn>
       </Transition>
     </div>
-
   </div>
-
 </template>
-
 <script setup>
 import { db } from "../firebaseConfig";
 import {
@@ -170,13 +188,19 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 import BotLoading from "../components/BotLoading.vue";
 import { useToast } from 'vue-toast-notification';
 import UserProfile from "../components/UserProfile.vue";
+import GroupInfo from "../components/GroupInfo.vue";
+
 import MarkdownIt from 'markdown-it';
 import { useCookies } from "vue3-cookies";
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { getStorage, ref as firebaseRef, uploadBytes, getDownloadURL } from "firebase/storage";
+const router = useRouter()
+
 let { cookies } = useCookies()
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API);
 const userStore = useUserStore();
-const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin"]);
+const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin", "description"]);
 const user = ref();
 const { userId } = storeToRefs(userStore);
 const showSetting = ref(false)
@@ -189,7 +213,13 @@ const messageArray = ref([]);
 const toggleMember = ref(false);
 const toggleImageSelect = ref(false);
 const toast = useToast();
-
+function expandIcon() {
+  if (toggleMember.value) {
+    return 'fa-solid fa-angle-up'
+  } else {
+    return 'fa-solid fa-angle-down'
+  }
+}
 const parseMarkdown = (content) => {
   const md = new MarkdownIt();
   return md.render(content);
@@ -267,7 +297,9 @@ async function deleteMessage(id) {
     const boxDocRef = doc(db, "boxes", props.boxId);
     const messageRef = doc(boxDocRef, "messages", id);
     await deleteDoc(messageRef);
-    toast.info('Message unsent');
+    toast.info('Message unsent', {
+      position: 'top-right'
+    });
   } else {
     console.log("Deletion cancelled");
   }
@@ -354,7 +386,41 @@ function processImg(event) {
   }
   thumbnailImg.value = event.target.files[0];
 }
+const storage = getStorage();
+const imgUploading = ref(false)
 function sendImg() {
+  imgUploading.value = true
+  let now = new Date();
+  let time = now.getTime().toString();
+  const storageRef = firebaseRef(storage, 'images/' + time + '.png')
+  uploadBytes(storageRef, thumbnailImg.value).then((snapshot) => {
+    console.log('Uploaded a blob or file!');
+    getDownloadURL(snapshot.ref).then((downloadURL) => {
+      console.log('File available at', downloadURL);
+      try {
+        const userDocRef = doc(db, 'users', userStore.userId);
+        const boxDocRef = doc(db, "boxes", props.boxId);
+        const messageCollectionRef = collection(boxDocRef, "messages");
+        addDoc(messageCollectionRef, {
+          content: downloadURL,
+          timeSent: Date.now(),
+          senderRef: userDocRef,
+          messageType: 'image',
+        }).then((newMessage) => {
+          toggleImageSelect.value = false
+          thumbnailImg.value = '';
+          thumbnailSrc.value = ''
+          imgUploading.value = false
+        }).catch((error) => {
+          console.error('Error adding message:', error);
+          imgUploading.value = false
+        });
+      } catch (e) {
+        console.error('Error:', e);
+        imgUploading.value = false
+      }
+    })
+  });
   // console.log(thumbnailImg.value);
   // console.log(thumbnailSrc.value);
 }
@@ -439,6 +505,7 @@ watch(
     getMessage(newBoxId)
     fetchMembers();
     fetchExisted();
+
   },
   { immediate: true }
 );
@@ -447,7 +514,6 @@ onMounted(() => {
   fetchMembers();
   fetchExisted();
   bgContainer.value.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${cookies.get('bgImage')})`
-  console.log(bgContainer.value.style)
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });
@@ -528,10 +594,18 @@ p {
 
 .message-box {
   height: 100%;
-  border: 2px solid rgb(183, 183, 183);
-  border-radius: 0.5rem;
+  border: 2px solid var(--main-color);
+  border-radius: 0.2rem;
   width: 100%;
   padding-left: 1rem;
+  transition: all .5s linear;
+  box-sizing: border-box;
+}
+
+.message-box:focus {
+  outline: none;
+  /* border: 2px solid rgb(183, 183, 183); */
+
 }
 
 .icon-board {
@@ -544,11 +618,14 @@ p {
 .image-send-board {
   padding: 1rem;
   position: absolute;
-  right: 5rem;
-  bottom: 4rem;
-  background-color: rgb(92, 92, 92);
-  border-radius: 0.5rem;
-
+  right: 1rem;
+  bottom: 3rem;
+  z-index: 999;
+  /* background-color: rgb(92, 92, 92); */
+  border-top-left-radius: .5rem;
+  border-top-right-radius: .5rem;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .each-message {
@@ -657,10 +734,21 @@ p {
 
 .scroll-bottom {
   position: absolute;
+  z-index: 1;
   display: flex;
   flex-direction: row;
   justify-content: center;
   bottom: 4rem;
   width: 100%;
+}
+
+a {
+  /* Reset all styles to default */
+  color: inherit;
+  text-decoration: none;
+}
+
+.img-input {
+  margin-top: 1rem;
 }
 </style>

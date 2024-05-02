@@ -10,7 +10,7 @@
             </div>
         </v-app-bar>
         <div style="display:flex; flex-direction: column;align-items: center;padding-top:30vh;">
-            <v-icon style="font-size: 8rem;color:gray;" icon="mdi-message-processing-outline"></v-icon>
+            <v-icon style="font-size: 8rem;color:gray;" icon="fa-regular fa-comment-dots"></v-icon>
             <p class="noti-text">No box selected, select or join a box to begin conversation</p>
         </div>
     </div>

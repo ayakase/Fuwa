@@ -3,10 +3,12 @@ import HomeView from '../views/HomeView.vue'
 import ExploreView from '../views/ExploreView.vue'
 import FavoriteView from '../views/FavoriteView.vue'
 import GroupsView from '../views/GroupsView.vue'
+import InboxView from '../views/InboxView.vue'
+import VideoRoom from '../views/VideoRoom.vue'
 import SettingView from '../views/SettingView.vue'
 import LoginView from '../views/LoginView.vue'
 import InviteView from '../views/InviteView.vue'
-import ChatBotView from '@/views/ChatBotView.vue'
+// import ChatBotView from '@/views/ChatBotView.vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 const auth = getAuth()
 const router = createRouter({
@@ -18,6 +20,7 @@ const router = createRouter({
       component: HomeView,
       meta: {
         requiresAuth: true,
+        showNav: true,
       }
     },
     {
@@ -26,6 +29,7 @@ const router = createRouter({
       component: ExploreView,
       meta: {
         requiresAuth: true,
+        showNav: true,
       }
     },
     {
@@ -34,6 +38,27 @@ const router = createRouter({
       component: GroupsView,
       meta: {
         requiresAuth: true,
+        showNav: true,
+
+      }
+    },
+    {
+      path: '/inbox',
+      name: 'inbox',
+      component: InboxView,
+      meta: {
+        requiresAuth: true,
+        showNav: true,
+
+      }
+    }, {
+      path: '/video-call/:id',
+      name: 'video call',
+      component: VideoRoom,
+      meta: {
+        requiresAuth: true,
+        showNav: false,
+
       }
     },
     {
@@ -42,6 +67,8 @@ const router = createRouter({
       component: FavoriteView,
       meta: {
         requiresAuth: true,
+        showNav: true,
+
       }
     },
     {
@@ -50,16 +77,19 @@ const router = createRouter({
       component: SettingView,
       meta: {
         requiresAuth: true,
+        showNav: true,
+
       }
     },
-    {
-      path: '/chat-bot',
-      name: 'chatbot',
-      component: ChatBotView,
-      meta: {
-        requiresAuth: true,
-      }
-    },
+    // {
+    //   path: '/chat-bot',
+    //   name: 'chatbot',
+    //   component: ChatBotView,
+    //   meta: {
+    //     requiresAuth: true,
+
+    //   }
+    // },
     {
       path: '/login',
       name: 'login',

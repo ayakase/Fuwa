@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <v-text-field v-model="searchTerm" class="search-box" label="Search" prepend-icon="mdi-magnify"
+        <v-text-field v-model="searchTerm" class="search-box" label="Search" prepend-icon="fa-solid fa-magnifying-glass"
             variant="underlined" @input="handleInput"></v-text-field>
         <div class="result-container">
             <v-card image="https://cdn.vuetifyjs.com/docs/images/cards/dark-beach.jpg" class="each-box"

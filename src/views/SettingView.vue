@@ -10,12 +10,12 @@
                     </v-btn>
                 </div>
                 <div class="image-themes">
-                    <v-card @click="selectTheme(item.id)" :class="{ 'selected-theme': (themeCheck == item.id) }"
-                        class="each-theme" v-for="item in  themesArray " variant="flat">
+                    <v-card @click="selectTheme(theme.id)" :class="{ 'selected-theme': (themeCheck == theme.id) }"
+                        class="each-theme" v-for="theme in  themesArray " variant="flat">
                         <v-card-title>
-                            {{ item.name }}
+                            {{ theme.name }}
                         </v-card-title>
-                        <v-img cover height="120" :src="item.image">
+                        <v-img v-if="theme.image" cover height="120" :src="theme.image">
                         </v-img>
                     </v-card>
                 </div>
@@ -53,6 +53,13 @@
                     <v-text-field class="name-field" v-model="userInfo.displayName" variant="underlined"></v-text-field>
                     <v-btn style="background-color: green;color: white;" @click="saveName">Save</v-btn>
                 </div>
+                <div class="name-setting">
+                    Connection ID:
+                </div>
+                <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
+                    <v-text-field class="name-field" v-model="userInfo.cid" variant="underlined"></v-text-field>
+                    <v-btn style="background-color: green;color: white;" @click="saveCid">Save</v-btn>
+                </div>
                 <div class="about-setting">
                     About Me:
                 </div>
@@ -75,12 +82,15 @@
                 Sign Out
             </v-btn>
         </div>
+        <v-file-input class="img-input" id="formFile" @change="processImg" label="Image"
+          variant="solo-filled"></v-file-input>
+        <img :src="thumbnailSrc" alt="">
     </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { computed } from 'vue';
+import { computed,watch } from 'vue';
 import { useTheme } from 'vuetify'
 import { useCookies } from "vue3-cookies";
 import { useToast } from 'vue-toast-notification';
@@ -90,11 +100,10 @@ import { storeToRefs } from "pinia";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
+const auth = getAuth()
 import 'vue-toast-notification/dist/theme-sugar.css';
 const toast = useToast();
-const auth = getAuth()
 import { useUserStore } from '../stores/userStore';
-import { watch } from 'vue';
 const user = ref()
 const userStore = useUserStore()
 const router = useRouter()
@@ -103,6 +112,15 @@ const { userId } = storeToRefs(userStore);
 let { cookies } = useCookies()
 const theme = useTheme()
 const emit = defineEmits(['changeBg'])
+
+let thumbnailImg = ref(null);
+const thumbnailSrc = ref();
+function processImg(event) {
+    if (event.target.files.length) {
+        thumbnailSrc.value = URL.createObjectURL(event.target.files[0]);
+    }
+    thumbnailImg.value = event.target.files[0];
+}
 
 function showNotification() {
     // Check if the browser supports notifications
@@ -124,22 +142,25 @@ function showNotification() {
 
 function toggleTheme() {
     theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
-    toast.info("Theme changed to " + theme.global.name.value);
+    toast.info("Theme changed to " + theme.global.name.value, {
+        position: 'top-right'
+    });
     cookies.set('theme', theme.global.name.value, 60 * 60 * 24 * 30)
 }
 const themeState = computed(() => {
     if (theme.global.current.value.dark == true) {
-        return 'mdi-moon-waning-crescent'
+        return 'fa-regular fa-moon'
     } else {
-        return 'mdi-weather-sunny'
+        return 'fa-regular fa-sun'
     }
 })
 
-const colorCode = ref(cookies.get('main-color'))
+const colorCode = ref(cookies.get('main-color') )
 function confirmColor() {
     document.documentElement.style.setProperty('--main-color', colorCode.value);
-    cookies.set('main-color', colorCode.value)
+    cookies.set('main-color', colorCode.value, 60 * 60 * 24 * 30)
 }
+
 const themesArray = [
     {
         id: 0,
@@ -205,30 +226,63 @@ const themesArray = [
 ]
 async function saveName() {
     if (userInfo.value.displayName.length < 4 || userInfo.value.displayName.length > 30) {
-        toast.error("Display name must have more than 4 characters and less than 30 characters");
+        toast.error("Display name must have more than 4 characters and less than 30 characters", {
+            position: 'top-right'
+        });
     } else {
         const userRef = doc(db, "users", userId.value)
         await updateDoc(userRef, {
             displayName: userInfo.value.displayName
         })
-        toast.success("Successfully changed your display name");
+        toast.success("Successfully changed your display name", {
+            position: 'top-right'
+        });
     }
 }
+async function saveCid() {
+    const regex = /^[a-zA-Z]+#\d+$/;
+    const connectionId = userInfo.value.cid.trim();
+
+    if (connectionId === "") {
+        const userRef = doc(db, "users", userId.value);
+        await updateDoc(userRef, { cid: "" });
+        toast.success("Successfully cleared your Connection Id", {
+            position: 'top-right'
+        });
+    } else if (!regex.test(connectionId)) {
+        toast.error("Connection Id must follow text#number format", {
+            position: 'top-right'
+        });
+    } else {
+        const userRef = doc(db, "users", userId.value);
+        await updateDoc(userRef, { cid: connectionId });
+        toast.success("Successfully changed your Connection Id", {
+            position: 'top-right'
+        });
+    }
+}
+
 async function saveAbout() {
     if (userInfo.value.about.length < 2 || userInfo.value.about.length > 500) {
-        toast.error("Description must have more than 1 characters and less than 500 characters");
+        toast.error("Description must have more than 1 characters and less than 500 characters", {
+            position: 'top-right'
+        });
     } else {
         const userRef = doc(db, "users", userId.value)
         await updateDoc(userRef, {
             about: userInfo.value.about
         })
-        toast.success("Successfully changed your about profile");
+        toast.success("Successfully changed your about profile", {
+            position: 'top-right'
+        });
     }
 }
 const handleSignOut = () => {
     signOut(auth).then(() => {
         user.value = null
-        toast.info('Signed Out, redirecting in 3s');
+        toast.info('Signed Out, redirecting in 3s', {
+            position: 'top-right'
+        });
         setTimeout(() => {
             location.reload();
         }, 3000);
@@ -238,12 +292,14 @@ const handleSignOut = () => {
 }
 let themeCheck = ref(cookies.get('themeId'))
 function selectTheme(id) {
-    cookies.set('themeId', id);
-    cookies.set('theme', themesArray[id].themeMode)
+    cookies.set('themeId', id, 60 * 60 * 24 * 30);
+    cookies.set('theme', themesArray[id].themeMode, 60 * 60 * 24 * 30)
     theme.global.name.value = themesArray[id].themeMode
-    cookies.set('bgImage', themesArray[id].image)
+    cookies.set('bgImage', themesArray[id].image, 60 * 60 * 24 * 30)
     emit('changeBg')
-    toast.success(`Theme changed to ${themesArray[id].name}`);
+    toast.success(`Theme changed to ${themesArray[id].name}`, {
+        position: 'top-right'
+    });
     themeCheck.value = cookies.get('themeId')
 }
 onMounted(() => {
