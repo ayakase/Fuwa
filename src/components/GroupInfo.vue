@@ -2,7 +2,7 @@
     <v-dialog v-if="showSetting" max-width="500">
         <template v-slot:activator="{ props: activatorProps }">
             <v-list-item prepend-icon="fa-solid fa-sliders" v-bind="activatorProps" color="surface-variasdaant">
-               Group Management
+                Group Management
             </v-list-item>
         </template>
 
@@ -10,7 +10,8 @@
             <div>somethng</div>
             <v-card class="container">
                 <v-text-field style="width: 100%;" v-model="boxName" label="Label" variant="outlined"></v-text-field>
-                <v-text-field style="width: 100%;" v-model="boxDescription" label="Label" variant="outlined"></v-text-field>
+                <v-text-field style="width: 100%;" v-model="boxDescription" label="Label"
+                    variant="outlined"></v-text-field>
                 <!-- <v-divider style="width: 100%;"></v-divider>
                 <v-card-text style="font-size: larger;">
                     {{ memberInfo.about }}

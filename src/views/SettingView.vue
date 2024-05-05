@@ -41,56 +41,84 @@
             <v-card-title style="padding: 0;font-size: 1.5rem;"> Profile settings</v-card-title>
 
             <v-card class="profile-setting" variant="tonal" v-if="userStore.userInfo">
-                <div class="email-setting">
-                    Email:
+                <div style="flex:1">
+                    <div class="email-setting">
+                        Email:
+                    </div>
+                    <v-text-field class="email-field" :model-value="userInfo.email" variant="underlined"
+                        disabled></v-text-field>
+                    <div class="name-setting">
+                        Display Name:
+                    </div>
+                    <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
+                        <v-text-field class="name-field" v-model="userInfo.displayName"
+                            variant="underlined"></v-text-field>
+                        <v-btn style="background-color: green;color: white;" @click="saveName">Save</v-btn>
+                    </div>
+                    <div class="name-setting">
+                        Connection ID:
+                    </div>
+                    <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
+                        <v-text-field class="name-field" v-model="userInfo.cid" variant="underlined"></v-text-field>
+                        <v-btn style="background-color: green;color: white;" @click="saveCid">Save</v-btn>
+                    </div>
+                    <div class="about-setting">
+                        About Me:
+                    </div>
+                    <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
+                        <v-textarea class="name-field" v-model="userInfo.about" variant="underlined"></v-textarea>
+                        <v-btn style="background-color: green;color: white;" @click="saveAbout">Save</v-btn>
+                    </div>
+
                 </div>
-                <v-text-field class="email-field" :model-value="userInfo.email" variant="underlined"
-                    disabled></v-text-field>
-                <div class="name-setting">
-                    Display Name:
-                </div>
-                <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
-                    <v-text-field class="name-field" v-model="userInfo.displayName" variant="underlined"></v-text-field>
-                    <v-btn style="background-color: green;color: white;" @click="saveName">Save</v-btn>
-                </div>
-                <div class="name-setting">
-                    Connection ID:
-                </div>
-                <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
-                    <v-text-field class="name-field" v-model="userInfo.cid" variant="underlined"></v-text-field>
-                    <v-btn style="background-color: green;color: white;" @click="saveCid">Save</v-btn>
-                </div>
-                <div class="about-setting">
-                    About Me:
-                </div>
-                <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
-                    <v-text-field class="name-field" v-model="userInfo.about" variant="underlined"></v-text-field>
-                    <v-btn style="background-color: green;color: white;" @click="saveAbout">Save</v-btn>
-                </div>
-                <div class="avatar-setting">
-                    Avatar:
-                </div>
-                <div class="avatar-field" style="display: flex;flex-direction: column;gap: 1rem;">
-                    <img v-if="userInfo.avatar" :src="userInfo.avatar" style="width: 10rem;height: 10rem;">
-                    <v-btn style="background-color: green;color: white;width: 10rem;">Change avatar</v-btn>
+                <div style="width: 20rem;">
+                    <div class="avatar-field" style="display: flex;flex-direction: column;gap: 1rem;">
+                        <img v-if="userInfo.avatar" :src="userInfo.avatar" style="width: 100%;aspect-ratio:1;">
+
+
+                        <v-dialog>
+                            <template v-slot:activator="{ props: activatorProps }">
+                                <v-btn v-bind="activatorProps" style="background-color: green;color: white;">Change
+                                    avatar</v-btn>
+                            </template>
+                            <template v-slot:default="{ isActive }">
+                                <v-card style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
+                                    <v-file-input accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                                        style="width:50%" prepend-icon="" class="img-input" id="formFile"
+                                        @change="processImg" label="Image" variant="solo-filled"></v-file-input>
+                                    <div style="max-width: 50%;">
+                                        <cropper :src="thumbnailSrc" @change="change"
+                                            :stencil-props="{ aspectRatio: 1 }" :stencil-component="CircleStencil" />
+                                        <!-- <img :src="cropImg" alt=""> -->
+                                    </div>
+                                    <v-card-actions>
+                                        <v-btn color="error" @click="isActive.value = false">
+                                            Cancel
+                                        </v-btn>
+                                        <v-btn color="success" @click="uploadAvatar()">
+                                            Save Avatar
+                                        </v-btn>
+                                    </v-card-actions>
+                                </v-card>
+                            </template>
+                        </v-dialog>
+
+                    </div>
                 </div>
             </v-card>
-        </div>
 
+        </div>
         <div class="pa-2 sign-out">
             <v-btn color="error" v-if="user" @click="handleSignOut()" block>
                 Sign Out
             </v-btn>
         </div>
-        <v-file-input class="img-input" id="formFile" @change="processImg" label="Image"
-          variant="solo-filled"></v-file-input>
-        <img :src="thumbnailSrc" alt="">
     </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { computed,watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useTheme } from 'vuetify'
 import { useCookies } from "vue3-cookies";
 import { useToast } from 'vue-toast-notification';
@@ -99,16 +127,20 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from "pinia";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { Cropper, CircleStencil } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
+import { getStorage, ref as firebaseRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const auth = getAuth()
+const router = useRouter()
 import 'vue-toast-notification/dist/theme-sugar.css';
 const toast = useToast();
 import { useUserStore } from '../stores/userStore';
 const user = ref()
 const userStore = useUserStore()
-const router = useRouter()
-const { userInfo } = storeToRefs(userStore);
-const { userId } = storeToRefs(userStore);
+const { userId, userInfo } = storeToRefs(userStore);
+
+// const {  } = storeToRefs(userStore);
 let { cookies } = useCookies()
 const theme = useTheme()
 const emit = defineEmits(['changeBg'])
@@ -121,7 +153,34 @@ function processImg(event) {
     }
     thumbnailImg.value = event.target.files[0];
 }
+const cropImg = ref()
+function change({ coordinates, canvas }) {
+    console.log(coordinates, canvas);
+    canvas.toBlob((blob) => {
+        cropImg.value = blob;
+        console.log(cropImg.value);
+    });
+}
+const storage = getStorage();
 
+function uploadAvatar() {
+    //   imgUploading.value = true
+    let now = new Date();
+    let time = now.getTime().toString();
+    const storageRef = firebaseRef(storage, 'avatars/' + time + '.png')
+    uploadBytes(storageRef, cropImg.value).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then(async (downloadURL) => {
+            const userRef = doc(db, 'users', userStore.userId);
+            await updateDoc(userRef, {
+                avatar: downloadURL
+            })
+            toast.success("Successfully changed avatar, reload to see the change takes effect", {
+                position: 'top-right'
+            });
+        })
+    });
+
+}
 function showNotification() {
     // Check if the browser supports notifications
     if (!("Notification" in window)) {
@@ -155,7 +214,7 @@ const themeState = computed(() => {
     }
 })
 
-const colorCode = ref(cookies.get('main-color') )
+const colorCode = ref(cookies.get('main-color'))
 function confirmColor() {
     document.documentElement.style.setProperty('--main-color', colorCode.value);
     cookies.set('main-color', colorCode.value, 60 * 60 * 24 * 30)
@@ -263,8 +322,8 @@ async function saveCid() {
 }
 
 async function saveAbout() {
-    if (userInfo.value.about.length < 2 || userInfo.value.about.length > 500) {
-        toast.error("Description must have more than 1 characters and less than 500 characters", {
+    if (userInfo.value.about.length < 2 || userInfo.value.about.length > 1000) {
+        toast.error("Description must have more than 1 characters and less than 1000 characters", {
             position: 'top-right'
         });
     } else {
@@ -303,6 +362,7 @@ function selectTheme(id) {
     themeCheck.value = cookies.get('themeId')
 }
 onMounted(() => {
+    console.log(userInfo.displayName)
     const themeValue = cookies.get('theme');
     if (themeValue === null) {
         cookies.set('theme', 'light', 60 * 60 * 24 * 30);
@@ -359,7 +419,8 @@ onMounted(() => {
 } */
 .profile-setting {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    gap: 2rem;
     padding: 1rem;
 }
 

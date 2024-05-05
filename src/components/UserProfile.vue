@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="500">
+    <v-dialog max-width="800">
         <template v-slot:activator="{ props: activatorProps }">
             <v-list-item :prepend-avatar="props.avatar" v-bind="activatorProps" color="surface-variasdaant">
                 <p>

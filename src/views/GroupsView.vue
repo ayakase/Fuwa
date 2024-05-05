@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <v-navigation-drawer class="box-view" :rail="rail">
+        <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80">
             <div class="message-top-bar">
                 <!-- <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn> -->
                 <v-btn v-if="!rail" variant="text" icon="fa-solid fa-chevron-left" @click="rail = !rail"></v-btn>
@@ -9,18 +9,27 @@
             <v-divider></v-divider>
             <v-list @click="rail = false">
                 <v-list-item @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description)"
-                    :prepend-avatar="user.photoURL" class="chat-box-container" v-if="boxes.length > 0"
-                    v-for="box in boxes" :key="box" :value="box.id">
+                    class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box"
+                    :value="box.id">
                     <v-tooltip v-if="rail" activator="parent" location="end">{{
             box.title
         }}</v-tooltip>
                     <div class="chat-box">
-                        <p class="box-title" v-if="!rail">{{ box.title }}</p>
-                        <button v-if="showDeleteBtn(box.owner)" class="delete-box-button"
+                        <div style="display:flex; align-items: center;gap:1rem">
+                            <v-avatar :size="rail ? 40 : 65" :image="user.photoURL"></v-avatar>
+                            <div>
+                                <p class="box-title" v-if="!rail">{{ box.title }}</p>
+                                <p v-if="!rail"
+                                    style="color:gray;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 15rem;">
+                                    {{ box.latestMessage }}</p>
+                                <p style="color: gray;font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
+                            </div>
+                        </div>
+                        <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
                             @click="deleteBox(box.title, box.id)">
                             <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
                         </button>
-                        <button v-if="showLeaveBtn(box.owner)" class="leave-box-button"
+                        <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button"
                             @click="leaveBox(box.title, box.id)">
                             <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
                         </button>
@@ -98,8 +107,7 @@ const $toast = useToast();
 const userStore = useUserStore();
 const user = ref();
 const auth = getAuth();
-const { userId } = storeToRefs(userStore);
-const { userInfo } = storeToRefs(userStore);
+const { userId, userInfo } = storeToRefs(userStore);
 const rail = ref(true);
 const boxes = ref([]);
 const boxId = ref("");
@@ -149,56 +157,50 @@ async function fetchBoxes() {
     if (userId.value) {
         const listQuery = query(collection(db, "boxes"),
             where("members", "array-contains", doc(db, "users", userId.value)),
-            orderBy("dateCreated", "desc")
+            orderBy("latestChange", "desc")
         )
-        const boxesList = [];
-        const snapshot = await getDocs(listQuery)
-        // console.log(result.docs[0].data())
-        if (snapshot.docs.length > 0) {
-            snapshot.forEach((doc) => {
-                // console.log(doc.data().members)
-                boxesList.push({
-                    id: doc.id,
-                    title: doc.data().title,
-                    owner: doc.data().owner,
-                    members: doc.data().members,
-                    description: doc.data().description,
-                    existed: doc.data().existed
+        onSnapshot(listQuery, (snapshot) => {
+            console.log(snapshot.docs)
+            const boxesList = [];
+            if (snapshot.docs.length > 0) {
+                snapshot.forEach((doc) => {
+                    // console.log(doc.data().members)
+                    boxesList.push({ ...doc.data(), id: doc.id });
                 });
-            });
-            boxes.value = boxesList;
-            boxId.value = boxes.value[0].id;
-            boxName.value = boxes.value[0].title;
-            boxMembers.value = boxes.value[0].members
-            hasBox.value = true;
-        } else {
-            boxes.value = [];
-            hasBox.value = false;
-        }
-        // getDocs(listQuery, (snapshot) => {
-        //     console.log(snapshot)
-        // const boxesList = [];
-        // if (snapshot.docs.length > 0) {
-        //     snapshot.forEach((doc) => {
-        //         // console.log(doc.data().members)
-        //         boxesList.push({
-        //             id: doc.id,
-        //             title: doc.data().title,
-        //             owner: doc.data().owner,
-        //             members: doc.data().members
-        //         });
-        //     });
-        //     boxes.value = boxesList;
-        //     boxId.value = boxes.value[0].id;
-        //     boxName.value = boxes.value[0].title;
-        //     boxMembers.value = boxes.value[0].members
-        //     hasBox.value = true;
-        // } else {
-        //     boxes.value = [];
-        //     hasBox.value = false;
-        // }
+                boxes.value = boxesList;
+                // boxId.value = boxes.value[0].id;
+                // boxName.value = boxes.value[0].title;
+                // boxMembers.value = boxes.value[0].members
+                hasBox.value = true;
+            } else {
+                boxes.value = [];
+                hasBox.value = false;
+            }
+            // getDocs(listQuery, (snapshot) => {
+            //     console.log(snapshot)
+            // const boxesList = [];
+            // if (snapshot.docs.length > 0) {
+            //     snapshot.forEach((doc) => {
+            //         // console.log(doc.data().members)
+            //         boxesList.push({
+            //             id: doc.id,
+            //             title: doc.data().title,
+            //             owner: doc.data().owner,
+            //             members: doc.data().members
+            //         });
+            //     });
+            //     boxes.value = boxesList;
+            //     boxId.value = boxes.value[0].id;
+            //     boxName.value = boxes.value[0].title;
+            //     boxMembers.value = boxes.value[0].members
+            //     hasBox.value = true;
+            // } else {
+            //     boxes.value = [];
+            //     hasBox.value = false;
+            // }
 
-        // });
+            // });
+        })
     }
 }
 // watch(userId, async (newValue, oldValue) => {
@@ -219,7 +221,9 @@ async function fetchBoxes() {
 watch(
     () => userId.value,
     (newUserId, oldUserId) => {
-        fetchBoxes();
+        if (newUserId) {
+            fetchBoxes();
+        }
     },
     { immediate: true }
 
@@ -262,8 +266,12 @@ async function addBoxToDb() {
             dateCreated: Date.now(),
         });
         const boxDocRef = doc(db, "boxes", newBox.id);
-        await updateDoc(userDocRef, {
-            boxes: arrayUnion(boxDocRef)
+        // await updateDoc(userDocRef, {
+        //     boxes: arrayUnion(boxDocRef)
+        // })
+        await updateDoc(boxDocRef, {
+            latestMessage: `${userInfo.value.displayName} created this chat`,
+            latestChange: Date.now()
         })
         const messageCollectionRef = collection(boxDocRef, "messages");
         const newMessage = await addDoc(messageCollectionRef, {
@@ -275,9 +283,9 @@ async function addBoxToDb() {
         $toast.success("Created box chat " + newBoxTitle.value, {
             position: 'top-right'
         });
-        setTimeout(() => {
-            fetchBoxes()
-        }, 3000);
+        // setTimeout(() => {
+        //     fetchBoxes()
+        // }, 3000);
     } catch (e) {
         console.error("Error adding document: ", e);
     }
@@ -291,15 +299,20 @@ function showLeaveBtn(owner) {
 }
 async function deleteBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
+        const boxDocRef = doc(db, 'boxes', id)
         try {
-            await deleteDoc(doc(db, "boxes", id));
-            await updateDoc(doc(db, "users", userId.value), {
-                boxes: arrayRemove(doc(db, "boxes", id))
+            await deleteDoc(boxDocRef);
+            // await updateDoc(doc(db, "users", userId.value), {
+            //     boxes: arrayRemove(doc(db, "boxes", id))
+            // })
+            await updateDoc(boxDocRef, {
+                latestMessage: `${userInfo.value.displayName} deleted this chat`,
+                latestChange: Date.now()
             })
         } catch (e) {
             console.error(e.message)
         }
-        fetchBoxes();
+        // fetchBoxes();
         $toast.info("Deleted box chat " + title, {
             position: 'top-right'
         });
@@ -313,11 +326,14 @@ async function leaveBox(title, id) {
         const boxDocRef = doc(db, "boxes", id);
         const messageCollectionRef = collection(boxDocRef, "messages");
 
-        await updateDoc(doc(db, "users", userId.value), {
-            boxes: arrayRemove(doc(db, "boxes", id))
-        })
-        await updateDoc(doc(db, "boxes", id), {
-            members: arrayRemove(doc(db, "users", userId.value))
+        // await updateDoc(doc(db, "users", userId.value), {
+        //     boxes: arrayRemove(doc(db, "boxes", id))
+        // })
+
+        await updateDoc(boxDocRef, {
+            members: arrayRemove(doc(db, "users", userId.value)),
+            latestMessage: `${userInfo.value.displayName} left this chat`,
+            latestChange: Date.now()
         })
         const newMessage = await addDoc(messageCollectionRef, {
             content: userInfo.value.displayName + " left this Group ",
@@ -325,13 +341,27 @@ async function leaveBox(title, id) {
             senderRef: userDocRef,
             messageType: 'system',
         });
-        fetchBoxes();
+        // fetchBoxes();
         $toast.info("Left " + title, {
             position: 'top-right'
         });
     } else {
         console.log("Deletion cancelled");
     }
+}
+function convertTime(timestamp) {
+    const dateTime = new Date(timestamp);
+    const today = new Date();
+    const sameDay = dateTime.getDate() === today.getDate() &&
+        dateTime.getMonth() === today.getMonth() &&
+        dateTime.getFullYear() === today.getFullYear();
+
+    let options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+    if (!sameDay) {
+        options = { day: 'numeric', month: 'numeric', year: 'numeric', ...options };
+    }
+
+    return dateTime.toLocaleString('en-GB', options);
 }
 </script>
 
@@ -354,10 +384,11 @@ async function leaveBox(title, id) {
 }
 
 .chat-box {
-    height: 100%;
+    height: 5rem;
     width: 100%;
     display: flex !important;
     flex-direction: row !important;
+    align-items: center;
     justify-content: space-between;
 }
 
@@ -380,8 +411,10 @@ async function leaveBox(title, id) {
 }
 
 .box-title {
+    font-size: larger;
     white-space: nowrap;
     width: 100%;
+    font-weight: bolder;
     overflow: hidden;
     text-overflow: ellipsis;
 }

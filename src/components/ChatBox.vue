@@ -65,7 +65,23 @@
           <v-card style="display:flex;" :class="messageType(message.sender, message.messageType, message.botMessage)"
             :variant="variantType(message.messageType)">
             <span v-if="message.messageType !== 'image'" v-html="parseMarkdown(message.content)"> </span>
-            <img style="max-width: 100%;" v-if="message.messageType == 'image'" :src="message.content">
+            <v-dialog v-if="message.messageType == 'image'">
+              <template v-slot:activator="{ props: activatorProps }">
+                <!-- <v-btn v-bind="activatorProps" color="surface-variant" text="Open Dialog" variant="flat"></v-btn> -->
+                <img class="" v-bind="activatorProps" style="max-width: 100%;" v-if="message.messageType == 'image'"
+                  :src="message.content">
+              </template>
+              <template v-slot:default="{ isActive }">
+                <v-card style="position:relative;" color="transparent">
+                  <img :src="message.content" alt="">
+                  <div @click="isActive.value = false" style="position:fixed; top:1rem;right:1.5rem;z-index: 99;display: flex; align-items: center;cursor:pointer;">
+                    <v-icon  icon="fa-solid fa-x" size="x-large" color="error">
+                    </v-icon>
+                    <span  style="font-size: 1.3rem"> &nbsp; or Esc</span>
+                  </div>
+                </v-card>
+              </template>
+            </v-dialog>
             <span>
             </span>
             <span v-if="message.messageType == 'system'">&nbsp;at {{ convertTime(message.time) }}</span>
@@ -132,7 +148,7 @@
         </div>
         <!-- <input class="img-input" accept="image/*" type="file" id="formFile" @change="processImg" /> -->
         <v-file-input class="img-input" id="formFile" @change="processImg" label="Image"
-          accept="image/png, image/jpeg, image/jpg, image/gif" variant="solo-filled"
+          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" variant="solo-filled"
           prepend-icon="fa-solid fa-paperclip"></v-file-input>
         <div style="width: 20rem;">
           <img :src="thumbnailSrc" alt="" style="width: 100%" />
@@ -168,6 +184,7 @@ import { db } from "../firebaseConfig";
 import {
   collection,
   addDoc,
+  updateDoc,
   doc,
   onSnapshot,
   query,
@@ -202,12 +219,12 @@ const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API);
 const userStore = useUserStore();
 const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin", "description"]);
 const user = ref();
-const { userId } = storeToRefs(userStore);
+const { userId, userInfo } = storeToRefs(userStore);
+
 const showSetting = ref(false)
 const auth = getAuth();
 const toggleIcon = ref(false);
 const messageContent = ref("");
-const sentMessages = ref(["hello"]);
 const bottomEl = ref(null);
 const messageArray = ref([]);
 const toggleMember = ref(false);
@@ -271,6 +288,10 @@ async function sendMessage() {
         senderRef: userDocRef,
         messageType: 'common',
       });
+      await updateDoc(boxDocRef, {
+        latestMessage: `${userInfo.value.displayName}: ${messageContent.value}`,
+        latestChange: Date.now()
+      })
       if (messageContent.value.toLowerCase().includes('@bot')) {
         showLoading.value = true;
         let prompt = messageContent.value.replace('@bot', '')
@@ -282,6 +303,11 @@ async function sendMessage() {
           senderRef: userDocRef,
           messageType: 'bot',
         });
+
+        await updateDoc(boxDocRef, {
+          latestMessage: `Bot: ${aiRes}`,
+          latestChange: Date.now()
+        })
       }
       messageContent.value = "";
       showLoading.value = false;
@@ -297,6 +323,10 @@ async function deleteMessage(id) {
     const boxDocRef = doc(db, "boxes", props.boxId);
     const messageRef = doc(boxDocRef, "messages", id);
     await deleteDoc(messageRef);
+    await updateDoc(boxDocRef, {
+      latestMessage: `${userInfo.value.displayName} unsent a message`,
+      latestChange: Date.now()
+    })
     toast.info('Message unsent', {
       position: 'top-right'
     });
@@ -306,7 +336,15 @@ async function deleteMessage(id) {
 }
 function convertTime(timestamp) {
   const dateTime = new Date(timestamp);
-  const options = { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+  const today = new Date();
+  const sameDay = dateTime.getDate() === today.getDate() &&
+    dateTime.getMonth() === today.getMonth() &&
+    dateTime.getFullYear() === today.getFullYear();
+  let options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+  if (!sameDay) {
+    options = { day: 'numeric', month: 'numeric', year: 'numeric', ...options };
+  }
+
   return dateTime.toLocaleString('en-GB', options);
 }
 const memberArray = ref()
@@ -350,9 +388,11 @@ async function fetchExisted() {
 }
 function avatarMap(member) {
   try {
-    const matchingMember = existedMapArray.value.find(element => member.path.includes(element.id));
-    if (matchingMember) {
-      return matchingMember.data().avatar;
+    if (existedMapArray.value) {
+      const matchingMember = existedMapArray.value.find(element => member.path.includes(element.id));
+      if (matchingMember) {
+        return matchingMember.data().avatar;
+      }
     }
     return null;
   } catch (error) {
@@ -361,9 +401,11 @@ function avatarMap(member) {
 }
 function nameMap(member) {
   try {
-    const matchingMember = existedMapArray.value.find(element => member.path.includes(element.id));
-    if (matchingMember) {
-      return matchingMember.data().displayName;
+    if (existedMapArray.value) {
+      const matchingMember = existedMapArray.value.find(element => member.path.includes(element.id));
+      if (matchingMember) {
+        return matchingMember.data().displayName;
+      }
     }
     return null;
   } catch (error) {
@@ -406,11 +448,15 @@ function sendImg() {
           timeSent: Date.now(),
           senderRef: userDocRef,
           messageType: 'image',
-        }).then((newMessage) => {
+        }).then(async () => {
           toggleImageSelect.value = false
           thumbnailImg.value = '';
           thumbnailSrc.value = ''
           imgUploading.value = false
+          await updateDoc(boxDocRef, {
+            latestMessage: `${userInfo.value.displayName}: *image`,
+            latestChange: Date.now()
+          })
         }).catch((error) => {
           console.error('Error adding message:', error);
           imgUploading.value = false
@@ -502,9 +548,11 @@ function scrollToBottom() {
 watch(
   () => props.boxId,
   (newBoxId, oldBoxId) => {
-    getMessage(newBoxId)
-    fetchMembers();
-    fetchExisted();
+    if (newBoxId) {
+      getMessage(newBoxId)
+      fetchMembers();
+      fetchExisted();
+    }
 
   },
   { immediate: true }
