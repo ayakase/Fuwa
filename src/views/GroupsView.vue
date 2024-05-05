@@ -8,7 +8,7 @@
             </div>
             <v-divider></v-divider>
             <v-list @click="rail = false">
-                <v-list-item @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description)"
+                <v-list-item @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite)"
                     class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box"
                     :value="box.id">
                     <v-tooltip v-if="rail" activator="parent" location="end">{{
@@ -41,7 +41,7 @@
                     chat</v-card-subtitle>
                 <LoadingComponent v-else></LoadingComponent>
 
-                <v-dialog width="500">
+                <v-dialog width="800">
                     <template v-slot:activator="{ props }">
                         <v-btn class="add-box" v-bind="props">
                             <span v-if="!rail">New Chat</span>
@@ -50,19 +50,29 @@
                     </template>
 
                     <template v-slot:default="{ isActive }">
-                        <v-card class="new-dialog">
-                            <v-card-title style="text-align: center">New Chat Box</v-card-title>
-                            <v-text-field variant="underlined" v-model="newBoxTitle" label="Box Name" required
-                                hide-details></v-text-field>
-                            <v-text-field variant="underlined" v-model="newBoxDescription" label="Box Description"
-                                required hide-details></v-text-field>
-                            <v-text-field variant="underlined" v-model="newBoxPassword"
-                                label="Password (leave blank if you want to let people join freely)" required
-                                hide-details></v-text-field>
-                            <v-text-field variant="underlined" v-model="newBoxInviteId" label="Invite ID" required
-                                hide-details></v-text-field>
+                        <v-card class="new-dialog" style="height:90%">
+                            <div style="display:flex;flex-direction: column; gap: 1rem;">
+                                <v-card-title style="text-align: center">New Chat Box</v-card-title>
+                                <v-text-field variant="underlined" v-model="newBoxTitle" label="Box Name" required
+                                    hide-details></v-text-field>
+                                <v-text-field variant="underlined" v-model="newBoxDescription" label="Box Description"
+                                    required hide-details></v-text-field>
+                                <v-text-field variant="underlined" v-model="newBoxPassword"
+                                    label="Password (leave blank if you want to let people join freely)" required
+                                    hide-details></v-text-field>
+                                <div style="display:flex; flex-direction: row;align-items:center;gap:1rem;">
+                                    <v-text-field variant="underlined" v-model="newBoxInviteId" label="Invite ID"
+                                        required hide-details disabled></v-text-field>
+                                    <v-btn style="height:3rem;background-color:green;" @click="generateInviteId()">
+                                        Random Id</v-btn>
+                                    <v-btn style="height:3rem;background-color:red;"
+                                        @click="newBoxInviteId = ''">Cancel</v-btn>
 
-                            <v-switch :label="newBoxPublicState" v-model="state" inset></v-switch>
+                                </div>
+
+                                <v-switch :label="newBoxPublicState" false-value="private" true-value="public"
+                                    v-model="newBoxPublicState" inset></v-switch>
+                            </div>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
                                 <v-btn text="Create new chat" @click="addBoxToDb()"> </v-btn>
@@ -73,7 +83,7 @@
             </v-list>
         </v-navigation-drawer>
         <ChatBox :box-id="boxId" :box-name="boxName" :existed-members="existedMembers" :box-members="boxMembers"
-            v-if="boxId" :isAdmin="isAdmin" :description="boxDescription"></ChatBox>
+            v-if="boxId" :isAdmin="isAdmin" :description="boxDescription" :inviteId="boxInviteId"></ChatBox>
         <NoBox v-else></NoBox>
     </div>
 </template>
@@ -115,45 +125,20 @@ const boxName = ref("");
 const boxMembers = ref([]);
 const boxDescription = ref("");
 const existedMembers = ref([]);
-
-const boxOwner = ref();
+const boxInviteId = ref("");
 const test = ref();
 const hasBox = ref(true);
 const isAdmin = ref(false)
-function selectBox(id, title, members, existed, owner, description) {
+function selectBox(id, title, members, existed, owner, description, invite) {
     boxId.value = id;
     boxName.value = title;
     boxMembers.value = members;
     existedMembers.value = existed;
     boxDescription.value = description;
+    boxInviteId.value = invite
     isAdmin.value = `users/${userId.value}` == owner.path
 }
 async function fetchBoxes() {
-    // let boxRefArray = userInfo.value.boxes
-    // if (boxRefArray && boxRefArray.length > 0) {
-    //     try {
-    //         const boxesDocs = await Promise.all(boxRefArray.map(ref => getDoc(ref)));
-    //         boxes.value = boxesDocs.map(doc => {
-    //             if (doc.exists()) {
-    //                 const data = { ...doc.data(), id: doc.id };
-    //                 return data;
-    //             } else {
-    //                 return null;
-    //             }
-    //         }).filter(item => item !== null)
-    //         if (boxes.value.length > 0) {
-    //             hasBox.value = true;
-    //         } else {
-    //             hasBox.value = false;
-    //         }
-
-
-    //     } catch (e) {
-    //         console.log(e)
-    //     }
-    // } else {
-    //     boxes.value = [];
-    // }
     if (userId.value) {
         const listQuery = query(collection(db, "boxes"),
             where("members", "array-contains", doc(db, "users", userId.value)),
@@ -168,56 +153,17 @@ async function fetchBoxes() {
                     boxesList.push({ ...doc.data(), id: doc.id });
                 });
                 boxes.value = boxesList;
-                // boxId.value = boxes.value[0].id;
-                // boxName.value = boxes.value[0].title;
-                // boxMembers.value = boxes.value[0].members
+
                 hasBox.value = true;
             } else {
                 boxes.value = [];
                 hasBox.value = false;
             }
-            // getDocs(listQuery, (snapshot) => {
-            //     console.log(snapshot)
-            // const boxesList = [];
-            // if (snapshot.docs.length > 0) {
-            //     snapshot.forEach((doc) => {
-            //         // console.log(doc.data().members)
-            //         boxesList.push({
-            //             id: doc.id,
-            //             title: doc.data().title,
-            //             owner: doc.data().owner,
-            //             members: doc.data().members
-            //         });
-            //     });
-            //     boxes.value = boxesList;
-            //     boxId.value = boxes.value[0].id;
-            //     boxName.value = boxes.value[0].title;
-            //     boxMembers.value = boxes.value[0].members
-            //     hasBox.value = true;
-            // } else {
-            //     boxes.value = [];
-            //     hasBox.value = false;
-            // }
 
-            // });
         })
     }
 }
-// watch(userId, async (newValue, oldValue) => {
-//     const listQuery = query(collection(db, "boxes"), where('owner', '==', doc(db, `users/${newValue}`)), orderBy('dateCreated', 'desc'))
-//     onSnapshot(listQuery, (snapshot) => {
-//         const boxesList = []
-//         snapshot.forEach((doc) => {
-//             console.log(doc.data())
-//             console.log(doc.data().id)
-//             boxesList.push({
-//                 id: doc.id,
-//                 title: doc.data().title
-//             });
-//             boxes.value = boxesList
-//         });
-//     })
-// })
+
 watch(
     () => userId.value,
     (newUserId, oldUserId) => {
@@ -228,28 +174,24 @@ watch(
     { immediate: true }
 
 );
-onMounted(() => {
-    onAuthStateChanged(auth, (firebaseUser) => {
-        user.value = firebaseUser;
-    });
-
-});
 const toggleBox = ref(true);
-const state = ref(false);
+
 const newBoxPublicState = ref("private");
+
 const newBoxTitle = ref("");
 const newBoxDescription = ref("");
 const newBoxPassword = ref("");
-const newBoxInviteId = ref("");
 const newBoxThumbnail = ref("");
-watch(state, async (newValue, oldValue) => {
-    if (newValue == true) {
-        newBoxPublicState.value = "public";
-    } else {
-        newBoxPublicState.value = "private";
+const newBoxInviteId = ref("");
+function generateInviteId() {
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 10; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        result += charset[randomIndex];
     }
-});
-
+    newBoxInviteId.value = result
+}
 async function addBoxToDb() {
     try {
         const userDocRef = doc(db, 'users', userStore.userId);
@@ -259,7 +201,7 @@ async function addBoxToDb() {
             members: [userDocRef],
             existed: [userDocRef],
             description: newBoxDescription.value,
-            isPublic: state.value,
+            isPublic: (newBoxPublicState.value === 'public') ? true : false,
             password: newBoxPassword.value,
             invite: newBoxInviteId.value,
             thumbnail: newBoxThumbnail.value,
@@ -363,6 +305,11 @@ function convertTime(timestamp) {
 
     return dateTime.toLocaleString('en-GB', options);
 }
+onMounted(() => {
+    onAuthStateChanged(auth, (firebaseUser) => {
+        user.value = firebaseUser;
+    });
+});
 </script>
 
 <style scoped>

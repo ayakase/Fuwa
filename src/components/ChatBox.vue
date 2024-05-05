@@ -74,10 +74,11 @@
               <template v-slot:default="{ isActive }">
                 <v-card style="position:relative;" color="transparent">
                   <img :src="message.content" alt="">
-                  <div @click="isActive.value = false" style="position:fixed; top:1rem;right:1.5rem;z-index: 99;display: flex; align-items: center;cursor:pointer;">
-                    <v-icon  icon="fa-solid fa-x" size="x-large" color="error">
+                  <div @click="isActive.value = false"
+                    style="position:fixed; top:1rem;right:1.5rem;z-index: 99;display: flex; align-items: center;cursor:pointer;">
+                    <v-icon icon="fa-solid fa-x" size="x-large" color="error">
                     </v-icon>
-                    <span  style="font-size: 1.3rem"> &nbsp; or Esc</span>
+                    <span style="font-size: 1.3rem"> &nbsp; or Esc</span>
                   </div>
                 </v-card>
               </template>
@@ -161,8 +162,9 @@
 
       <v-list density="compact" nav>
         <GroupInfo :box-id="props.boxId" :box-name="props.boxName" v-if="props.boxId" :isAdmin="props.isAdmin"
-          :description="props.description"></GroupInfo>
-        <v-list-item prepend-icon="mdi-account" title="My Account" value="account"></v-list-item>
+          :description="props.description" :inviteId="props.inviteId"></GroupInfo>
+        <v-list-item prepend-icon="fa-solid fa-link" v-if="props.inviteId !== ''" @click="getInvite(props.inviteId)"
+          title="Get Invite link" value="account"></v-list-item>
         <v-divider></v-divider>
         <v-list-item prepend-icon="fa-solid fa-user-group" @click="toggleMember = !toggleMember" title="Members"
           value="members" :append-icon="expandIcon()">
@@ -217,7 +219,7 @@ let { cookies } = useCookies()
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API);
 const userStore = useUserStore();
-const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin", "description"]);
+const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin", "description", "inviteId"]);
 const user = ref();
 const { userId, userInfo } = storeToRefs(userStore);
 
@@ -344,8 +346,14 @@ function convertTime(timestamp) {
   if (!sameDay) {
     options = { day: 'numeric', month: 'numeric', year: 'numeric', ...options };
   }
-
   return dateTime.toLocaleString('en-GB', options);
+}
+function getInvite(id) {
+  console.log(`${window.location.host}/invite/${id}`)
+  navigator.clipboard.writeText(`${window.location.host}/invite/${id}`)
+  toast.info('Invite link copied to the clipboard', {
+    position: 'bottom-right'
+  });
 }
 const memberArray = ref()
 const memberMapArray = ref()

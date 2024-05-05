@@ -1,17 +1,88 @@
 <template>
     <div class="container">
-        {{ inviteId }}
+        <v-card v-if="boxInfo" elevation="20">
+            <v-card-title style="font-size: xx-large;">
+                {{ boxInfo.title }}
+            </v-card-title>
+            <v-card-subtitle>
+                {{ boxInfo.description }}
+            </v-card-subtitle>
+            <v-card-actions>
+                <div style="display: flex;justify-content: center;width: 100%;">
+                    <v-btn size="x-large">Join us! &nbsp;
+                        <v-icon icon="fa-solid fa-arrow-right-to-bracket fa-beat-fade"></v-icon>
+                    </v-btn>
+                </div>
+            </v-card-actions>
+        </v-card>
+        <div v-else>
+            <div class="loader"></div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { db } from "../firebaseConfig";
+import LoadingComponent from "../components/LoadingComponent.vue"
+import { getDocs, collection, where, query, arrayUnion } from 'firebase/firestore'
 const route = useRoute();
 const inviteId = ref(route.params.id)
+const boxInfo = ref()
+const q = query(collection(db, "boxes"), where("invite", '==', inviteId.value))
+async function fetchBox() {
+    let box = await getDocs(q)
+    boxInfo.value = box.docs[0].data()
+    console.log(boxInfo.value)
+}
 onMounted(() => {
-    // inviteId.value = 
+    fetchBox()
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loader {
+    width: 100px;
+    aspect-ratio: 1;
+    display: grid;
+    border: 8px solid #0000;
+    border-radius: 50%;
+    border-color: #ccc #0000;
+    animation: l16 1s infinite linear;
+}
+
+.loader::before,
+.loader::after {
+    content: "";
+    grid-area: 1/1;
+    margin: 2px;
+    border: inherit;
+    border-radius: 50%;
+}
+
+.loader::before {
+    border-color: #f03355 #0000;
+    animation: inherit;
+    animation-duration: .5s;
+    animation-direction: reverse;
+}
+
+.loader::after {
+    margin: 8px;
+}
+
+@keyframes l16 {
+    100% {
+        transform: rotate(1turn)
+    }
+}
+</style>
