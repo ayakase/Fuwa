@@ -8,7 +8,7 @@ import { computed } from 'vue';
 import { getAuth, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut, signInWithPopup } from 'firebase/auth';
 import { useUserStore } from './stores/userStore';
 import { db } from './firebaseConfig';
-import { doc, collection, addDoc, setDoc, getDocs, query, where } from 'firebase/firestore';
+import { doc, collection, addDoc, setDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
 const userStore = useUserStore()
 let { cookies } = useCookies()
 const user = ref()
@@ -59,30 +59,51 @@ function changeSideBar() {
 //   }
 // }
 const userInfo = ref()
+const userId = ref()
 async function getUser(user) {
   if (user) {
     const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+    if (querySnapshot.empty) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+      await getUser(user);
+      return;
+    }
     querySnapshot.forEach((doc) => {
       userInfo.value = doc.data();
       userStore.changeUserInfo(userInfo.value);
-      userStore.changeUserId(doc.id)
+      userStore.changeUserId(doc.id);
+      userId.value = doc.id
     });
   }
 }
-const handleSignOut = () => {
-  signOut(auth).then(() => {
-    user.value = null
-    $toast.info('Signed Out', {
-      position: 'top-right'
-    });
+setInterval(async () => {
+  if (userId.value) {
+    const userRef = doc(db, 'users', userId.value);
+    console.log(userId.value)
+    await updateDoc(userRef, {
+      lastOnline: Date.now()
+    })
+  }
+}, 60000);
 
-  }).catch((error) => {
+// const handleSignOut = () => {
+//   signOut(auth).then(() => {
+//     user.value = null
+//     $toast.info('Signed Out', {
+//       position: 'top-right'
+//     });
 
-  });
-}
+//   }).catch((error) => {
+
+//   });
+// }
 onAuthStateChanged(auth, (firebaseUser) => {
   user.value = firebaseUser;
   getUser(firebaseUser)
+
+  // setTimeout(() => {
+  //   getUser(firebaseUser)
+  // }, 1000);
   // if (firebaseUser) {
   //   console.log('yes');
   // } else {
@@ -138,7 +159,7 @@ const toggleSecond = ref(false)
           <v-list v-if="user" density="compact" nav>
             <v-list-item prepend-icon="fa-solid fa-home" title="Home" value="home" @click="router.push('/')">
               <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
-              <v-list-item prepend-icon="fa-regular fa-message" title="Groups" value="message"
+            <v-list-item prepend-icon="fa-regular fa-message" title="Groups" value="message"
               @click="router.push('/groups')">
               <v-tooltip activator="parent" location="start">Groups</v-tooltip>
             </v-list-item>

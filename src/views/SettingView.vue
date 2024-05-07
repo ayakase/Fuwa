@@ -74,8 +74,6 @@
                 <div style="width: 20rem;">
                     <div class="avatar-field" style="display: flex;flex-direction: column;gap: 1rem;">
                         <img v-if="userInfo.avatar" :src="userInfo.avatar" style="width: 100%;aspect-ratio:1;">
-
-
                         <v-dialog>
                             <template v-slot:activator="{ props: activatorProps }">
                                 <v-btn v-bind="activatorProps" style="background-color: green;color: white;">Change
@@ -106,7 +104,6 @@
                     </div>
                 </div>
             </v-card>
-
         </div>
         <div class="pa-2 sign-out">
             <v-btn color="error" v-if="user" @click="handleSignOut()" block>
@@ -130,7 +127,6 @@ import { db } from "../firebaseConfig";
 import { Cropper, CircleStencil } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { getStorage, ref as firebaseRef, uploadBytes, getDownloadURL } from "firebase/storage";
-
 const auth = getAuth()
 const router = useRouter()
 import 'vue-toast-notification/dist/theme-sugar.css';
@@ -145,13 +141,13 @@ let { cookies } = useCookies()
 const theme = useTheme()
 const emit = defineEmits(['changeBg'])
 
-let thumbnailImg = ref(null);
+// const thumbnailImg = ref(null);
 const thumbnailSrc = ref();
 function processImg(event) {
     if (event.target.files.length) {
         thumbnailSrc.value = URL.createObjectURL(event.target.files[0]);
     }
-    thumbnailImg.value = event.target.files[0];
+    // thumbnailImg.value = event.target.files[0];
 }
 const cropImg = ref()
 function change({ coordinates, canvas }) {
@@ -160,6 +156,7 @@ function change({ coordinates, canvas }) {
         cropImg.value = blob;
         console.log(cropImg.value);
     });
+
 }
 const storage = getStorage();
 
@@ -174,9 +171,12 @@ function uploadAvatar() {
             await updateDoc(userRef, {
                 avatar: downloadURL
             })
-            toast.success("Successfully changed avatar, reload to see the change takes effect", {
+            toast.success("Successfully changed avatar", {
                 position: 'top-right'
             });
+            setTimeout(() => {
+                window.location.reload()
+            }, 1000);
         })
     });
 
@@ -360,6 +360,22 @@ function selectTheme(id) {
         position: 'top-right'
     });
     themeCheck.value = cookies.get('themeId')
+}
+async function getUser(user) {
+    if (user) {
+        const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+        if (querySnapshot.empty) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            await getUser(user);
+            return;
+        }
+
+        querySnapshot.forEach((doc) => {
+            userInfo.value = doc.data();
+            userStore.changeUserInfo(userInfo.value);
+            userStore.changeUserId(doc.id);
+        });
+    }
 }
 onMounted(() => {
     console.log(userInfo.displayName)

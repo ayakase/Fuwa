@@ -5,34 +5,68 @@
                 <!-- <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn> -->
                 <v-btn v-if="!rail" variant="text" icon="fa-solid fa-chevron-left" @click="rail = !rail"></v-btn>
                 <v-btn v-if="rail" variant="text" icon="fa-solid fa-chevron-right" @click="rail = !rail"></v-btn>
+                <v-btn v-if="!rail" variant="text" icon="fa-solid fa-rotate-right" @click="reloadBoxes()"></v-btn>
+
             </div>
             <v-divider></v-divider>
-            <v-list @click="rail = false">
-                <v-list-item @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite)"
-                    class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box"
-                    :value="box.id">
-                    <v-tooltip v-if="rail" activator="parent" location="end">{{
-            box.title
-        }}</v-tooltip>
+            <v-list style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;">
+                <v-list-item :class="{ active: box.id == boxId }"
+                    @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite)"
+                    class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box" :value="box.id"
+                    style="overflow:hidden;border-radius: .5rem;">
+                    <img :src="box.banner" alt="" v-if="!rail"
+                        style="position:absolute;left:0;top:0;z-index: -1;width: 100%;filter: blur(3px) brightness(40%)">
+                    <v-tooltip v-if="rail" activator="parent" location="end">
+                        <p>
+                            {{ box.title }}
+                        </p>
+                        <p>
+                            {{ box.latestMessage }}
+                        </p>
+                    </v-tooltip>
                     <div class="chat-box">
-                        <div style="display:flex; align-items: center;gap:1rem">
-                            <v-avatar :size="rail ? 40 : 65" :image="user.photoURL"></v-avatar>
+                        <div style="display:flex; align-items: center;gap:1rem;position:relative">
+                            <!-- <v-avatar :size="rail ? 40 : 65" :image="box.thumbnail"></v-avatar> -->
+                            <img :src="box.thumbnail" alt=""
+                                style="width:4rem;transition: width 0.3s ease;border-radius:9999px;"
+                                :style="getStyle(rail)">
+
                             <div>
                                 <p class="box-title" v-if="!rail">{{ box.title }}</p>
                                 <p v-if="!rail"
-                                    style="color:gray;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 15rem;">
+                                    style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 15rem;">
                                     {{ box.latestMessage }}</p>
-                                <p style="color: gray;font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
+                                <p style="font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
                             </div>
                         </div>
-                        <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
-                            @click="deleteBox(box.title, box.id)">
-                            <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
-                        </button>
-                        <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button"
-                            @click="leaveBox(box.title, box.id)">
-                            <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
-                        </button>
+                        <v-icon size="small" v-if="box.pinned" style="position: absolute; top:.4rem;left:.1rem;"
+                            icon="fa-solid fa-thumbtack"></v-icon>
+
+                        <v-menu location="end" transition="scale-transition">
+                            <template v-slot:activator="{ props }">
+                                <v-btn v-bind="props" icon="fa-solid fa-ellipsis" size="small">
+                                </v-btn>
+                            </template>
+                            <v-card style="width:10rem;">
+                                <div style="width:100%">
+                                    <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
+                                        @click="deleteBox(box.title, box.id)">
+                                        Delete group
+                                        <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
+                                    </button>
+                                    <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button"
+                                        @click="leaveBox(box.title, box.id)">
+                                        Leave group
+                                        <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
+                                    </button>
+                                    <button class="leave-box-button" @click="pinBox(box.id)">
+                                        Pin to top
+                                        <v-icon size="small" icon="fa-solid fa-thumbtack"></v-icon>
+                                    </button>
+                                </div>
+                            </v-card>
+                        </v-menu>
+
                     </div>
                 </v-list-item>
                 <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You have
@@ -57,9 +91,9 @@
                                     hide-details></v-text-field>
                                 <v-text-field variant="underlined" v-model="newBoxDescription" label="Box Description"
                                     required hide-details></v-text-field>
-                                <v-text-field variant="underlined" v-model="newBoxPassword"
+                                <!-- <v-text-field variant="underlined" v-model="newBoxPassword"
                                     label="Password (leave blank if you want to let people join freely)" required
-                                    hide-details></v-text-field>
+                                    hide-details></v-text-field> -->
                                 <div style="display:flex; flex-direction: row;align-items:center;gap:1rem;">
                                     <v-text-field variant="underlined" v-model="newBoxInviteId" label="Invite ID"
                                         required hide-details disabled></v-text-field>
@@ -69,13 +103,78 @@
                                         @click="newBoxInviteId = ''">Cancel</v-btn>
 
                                 </div>
+                                <div style="display:flex; flex-direction:column;align-items: center;gap:1rem">
+                                    <v-dialog>
+                                        <template v-slot:activator="{ props: activatorProps }">
+                                            <v-btn v-bind="activatorProps"
+                                                style="background-color: green;color: white;width:15rem;">Select
+                                                Thumbnail</v-btn>
+                                        </template>
+                                        <template v-slot:default="{ isActive }">
+                                            <v-card
+                                                style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
+                                                <v-file-input
+                                                    accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                                                    style="width:50%" prepend-icon="" class="img-input" id="formFile"
+                                                    @change="getThumbnailUrl" label="Image"
+                                                    variant="solo-filled"></v-file-input>
+                                                <div style="max-width: 50%;">
+                                                    <cropper :src="thumbnailSrc" @change="getPreviewThumnail"
+                                                        :stencil-props="{ aspectRatio: 1 }"
+                                                        :stencil-component="CircleStencil" />
+                                                    <!-- <img :src="croppedThumbnail" alt=""> -->
+                                                </div>
+                                                <v-card-actions>
+                                                    <v-btn color="success" @click="isActive.value = false">
+                                                        Done
+                                                    </v-btn>
 
+                                                </v-card-actions>
+                                            </v-card>
+                                        </template>
+                                    </v-dialog>
+                                    <img style="width: 50%;border-radius: 9999px;" :src="previewThumnail" alt="">
+                                </div>
+                                <div style="display:flex; flex-direction:column;align-items: center;gap:1rem">
+                                    <v-dialog>
+                                        <template v-slot:activator="{ props: activatorProps }">
+                                            <v-btn v-bind="activatorProps"
+                                                style="background-color: green;color: white;width:15rem;">Select
+                                                Banner</v-btn>
+                                        </template>
+                                        <template v-slot:default="{ isActive }">
+                                            <v-card
+                                                style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
+                                                <v-file-input
+                                                    accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                                                    style="width:50%" prepend-icon="" class="img-input" id="formFile"
+                                                    @change="getBannerUrl" label="Image"
+                                                    variant="solo-filled"></v-file-input>
+                                                <div style="max-width: 50%;">
+                                                    <cropper :src="bannerSrc" @change="getPreviewBanner"
+                                                        :stencil-props="{ aspectRatio: 12 / 3 }" />
+                                                </div>
+                                                <v-card-actions>
+                                                    <v-btn color="error" @click="isActive.value = false">
+                                                        Cancel
+                                                    </v-btn>
+                                                    <v-btn color="success" @click="uploadAvatar()">
+                                                        Save Avatar
+                                                    </v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </template>
+                                    </v-dialog>
+                                    <img style="width: 80%" :src="previewBanner" alt="">
+                                </div>
                                 <v-switch :label="newBoxPublicState" false-value="private" true-value="public"
                                     v-model="newBoxPublicState" inset></v-switch>
                             </div>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn text="Create new chat" @click="addBoxToDb()"> </v-btn>
+                                <v-btn :loading="btnLoading" variant="outlined" color="success" text="Create new chat"
+                                    @click="addBoxToDb()">
+                                </v-btn>
                             </v-card-actions>
                         </v-card>
                     </template>
@@ -93,10 +192,10 @@ import {
     collection,
     addDoc,
     doc,
-    getDocs,
     onSnapshot,
     query,
     deleteDoc,
+    getDocs,
     orderBy,
     where,
     updateDoc,
@@ -112,7 +211,11 @@ import { useToast } from "vue-toast-notification";
 import "vue-toast-notification/dist/theme-sugar.css";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { storeToRefs } from "pinia";
-import { thumbnail } from "@cloudinary/url-gen/actions/resize";
+import { Cropper, CircleStencil } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
+import { getStorage, ref as firebaseRef, uploadBytes, getDownloadURL } from "firebase/storage";
+const storage = getStorage();
+
 const $toast = useToast();
 const userStore = useUserStore();
 const user = ref();
@@ -145,12 +248,14 @@ async function fetchBoxes() {
             orderBy("latestChange", "desc")
         )
         onSnapshot(listQuery, (snapshot) => {
-            console.log(snapshot.docs)
             const boxesList = [];
             if (snapshot.docs.length > 0) {
                 snapshot.forEach((doc) => {
-                    // console.log(doc.data().members)
-                    boxesList.push({ ...doc.data(), id: doc.id });
+                    if (userInfo.value.pin && userInfo.value.pin.path == doc.ref.path) {
+                        boxesList.unshift({ ...doc.data(), id: doc.id, pinned: true })
+                    } else {
+                        boxesList.push({ ...doc.data(), id: doc.id, pinned: false });
+                    }
                 });
                 boxes.value = boxesList;
 
@@ -163,7 +268,22 @@ async function fetchBoxes() {
         })
     }
 }
+async function getUser(user) {
+    if (user) {
+        const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+        querySnapshot.forEach((doc) => {
+            userInfo.value = doc.data();
+            userStore.changeUserInfo(userInfo.value);
+            userStore.changeUserId(doc.id);
+            userId.value = doc.id
+        });
+    }
+}
+async function reloadBoxes() {
+    await getUser(user.value)
+    await fetchBoxes();
 
+}
 watch(
     () => userId.value,
     (newUserId, oldUserId) => {
@@ -177,11 +297,11 @@ watch(
 const toggleBox = ref(true);
 
 const newBoxPublicState = ref("private");
-
 const newBoxTitle = ref("");
 const newBoxDescription = ref("");
 const newBoxPassword = ref("");
 const newBoxThumbnail = ref("");
+const newBoxBanner = ref("")
 const newBoxInviteId = ref("");
 function generateInviteId() {
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -192,9 +312,72 @@ function generateInviteId() {
     }
     newBoxInviteId.value = result
 }
+const thumbnailSrc = ref();
+const previewThumnail = ref();
+const croppedThumbnail = ref()
+
+function getThumbnailUrl(event) {
+    if (event.target.files.length) {
+        thumbnailSrc.value = URL.createObjectURL(event.target.files[0]);
+    }
+}
+function getPreviewThumnail({ coordinates, canvas }) {
+    console.log(coordinates, canvas);
+    canvas.toBlob((blob) => {
+        croppedThumbnail.value = blob;
+    });
+    previewThumnail.value = canvas.toDataURL();
+
+}
+async function uploadThumbnail() {
+    let now = new Date();
+    let time = now.getTime().toString();
+    const storageRef = firebaseRef(storage, 'thumbnails/' + time + '.png');
+    try {
+        const snapshot = await uploadBytes(storageRef, croppedThumbnail.value);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading thumbnail:", error);
+        throw error;
+    }
+}
+const bannerSrc = ref();
+const previewBanner = ref()
+const croppedBanner = ref()
+function getBannerUrl(event) {
+    if (event.target.files.length) {
+        bannerSrc.value = URL.createObjectURL(event.target.files[0]);
+    }
+}
+function getPreviewBanner({ coordinates, canvas }) {
+    console.log(coordinates, canvas);
+    canvas.toBlob((blob) => {
+        croppedBanner.value = blob;
+    });
+    previewBanner.value = canvas.toDataURL();
+
+}
+async function uploadBanner() {
+    let now = new Date();
+    let time = now.getTime().toString();
+    const storageRef = firebaseRef(storage, 'thumbnails/' + time + '.png');
+    try {
+        const snapshot = await uploadBytes(storageRef, croppedBanner.value);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading thumbnail:", error);
+        throw error;
+    }
+}
+const btnLoading = ref(false)
 async function addBoxToDb() {
     try {
+        btnLoading.value = true
         const userDocRef = doc(db, 'users', userStore.userId);
+        newBoxThumbnail.value = await uploadThumbnail()
+        newBoxBanner.value = await uploadBanner()
         const newBox = await addDoc(collection(db, "boxes"), {
             title: newBoxTitle.value,
             owner: userDocRef,
@@ -205,6 +388,7 @@ async function addBoxToDb() {
             password: newBoxPassword.value,
             invite: newBoxInviteId.value,
             thumbnail: newBoxThumbnail.value,
+            banner: newBoxBanner.value,
             dateCreated: Date.now(),
         });
         const boxDocRef = doc(db, "boxes", newBox.id);
@@ -222,6 +406,8 @@ async function addBoxToDb() {
             senderRef: userDocRef,
             messageType: 'system',
         });
+        btnLoading.value = false
+
         $toast.success("Created box chat " + newBoxTitle.value, {
             position: 'top-right'
         });
@@ -229,16 +415,33 @@ async function addBoxToDb() {
         //     fetchBoxes()
         // }, 3000);
     } catch (e) {
+        btnLoading.value = false
         console.error("Error adding document: ", e);
     }
 }
-
+function getStyle(rail) {
+    return { width: rail ? '2.5rem' : '4rem' }
+}
 function showDeleteBtn(owner) {
     return (`users/${userId.value}` == owner.path)
 }
 function showLeaveBtn(owner) {
     return !(`users/${userId.value}` == owner.path)
 }
+
+async function pinBox(id) {
+    const boxDocRef = doc(db, 'boxes', id)
+    const userDocRef = doc(db, 'users', userStore.userId);
+    try {
+        await updateDoc(userDocRef, {
+            pin: boxDocRef
+        })
+        reloadBoxes()
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 async function deleteBox(title, id) {
     if (confirm("Delete box: " + title + " ?") == true) {
         const boxDocRef = doc(db, 'boxes', id)
@@ -342,12 +545,13 @@ onMounted(() => {
 .delete-box-button,
 .leave-box-button {
     border-radius: 0.2rem;
-    width: 1.5rem;
+    height: 3rem;
+    width: 100%;
 }
 
 .delete-box-button:hover,
 .leave-box-button:hover {
-    color: var(--main-color);
+    background-color: var(--main-color);
 }
 
 .message-top-bar {
@@ -364,5 +568,15 @@ onMounted(() => {
     font-weight: bolder;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* .chat-box-container:active {
+    transition: all .5s linear;
+    transform: scale(1.2);
+} */
+.active {
+    /* animation: shake 5s;
+    animation-iteration-count: infinite; */
+    transition: all .2s linear;
 }
 </style>

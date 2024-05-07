@@ -169,8 +169,7 @@
         <v-list-item prepend-icon="fa-solid fa-user-group" @click="toggleMember = !toggleMember" title="Members"
           value="members" :append-icon="expandIcon()">
         </v-list-item>
-        <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id" :name="member.displayName"
-          :cid="member.cid" :avatar="member.avatar"></UserProfile>
+        <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id" ></UserProfile>
       </v-list>
     </v-navigation-drawer>
     <div class="scroll-bottom">
@@ -358,19 +357,17 @@ function getInvite(id) {
 const memberArray = ref()
 const memberMapArray = ref()
 async function fetchMembers() {
-  memberArray.value = null
-  const userRefArray = props.boxMembers
+  memberArray.value = null;
+  const userRefArray = props.boxMembers;
   try {
     const userDocs = await Promise.all(userRefArray.map(ref => getDoc(ref)));
-    memberArray.value = userDocs.map(doc => {
-      if (doc.exists()) {
+    memberArray.value = userDocs
+      .filter(doc => doc.exists()) 
+      .map(doc => {
         const data = { ...doc.data(), id: doc.id };
         return data;
-      } else {
-        return null;
-      }
-    });
-    // memberMapArray.value = userDocs
+      });
+    console.log(memberArray.value);
   } catch (error) {
     console.error('Error fetching users:', error);
   }

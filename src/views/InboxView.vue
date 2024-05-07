@@ -24,7 +24,7 @@
             <v-divider></v-divider>
             <v-list @click="rail = false">
                 <v-list-item @click="selectBox(box.id, box.title, box.members, box.existed, box.owner)"
-                    :prepend-avatar="user.photoURL" class="chat-box-container" v-if="boxes.length > 0"
+                    :prepend-avatar="box.thumbnail" class="chat-box-container" v-if="boxes.length > 0"
                     v-for="box in boxes" :key="box" :value="box.id">
                     <v-tooltip v-if="rail" activator="parent" location="end">{{
             box.title
@@ -244,9 +244,9 @@ watch(
 
 );
 onMounted(() => {
-    onAuthStateChanged(auth, (firebaseUser) => {
-        user.value = firebaseUser;
-    });
+    // onAuthStateChanged(auth, (firebaseUser) => {
+    //     user.value = firebaseUser;
+    // });
 
 });
 const toggleBox = ref(true);
@@ -278,8 +278,8 @@ async function addBoxToDb() {
             messageType: 'system',
         });
         $toast.success("Created box chat " + boxTitle.value, {
-      position: 'top-right'
-    });
+            position: 'top-right'
+        });
         setTimeout(() => {
             fetchBoxes()
         }, 3000);
@@ -305,8 +305,8 @@ async function deleteBox(title, id) {
             console.error(e.message)
         }
         $toast.info("Deleted box chat " + title, {
-      position: 'top-right'
-    });
+            position: 'top-right'
+        });
     } else {
         console.log("Deletion cancelled");
     }
@@ -331,8 +331,8 @@ async function leaveBox(title, id) {
 
         });
         $toast.info("Left " + title, {
-      position: 'top-right'
-    });
+            position: 'top-right'
+        });
     } else {
         console.log("Deletion cancelled");
     }

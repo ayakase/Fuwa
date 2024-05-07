@@ -9,8 +9,11 @@
             </v-card-subtitle>
             <v-card-actions>
                 <div style="display: flex;justify-content: center;width: 100%;">
-                    <v-btn size="x-large">Join us! &nbsp;
-                        <v-icon icon="fa-solid fa-arrow-right-to-bracket fa-beat-fade"></v-icon>
+                    <v-btn size="x-large" v-if="user"> Join us! &nbsp; <v-icon
+                            icon="fa-solid fa-arrow-right-to-bracket fa-beat-fade"></v-icon>
+                    </v-btn>
+                    <v-btn @click="router.push('/login')" size="x-large" v-if="!user"> Sign up, login and join us! &nbsp; <v-icon
+                            icon="fa-solid fa-arrow-right-to-bracket fa-beat-fade"></v-icon>
                     </v-btn>
                 </div>
             </v-card-actions>
@@ -26,10 +29,15 @@ import { onMounted, ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { db } from "../firebaseConfig";
 import LoadingComponent from "../components/LoadingComponent.vue"
+import { useRouter } from 'vue-router';
+const router = useRouter()
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getDocs, collection, where, query, arrayUnion } from 'firebase/firestore'
 const route = useRoute();
 const inviteId = ref(route.params.id)
 const boxInfo = ref()
+const auth = getAuth()
+const user = ref()
 const q = query(collection(db, "boxes"), where("invite", '==', inviteId.value))
 async function fetchBox() {
     let box = await getDocs(q)
@@ -38,6 +46,9 @@ async function fetchBox() {
 }
 onMounted(() => {
     fetchBox()
+    onAuthStateChanged(auth, (firebaseUser) => {
+        user.value = firebaseUser
+    })
 })
 </script>
 

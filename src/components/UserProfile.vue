@@ -1,13 +1,18 @@
 <template>
-    <v-dialog max-width="800">
+    <v-dialog max-width="800"  v-if="memberInfo">
         <template v-slot:activator="{ props: activatorProps }">
-            <v-list-item :prepend-avatar="props.avatar" v-bind="activatorProps" color="surface-variasdaant">
+            <v-list-item style="position: relative;" :prepend-avatar="memberInfo.avatar" v-bind="activatorProps"
+                color="surface-variasdaant">
                 <p>
-                    {{ props.name }}
+                    {{ memberInfo.displayName }}
                 </p>
                 <p>
-                    {{ props.cid }}
+                    {{ memberInfo.cid }}
                 </p>
+                <div style="position: absolute;right: 0; top:.5rem;"
+                    v-if="memberInfo && memberInfo.lastOnline && online(memberInfo.lastOnline)">
+                    <v-icon style="color: green;" size="smaller" icon="fa-solid fa-circle"></v-icon>
+                </div>
             </v-list-item>
         </template>
 
@@ -23,6 +28,7 @@
                 <v-card-text style="font-size: larger;">
                     {{ memberInfo.about }}
                 </v-card-text>
+
                 <!-- <v-text-field clearable label="Leave them a message" variant="outlined"
                     style="width: 100%;"></v-text-field> -->
                 <v-card-actions style="width: 100%">
@@ -40,19 +46,33 @@
 </template>
 
 <script setup>
-const props = defineProps(["id", "name", "avatar", "cid"]);
+const props = defineProps(["id"]);
 import { db } from "../firebaseConfig";
 import { getDoc, doc } from 'firebase/firestore';
 import { ref, onMounted } from 'vue';
 import LoadingComponent from '../components/LoadingComponent.vue'
 const userDocRef = doc(db, 'users', props.id);
 const memberInfo = ref('')
+function online(lastOnline) {
+    if (((Date.now() - lastOnline) / 1000) > 60) {
+        return false
+    } else {
+        return true
+    }
+}
 async function getUserInfo() {
     let userInfo = await getDoc(userDocRef)
     memberInfo.value = userInfo.data()
 }
 onMounted(() => {
     getUserInfo()
+    const intervalId = setInterval(() => {
+        getUserInfo()
+    }, 60000)
+
+    return () => {
+        clearInterval(intervalId)
+    }
 })
 </script>
 

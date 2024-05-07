@@ -11,11 +11,10 @@
         <div class="result-container">
             <v-card class="each-box" v-if="resultBoxes" v-for="box in resultBoxes">
                 <img style="position: absolute; top:0; height: 50%; width: 100%; object-fit: cover;filter: brightness(70%)"
-                    src="https://static.planetminecraft.com/files/resource_media/screenshot/1216/Minecraft-banner-2_2053463.jpg">
+                    :src="box.banner" alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg">
                 <div style="position: absolute; top: 0; height: 100%;width:100%; display: flex; align-items: center;">
-                    <img style="margin-left: 5%;width: 20%;border-radius: 9999px"
-                        src="https://cdn5.vectorstock.com/i/1000x1000/92/89/hipster-avatar-image-vector-19639289.jpg"
-                        alt="">
+                    <img style="margin-left: 5%;width: 20%;border-radius: 9999px; background-color: whitesmoke"
+                        :src="box.thumbnail" alt="">
                     <div>{{ box.title }}</div>
                 </div>
                 <div>
