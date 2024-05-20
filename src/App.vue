@@ -128,8 +128,8 @@ const toggleSecond = ref(false)
   <div>
     <v-card>
       <v-layout>
-        <v-navigation-drawer v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" @click="rail = false"
-          mobile-breakpoint="xs" :image="bgImage">
+        <v-navigation-drawer v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" mobile-breakpoint="xs"
+          :image="bgImage">
           <v-list>
             <v-list-item v-if="!user">
               <v-menu location="end">
@@ -150,9 +150,6 @@ const toggleSecond = ref(false)
             </v-list-item>
             <v-list-item v-if="userInfo" :prepend-avatar="userInfo.avatar" :title="userInfo.displayName"
               :subtitle="user.email">
-              <template v-slot:append>
-                <v-btn variant="text" icon="fa-solid fa-chevron-left" @click.stop="rail = !rail"></v-btn>
-              </template>
             </v-list-item>
           </v-list>
           <v-divider></v-divider>
@@ -195,6 +192,15 @@ const toggleSecond = ref(false)
               </v-btn>
             </div>
           </template> -->
+          <template v-slot:append>
+            <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">
+              <v-icon size='large' icon="fa-solid fa-chevron-right"></v-icon>
+            </v-btn>
+            <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="!rail" @click.stop="rail = true">
+              <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
+            </v-btn>
+
+          </template>
         </v-navigation-drawer>
         <!-- <div v-if="toggleSecond">
           <v-navigation-drawer>

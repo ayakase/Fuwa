@@ -2,89 +2,15 @@
     <div class="container">
         <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80">
             <div class="message-top-bar">
-                <!-- <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn> -->
-                <v-btn v-if="!rail" variant="text" icon="fa-solid fa-chevron-left" @click="rail = !rail"></v-btn>
-                <v-btn v-if="rail" variant="text" icon="fa-solid fa-chevron-right" @click="rail = !rail"></v-btn>
-                <v-btn v-if="!rail" variant="text" icon="fa-solid fa-rotate-right" @click="reloadBoxes()"></v-btn>
-
-            </div>
-            <v-divider></v-divider>
-            <v-list style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;">
-                <v-list-item :class="{ active: box.id == boxId }"
-                    @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite)"
-                    class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box" :value="box.id"
-                    style="overflow:hidden;border-radius: .5rem;">
-                    <img :src="box.banner" alt="" v-if="!rail"
-                        style="position:absolute;left:0;top:0;z-index: -1;width: 100%;filter: blur(3px) brightness(40%)">
-                    <v-tooltip v-if="rail" activator="parent" location="end">
-                        <p>
-                            {{ box.title }}
-                        </p>
-                        <p>
-                            {{ box.latestMessage }}
-                        </p>
-                    </v-tooltip>
-                    <div class="chat-box">
-                        <div style="display:flex; align-items: center;gap:1rem;position:relative">
-                            <!-- <v-avatar :size="rail ? 40 : 65" :image="box.thumbnail"></v-avatar> -->
-                            <img :src="box.thumbnail" alt=""
-                                style="width:4rem;transition: width 0.3s ease;border-radius:9999px;"
-                                :style="getStyle(rail)">
-
-                            <div>
-                                <p class="box-title" v-if="!rail">{{ box.title }}</p>
-                                <p v-if="!rail"
-                                    style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 15rem;">
-                                    {{ box.latestMessage }}</p>
-                                <p style="font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
-                            </div>
-                        </div>
-                        <v-icon size="small" v-if="box.pinned" style="position: absolute; top:.4rem;left:.1rem;"
-                            icon="fa-solid fa-thumbtack"></v-icon>
-
-                        <v-menu location="end" transition="scale-transition">
-                            <template v-slot:activator="{ props }">
-                                <v-btn v-bind="props" icon="fa-solid fa-ellipsis" size="small">
-                                </v-btn>
-                            </template>
-                            <v-card style="width:10rem;">
-                                <div style="width:100%">
-                                    <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
-                                        @click="deleteBox(box.title, box.id)">
-                                        Delete group
-                                        <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
-                                    </button>
-                                    <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button"
-                                        @click="leaveBox(box.title, box.id)">
-                                        Leave group
-                                        <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
-                                    </button>
-                                    <button class="leave-box-button" @click="pinBox(box.id)">
-                                        Pin to top
-                                        <v-icon size="small" icon="fa-solid fa-thumbtack"></v-icon>
-                                    </button>
-                                </div>
-                            </v-card>
-                        </v-menu>
-
-                    </div>
-                </v-list-item>
-                <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You have
-                    not
-                    joined any
-                    chat</v-card-subtitle>
-                <LoadingComponent v-else></LoadingComponent>
-
                 <v-dialog width="800">
                     <template v-slot:activator="{ props }">
-                        <v-btn class="add-box" v-bind="props">
-                            <span v-if="!rail">New Chat</span>
-                            <v-icon size="large" color="green-darken-2" icon="fa-solid fa-plus"></v-icon>
+                        <v-btn variant="text" icon="fa-solid fa-plus" class="add-box" v-bind="props">
                         </v-btn>
+
                     </template>
 
                     <template v-slot:default="{ isActive }">
-                        <v-card class="new-dialog" style="height:90%">
+                        <v-card class="new-dialog">
                             <div style="display:flex;flex-direction: column; gap: 1rem;">
                                 <v-card-title style="text-align: center">New Chat Box</v-card-title>
                                 <v-text-field variant="underlined" v-model="newBoxTitle" label="Box Name" required
@@ -155,11 +81,8 @@
                                                         :stencil-props="{ aspectRatio: 12 / 3 }" />
                                                 </div>
                                                 <v-card-actions>
-                                                    <v-btn color="error" @click="isActive.value = false">
-                                                        Cancel
-                                                    </v-btn>
-                                                    <v-btn color="success" @click="uploadAvatar()">
-                                                        Save Avatar
+                                                    <v-btn color="success" @click="isActive.value = false">
+                                                        Done
                                                     </v-btn>
                                                 </v-card-actions>
                                             </v-card>
@@ -179,10 +102,90 @@
                         </v-card>
                     </template>
                 </v-dialog>
+                <v-btn @click="boxes = []; reloadBoxes()" icon="fa-solid fa-arrow-rotate-right">
+                </v-btn>
+            </div>
+            <v-divider></v-divider>
+            <v-list style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;">
+                <v-list-item :class="{ active: box.id == boxId }"
+                    @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite, box.thumbnail)"
+                    class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box" :value="box.id"
+                    style="overflow:hidden;border-radius: .5rem;">
+                    <img :src="box.banner" alt="" v-if="!rail"
+                        style="position:absolute;left:0;top:0;z-index: -1;width: 100%;filter:  brightness(40%)">
+                    <v-tooltip v-if="rail" activator="parent" location="end">
+                        <p>
+                            {{ box.title }}
+                        </p>
+                        <p>
+                            {{ box.latestMessage }}
+                        </p>
+                    </v-tooltip>
+                    <div class="chat-box">
+                        <div style="display:flex; align-items: center;gap:1rem;position:relative;color:whitesmoke;">
+                            <!-- <v-avatar :size="rail ? 40 : 65" :image="box.thumbnail"></v-avatar> -->
+                            <img :src="box.thumbnail" alt=""
+                                style="width:4rem;transition: width 0.3s ease;border-radius:9999px;"
+                                :style="getStyle(rail)">
+
+                            <div>
+                                <p class="box-title" v-if="!rail">{{ box.title }}</p>
+                                <p v-if="!rail"
+                                    style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 15rem;">
+                                    {{ box.latestMessage }}</p>
+                                <p style="font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
+                            </div>
+                        </div>
+                        <v-icon size="small" v-if="box.pinned"
+                            style="position: absolute; top:.5rem;left:.5rem;color:#f44336;"
+                            icon="fa-solid fa-thumbtack"></v-icon>
+
+                        <v-menu location="end" transition="scale-transition">
+                            <template v-slot:activator="{ props }">
+                                <v-btn v-bind="props" icon="fa-solid fa-ellipsis" size="small">
+                                </v-btn>
+                            </template>
+                            <v-card style="width:10rem;">
+                                <div style="width:100%">
+                                    <button class="leave-box-button" @click="pinBox(box.id)">
+                                        Pin to top
+                                        <v-icon size="small" icon="fa-solid fa-thumbtack"></v-icon>
+                                    </button>
+                                    <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
+                                        @click="deleteBox(box.title, box.id)">
+                                        Delete group
+                                        <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
+                                    </button>
+                                    <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button"
+                                        @click="leaveBox(box.title, box.id)">
+                                        Leave group
+                                        <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
+                                    </button>
+                                </div>
+                            </v-card>
+                        </v-menu>
+
+                    </div>
+                </v-list-item>
+                <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You have
+                    not
+                    joined any
+                    chat</v-card-subtitle>
+                <ChatLoading v-else></ChatLoading>
+
             </v-list>
+            <div style="position:absolute;bottom:0;width:100%;">
+                <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">
+                    <v-icon size='large' icon="fa-solid fa-chevron-right"></v-icon>
+                </v-btn>
+                <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="!rail" @click.stop="rail = true">
+                    <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
+                </v-btn>
+            </div>
         </v-navigation-drawer>
         <ChatBox :box-id="boxId" :box-name="boxName" :existed-members="existedMembers" :box-members="boxMembers"
-            v-if="boxId" :isAdmin="isAdmin" :description="boxDescription" :inviteId="boxInviteId"></ChatBox>
+            v-if="boxId" :isAdmin="isAdmin" :description="boxDescription" :inviteId="boxInviteId"
+            :thumbnail="boxThumbnail"></ChatBox>
         <NoBox v-else></NoBox>
     </div>
 </template>
@@ -200,11 +203,11 @@ import {
     where,
     updateDoc,
     arrayRemove,
-    arrayUnion,
+    runTransaction
 } from "firebase/firestore";
 import { ref, watch, computed, onMounted } from "vue";
 import { useUserStore } from "../stores/userStore";
-import LoadingComponent from "../components/LoadingComponent.vue";
+import ChatLoading from "../components/ChatLoading.vue";
 import NoBox from "../components/NoBox.vue";
 import ChatBox from "../components/ChatBox.vue";
 import { useToast } from "vue-toast-notification";
@@ -221,7 +224,7 @@ const userStore = useUserStore();
 const user = ref();
 const auth = getAuth();
 const { userId, userInfo } = storeToRefs(userStore);
-const rail = ref(true);
+const rail = ref(false);
 const boxes = ref([]);
 const boxId = ref("");
 const boxName = ref("");
@@ -229,16 +232,17 @@ const boxMembers = ref([]);
 const boxDescription = ref("");
 const existedMembers = ref([]);
 const boxInviteId = ref("");
-const test = ref();
+const boxThumbnail = ref("");
 const hasBox = ref(true);
 const isAdmin = ref(false)
-function selectBox(id, title, members, existed, owner, description, invite) {
+function selectBox(id, title, members, existed, owner, description, invite, thumbnail) {
     boxId.value = id;
     boxName.value = title;
     boxMembers.value = members;
     existedMembers.value = existed;
     boxDescription.value = description;
     boxInviteId.value = invite
+    boxThumbnail.value = thumbnail
     isAdmin.value = `users/${userId.value}` == owner.path
 }
 async function fetchBoxes() {
@@ -373,52 +377,53 @@ async function uploadBanner() {
 }
 const btnLoading = ref(false)
 async function addBoxToDb() {
-    try {
-        btnLoading.value = true
-        const userDocRef = doc(db, 'users', userStore.userId);
-        newBoxThumbnail.value = await uploadThumbnail()
-        newBoxBanner.value = await uploadBanner()
-        const newBox = await addDoc(collection(db, "boxes"), {
-            title: newBoxTitle.value,
-            owner: userDocRef,
-            members: [userDocRef],
-            existed: [userDocRef],
-            description: newBoxDescription.value,
-            isPublic: (newBoxPublicState.value === 'public') ? true : false,
-            password: newBoxPassword.value,
-            invite: newBoxInviteId.value,
-            thumbnail: newBoxThumbnail.value,
-            banner: newBoxBanner.value,
-            dateCreated: Date.now(),
-        });
-        const boxDocRef = doc(db, "boxes", newBox.id);
-        // await updateDoc(userDocRef, {
-        //     boxes: arrayUnion(boxDocRef)
-        // })
-        await updateDoc(boxDocRef, {
-            latestMessage: `${userInfo.value.displayName} created this chat`,
-            latestChange: Date.now()
-        })
-        const messageCollectionRef = collection(boxDocRef, "messages");
-        const newMessage = await addDoc(messageCollectionRef, {
-            content: userInfo.value.displayName + " created this Group ",
-            timeSent: Date.now(),
-            senderRef: userDocRef,
-            messageType: 'system',
-        });
-        btnLoading.value = false
-
-        $toast.success("Created box chat " + newBoxTitle.value, {
+    if (!newBoxTitle.value || !newBoxDescription.value || !croppedThumbnail.value || !croppedBanner.value) {
+        $toast.error("Do not leave title, description, thumbnail and banner empty", {
             position: 'top-right'
         });
-        // setTimeout(() => {
-        //     fetchBoxes()
-        // }, 3000);
-    } catch (e) {
-        btnLoading.value = false
-        console.error("Error adding document: ", e);
+    } else {
+        try {
+            btnLoading.value = true;
+            await runTransaction(db, async (transaction) => {
+                const userDocRef = doc(db, 'users', userStore.userId);
+                newBoxThumbnail.value = await uploadThumbnail();
+                newBoxBanner.value = await uploadBanner();
+                const newBox = await addDoc(collection(db, "boxes"), {
+                    title: newBoxTitle.value,
+                    owner: userDocRef,
+                    members: [userDocRef],
+                    existed: [userDocRef],
+                    description: newBoxDescription.value,
+                    isPublic: (newBoxPublicState.value === 'public') ? true : false,
+                    password: newBoxPassword.value,
+                    invite: newBoxInviteId.value,
+                    thumbnail: newBoxThumbnail.value,
+                    banner: newBoxBanner.value,
+                    dateCreated: Date.now(),
+                });
+                const boxDocRef = doc(db, "boxes", newBox.id);
+                await updateDoc(boxDocRef, {
+                    latestMessage: `${userInfo.value.displayName} created this chat`,
+                    latestChange: Date.now()
+                });
+                await addDoc(collection(boxDocRef, "messages"), {
+                    content: userInfo.value.displayName + " created this Group ",
+                    timeSent: Date.now(),
+                    senderRef: userDocRef,
+                    messageType: 'system',
+                });
+            });
+            btnLoading.value = false;
+            $toast.success("Created box chat " + newBoxTitle.value, {
+                position: 'top-right'
+            });
+        } catch (e) {
+            btnLoading.value = false;
+            console.error("Error adding document: ", e);
+        }
     }
 }
+
 function getStyle(rail) {
     return { width: rail ? '2.5rem' : '4rem' }
 }
@@ -450,10 +455,10 @@ async function deleteBox(title, id) {
             // await updateDoc(doc(db, "users", userId.value), {
             //     boxes: arrayRemove(doc(db, "boxes", id))
             // })
-            await updateDoc(boxDocRef, {
-                latestMessage: `${userInfo.value.displayName} deleted this chat`,
-                latestChange: Date.now()
-            })
+            // await updateDoc(boxDocRef, {
+            //     latestMessage: `${userInfo.value.displayName} deleted this chat`,
+            //     latestChange: Date.now()
+            // })
         } catch (e) {
             console.error(e.message)
         }
@@ -524,8 +529,8 @@ onMounted(() => {
 }
 
 .add-box {
-    margin-top: 1rem;
-    width: 100%;
+    /* margin-top: 1rem;
+    width: 100%; */
 }
 
 .new-dialog {
@@ -577,6 +582,7 @@ onMounted(() => {
 .active {
     /* animation: shake 5s;
     animation-iteration-count: infinite; */
+
     transition: all .2s linear;
 }
 </style>

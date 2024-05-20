@@ -1,19 +1,25 @@
 <template>
     <div class="container">
-        <v-card v-if="boxInfo" elevation="20">
+        <v-card style="width: 80%;height: 50%;position: relative;" v-if="boxInfo" elevation="20">
+            <img style="top:0; height: 50%; width: 100%; object-fit: cover;filter: brightness(70%)"
+                :src="boxInfo.banner" alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg">
+            <img style="left:0;margin-left: 5%;width: 20%;border-radius: 9999px; background-color: whitesmoke; position:absolute"
+                :src="boxInfo.thumbnail" alt="">
             <v-card-title style="font-size: xx-large;">
                 {{ boxInfo.title }}
             </v-card-title>
+
             <v-card-subtitle>
                 {{ boxInfo.description }}
             </v-card-subtitle>
             <v-card-actions>
+
                 <div style="display: flex;justify-content: center;width: 100%;">
                     <v-btn size="x-large" v-if="user"> Join us! &nbsp; <v-icon
                             icon="fa-solid fa-arrow-right-to-bracket fa-beat-fade"></v-icon>
                     </v-btn>
-                    <v-btn @click="router.push('/login')" size="x-large" v-if="!user"> Sign up, login and join us! &nbsp; <v-icon
-                            icon="fa-solid fa-arrow-right-to-bracket fa-beat-fade"></v-icon>
+                    <v-btn @click="router.push('/login')" size="x-large" v-if="!user"> Sign up, login and join us!
+                        &nbsp; <v-icon icon="fa-solid fa-arrow-right-to-bracket fa-beat-fade"></v-icon>
                     </v-btn>
                 </div>
             </v-card-actions>

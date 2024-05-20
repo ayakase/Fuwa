@@ -2,6 +2,7 @@
   <div class="container" ref="bgContainer">
     <v-app-bar :elevation="2" density="compact">
       <div class="top-bar">
+        <v-avatar :image="props.thumbnail"></v-avatar>
         <v-card-title class="box-name">{{ props.boxName }}</v-card-title>
         <div>
           <!-- <router-link to="/video-call" target="_blank">
@@ -169,7 +170,7 @@
         <v-list-item prepend-icon="fa-solid fa-user-group" @click="toggleMember = !toggleMember" title="Members"
           value="members" :append-icon="expandIcon()">
         </v-list-item>
-        <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id" ></UserProfile>
+        <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id"></UserProfile>
       </v-list>
     </v-navigation-drawer>
     <div class="scroll-bottom">
@@ -218,7 +219,7 @@ let { cookies } = useCookies()
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API);
 const userStore = useUserStore();
-const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin", "description", "inviteId"]);
+const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin", "description", "inviteId", "thumbnail"]);
 const user = ref();
 const { userId, userInfo } = storeToRefs(userStore);
 
@@ -314,6 +315,7 @@ async function sendMessage() {
       showLoading.value = false;
     } catch (e) {
       console.log(e);
+      showLoading.value = false;
     }
   }
 }
@@ -355,19 +357,17 @@ function getInvite(id) {
   });
 }
 const memberArray = ref()
-const memberMapArray = ref()
 async function fetchMembers() {
   memberArray.value = null;
   const userRefArray = props.boxMembers;
   try {
     const userDocs = await Promise.all(userRefArray.map(ref => getDoc(ref)));
     memberArray.value = userDocs
-      .filter(doc => doc.exists()) 
+      .filter(doc => doc.exists())
       .map(doc => {
         const data = { ...doc.data(), id: doc.id };
         return data;
       });
-    console.log(memberArray.value);
   } catch (error) {
     console.error('Error fetching users:', error);
   }
@@ -570,11 +570,7 @@ onMounted(() => {
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });
-  const listQuery = query(
-    collection(db, "boxes", props.boxId, 'messages'),
-    // where("boxRef", "==", doc(db, `box/${props.boxId}`)),
-    orderBy("timeSent", "asc")
-  )
+ 
 });
 </script>
 
@@ -606,6 +602,7 @@ p {
 
 .top-bar {
   width: 100%;
+  padding-left: 1rem;
   display: flex !important;
   flex-direction: row !important;
   justify-content: space-between;

@@ -1,9 +1,15 @@
 <template>
     <div class="container">
+        <div style="display:flex; align-items: center;gap:2rem;">
+            <h2>
+                Explore what people are talking about
+            </h2>
+            <v-icon icon="fa-regular fa-compass fa-shake" style="font-size:5rem;color:#ff1744;"></v-icon>
+        </div>
         <v-text-field v-model="searchTerm" class="search-box" label="Search"
             append-inner-icon="fa-solid fa-magnifying-glass" variant="solo-filled" @input="handleInput">
             <template v-slot:loader>
-                <v-progress-linear :active="custom" :model-value="progress" height="2"
+                <v-progress-linear :active="progressBar" :model-value="progress" height="2"
                     indeterminate></v-progress-linear>
             </template>
 
@@ -28,14 +34,22 @@
                     </div>
                 </v-card-actions>
             </v-card>
-        </div>
-
+            
+        <!-- <v-skeleton-loader 
+        v-for="x in 10" :key='x'
+          class="mx-auto border"
+          type="image, article"
+          style="width: 48%"
+        ></v-skeleton-loader> -->
+         </div>
     </div>
+
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { getAuth } from 'firebase/auth';
+import ChatLoading from '@/components/ChatLoading.vue';
 import { db } from '../firebaseConfig';
 import { collection, addDoc, doc, getDocs, arrayUnion, query, where, updateDoc, getDoc } from 'firebase/firestore';
 import { storeToRefs } from 'pinia'
@@ -51,7 +65,7 @@ const { userId } = storeToRefs(userStore)
 const { userInfo } = storeToRefs(userStore);
 
 const value = ref('')
-const custom = ref(false)
+const progressBar = ref(false)
 const progress = computed(() => {
     return Math.min(100, value.value.length * 10)
 })
@@ -85,7 +99,7 @@ async function fetchBoxes() {
                 resultArray.push(result.document)
             });
             resultBoxes.value = resultArray
-            custom.value = false
+            progressBar.value = false
         })
     // const response = []
     // const querySnapshot = await getDocs(
@@ -142,7 +156,7 @@ function joined(members) {
 }
 let typingTimeout
 function handleInput() {
-    custom.value = true
+    progressBar.value = true
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
         fetchBoxes();
@@ -160,12 +174,13 @@ onMounted(() => {
 <style scoped>
 .container {
     padding: 2rem;
+    gap: 2rem;
     height: 100%;
     display: flex;
     overflow: scroll;
     overflow-x: hidden;
     flex-direction: column;
-    /* align-items: center; */
+    align-items: center;
 }
 
 .search-box {
@@ -192,5 +207,36 @@ onMounted(() => {
     flex-direction: column;
     justify-content: flex-end;
     /* background-color: var(--main-color) */
+
+}
+
+.each-box:hover {
+    outline: 4px solid var(--main-color)
+}
+
+h2 {
+    font-size: 4rem;
+    background: linear-gradient(to right,
+            #7953cd 20%,
+            #00affa 40%,
+            #21bd02 60%,
+            #0190cd 80%,
+            #764ada 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+    background-size: 500% auto;
+    animation: textShine 5s ease-in-out infinite alternate;
+}
+
+@keyframes textShine {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 100% 50%;
+    }
 }
 </style>

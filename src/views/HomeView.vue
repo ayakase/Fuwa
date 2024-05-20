@@ -26,6 +26,7 @@
       </v-card>
     </div>
   </div>
+
   <div class="area">
     <ul class="circles">
       <li></li>

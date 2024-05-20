@@ -8,11 +8,10 @@ This is a serverless real-time chat application built with Vite, Vue 3, Firestor
 
 ## Features
 
-- **Real-Time Chatting:** Experience instant messaging with real-time updates.
+- **Real-Time Chatting:** Experience instant messaging with real-time updates, users can search, join or create chat groups and interact with other people.
 - **User Authentication:** Login via Google 0Auth, secure your chat with user authentication.
 - **Image Sharing:** Share images effortlessly using Cloudinary integration.
-- **Responsive Design:** Enjoy a consistent experience across various devices.
-
+- 
 ## Technologies Used
 
 | Technology   | Description                                       |
@@ -22,7 +21,7 @@ This is a serverless real-time chat application built with Vite, Vue 3, Firestor
 | Firestore 10 | Cloud-hosted NoSQL database                       |
 | Vuetify      | Material Design component library for Vue         |
 | Cloudinary   | Cloud-based image and video management platform   |
-| Gemini API   |                                                   |
+| Gemini API   | For chat bot                                                  |
 
 ## Getting Started
 
