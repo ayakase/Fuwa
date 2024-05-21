@@ -21,9 +21,16 @@
                 </v-navigation-drawer>
                 <v-main style="height: 100vh; padding: 1rem;">
                     <h2>{{ route.params.id }}</h2>
-                    <div>
-                        <video @click="videoFocused = !videoFocused" :class="{ 'video-focused': videoFocused }"
-                            ref="videoElement" autoplay></video>
+                    <div style="display: flex;flex-direction: row; justify-content: space-around;">
+                        <div style="width: 25%">
+                            <video ref="videoElement1" autoplay></video>
+                        </div>
+                        <div style="width: 25%">
+                            <video ref="videoElement2" autoplay></video>
+                        </div>
+                        <div style="width: 25%">
+                            <video ref="videoElement3" autoplay></video>
+                        </div>
                     </div>
 
                     <div class="control-buttons">
@@ -41,26 +48,31 @@
             </v-layout>
         </v-card>
     </div>
-
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router'
-const route = useRoute()
-const videoElement = ref(null);
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const videoElement1 = ref(null);
+const videoElement2 = ref(null);
+const videoElement3 = ref(null);
 let stream = null;
-const videoFocused = ref(false)
-const drawer = ref(true)
-const rail = ref(true)
+const videoFocused = ref(false);
+const drawer = ref(true);
+const rail = ref(true);
+
 const openCamera = async () => {
     try {
         stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        videoElement.value.srcObject = stream;
+        videoElement1.value.srcObject = stream;
+        videoElement2.value.srcObject = stream;
+        videoElement3.value.srcObject = stream;
     } catch (error) {
         console.error('Error accessing camera:', error);
     }
-}
+};
 
 const hangUp = () => {
     if (stream) {
@@ -68,12 +80,13 @@ const hangUp = () => {
             track.stop();
         });
     }
-}
+};
 
 onMounted(() => {
     openCamera();
-})
+});
 </script>
+
 
 <style scoped>
 .container {
@@ -83,15 +96,14 @@ onMounted(() => {
 
 video {
     border-radius: 1rem;
-    width: 25%;
-    transition: all .5s ease-in-out;
+    width: 100%;
 }
 
-.video-focused {
+/* .video-focused {
     left: 0;
     width: 50%;
     height: 50%;
-}
+} */
 
 .control-buttons {
     width: 100%;

@@ -6,13 +6,16 @@
             <v-btn class="login-btn" @click="signInWithGoogle"> Sign in with google
                 <img src="../assets/google-icon.png" class="icon" alt="">
             </v-btn>
+            <v-btn class="login-btn" @click="signInWithGithub"> Sign in with github
+                <img src="../assets/github.png" class="icon" alt="">
+            </v-btn>
         </div>
     </div>
 </template>
 
 <script setup>
 import { useUserStore } from '../stores/userStore';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, GithubAuthProvider, FacebookAuthProvider } from 'firebase/auth';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
@@ -68,6 +71,22 @@ const signInWithGoogle = () => {
             console.log(error);
         });
 }
+const signInWithGithub = () => {
+    const provider = new GithubAuthProvider()
+    signInWithPopup(getAuth(), provider)
+        .then((result) => {
+            userStore.checkUser(result.user)
+            addUserToDb(auth.currentUser)
+            // console.log(auth.currentUser)
+            toast.success('Logged in as ' + result.user.displayName, {
+                position: 'top-right'
+            });
+            // window.location.reload();
+            router.push('/explore')
+        }).catch((error) => {
+            console.log(error);
+        });
+}
 </script>
 
 <style scoped>
@@ -83,6 +102,7 @@ const signInWithGoogle = () => {
 
 .login-btn {
     height: 3rem !important;
+    width: 30%;
     font-size: large;
     background-color: white;
     color: black;
@@ -101,6 +121,7 @@ const signInWithGoogle = () => {
 .login-btn-container {
     width: 100%;
     height: 100%;
+    gap: 1rem;
     margin-top: 30%;
     display: flex;
     flex-direction: column;

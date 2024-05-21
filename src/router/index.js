@@ -52,7 +52,7 @@ const router = createRouter({
 
       }
     }, {
-      path: '/video-call/:id',
+      path: '/video-call',
       name: 'video call',
       component: VideoRoom,
       meta: {

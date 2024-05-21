@@ -128,7 +128,7 @@ const toggleSecond = ref(false)
   <div>
     <v-card>
       <v-layout>
-        <v-navigation-drawer v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" mobile-breakpoint="xs"
+        <v-navigation-drawer v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" 
           :image="bgImage">
           <v-list>
             <v-list-item v-if="!user">
@@ -154,18 +154,18 @@ const toggleSecond = ref(false)
           </v-list>
           <v-divider></v-divider>
           <v-list v-if="user" density="compact" nav>
+            <v-list-item prepend-icon="fa-solid fa-earth-americas" title="Explore" value="shared"
+              @click="router.push('/explore')">
+              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
+            </v-list-item>
             <v-list-item prepend-icon="fa-solid fa-home" title="Home" value="home" @click="router.push('/')">
               <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
-            <v-list-item prepend-icon="fa-regular fa-message" title="Groups" value="message"
+            <v-list-item prepend-icon="fa-solid fa-user-group" title="Groups" value="message"
               @click="router.push('/groups')">
               <v-tooltip activator="parent" location="start">Groups</v-tooltip>
             </v-list-item>
             <v-list-item prepend-icon="fa-solid fa-inbox" title="Inbox" value="inbox" @click="router.push('/inbox')">
               <v-tooltip activator="parent" location="start">Inbox</v-tooltip>
-            </v-list-item>
-            <v-list-item prepend-icon="fa-solid fa-earth-americas" title="Explore" value="shared"
-              @click="router.push('/explore')">
-              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
             </v-list-item>
             <!-- <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
               @click="router.push('/chat-bot')">
@@ -175,23 +175,15 @@ const toggleSecond = ref(false)
               @click="router.push('/setting')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item>
-            <!-- <p>
-              {{ $t('message.hello') }}
-            </p> -->
+            <p>
+              <!-- {{ $t('message.hello') }} -->
+            </p>
             <!-- <v-switch color="orange" label="Switch" v-model="state" @click="toggleTheme">
           </v-switch> -->
             <!-- <v-list-item @click="toggleTheme" title="Dark Mode" :prepend-icon="themeState" value="mode">
               <v-tooltip activator="parent" location="start">Dark Mode</v-tooltip>
             </v-list-item> -->
           </v-list>
-
-          <!-- <template v-slot:append>
-            <div class="pa-2">
-              <v-btn v-if="user" @click="handleSignOut()" class="" block>
-                Logout
-              </v-btn>
-            </div>
-          </template> -->
           <template v-slot:append>
             <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">
               <v-icon size='large' icon="fa-solid fa-chevron-right"></v-icon>
@@ -202,14 +194,6 @@ const toggleSecond = ref(false)
 
           </template>
         </v-navigation-drawer>
-        <!-- <div v-if="toggleSecond">
-          <v-navigation-drawer>
-            <v-list>
-              <v-list-item v-for="x in 5" :key="x" class="chat-title" :title="`box vui ve ${x}`" :value="`${x}`"
-                @click="router.push('')"></v-list-item>
-            </v-list>
-          </v-navigation-drawer>
-      </div> -->
         <v-main class="main-container">
           <RouterView @changeBg="changeSideBar"></RouterView>
         </v-main>

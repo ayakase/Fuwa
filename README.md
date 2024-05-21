@@ -19,9 +19,10 @@ This is a serverless real-time chat application built with Vite, Vue 3, Firestor
 | Vite         | Frontend build tool and development server        |
 | Vue 3        | JavaScript framework for building user interfaces |
 | Firestore 10 | Cloud-hosted NoSQL database                       |
+| Typesense    | Full-text searching                               |
 | Vuetify      | Material Design component library for Vue         |
 | Cloudinary   | Cloud-based image and video management platform   |
-| Gemini API   | For chat bot                                                  |
+| Gemini API   | For chat bot                                      |
 
 ## Getting Started
 

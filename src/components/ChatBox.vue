@@ -14,6 +14,8 @@
           <!-- <v-btn icon="mdi-phone" @click="router.push('/video-call')" target="_blank">
           </v-btn> -->
           <!-- <v-btn icon="mdi-webcam" @click="showSetting = !showSetting"></v-btn> -->
+          <!-- <v-btn icon="fa-solid fa-phone" @click="router.push('/video-call')" target="_blank"></v-btn>
+          <v-btn icon="fa-solid fa-video" @click="router.push('/video-call')" target="_blank"></v-btn> -->
           <v-btn icon="fa-solid fa-bars" @click="showSetting = !showSetting"></v-btn>
         </div>
       </div>
@@ -570,7 +572,7 @@ onMounted(() => {
   onAuthStateChanged(auth, (firebaseUser) => {
     user.value = firebaseUser;
   });
- 
+
 });
 </script>
 

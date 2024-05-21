@@ -35,7 +35,8 @@
                 <v-card-actions style="width: 100%">
                     <div style="width: 100%;display: flex; justify-content: space-between;">
                         <v-btn text=" Close" @click="isActive.value = false"></v-btn>
-                        <v-btn style="background-color: var(--main-color)" @click="sendMessage()">
+                        <v-btn style="background-color: var(--main-color)"
+                            @click="checkBox() && (isActive.value = false)">
                             Inbox &nbsp; <v-icon icon="fa-regular fa-paper-plane"></v-icon>
                         </v-btn>
                     </div>
@@ -53,7 +54,8 @@ import { ref, onMounted } from 'vue';
 import LoadingComponent from '../components/LoadingComponent.vue'
 import { useUserStore } from "../stores/userStore";
 import { storeToRefs } from "pinia";
-
+import { useRouter } from "vue-router";
+const router = useRouter()
 const userStore = useUserStore();
 const { userId, userInfo } = storeToRefs(userStore);
 
@@ -70,7 +72,7 @@ const receiverRef = doc(db, 'users', props.id);
 const senderRef = doc(db, 'users', userStore.userId);
 const receiverId = receiverRef.id.toString()
 const senderId = senderRef.id.toString()
-async function sendMessage() {
+async function checkBox() {
     try {
         console.log("sender " + senderId, "receiver " + receiverId)
         let findInbox = await getDocs(query(collection(db, "inboxes"),
@@ -88,33 +90,26 @@ async function sendMessage() {
                 dateCreated: Date.now(),
             });
             const inboxRef = doc(db, 'inboxes', newInbox.id);
-            await updateDoc(inboxRef, {
-                latestMessage: newMessage.value,
-                latestChange: Date.now()
-            })
-            const message = await addDoc(collection(inboxRef, "messages"), {
-                content: newMessage.value,
-                timeSent: Date.now(),
-                senderRef: senderRef,
-            });
+            sendMessage(inboxRef)
         } else {
-            console.log(findInbox.docs[0].id)
             const inboxRef = doc(db, 'inboxes', findInbox.docs[0].id);
-            await updateDoc(inboxRef, {
-                latestMessage: newMessage.value,
-                latestChange: Date.now()
-            })
-            const message = await addDoc(collection(inboxRef, "messages"), {
-                content: newMessage.value,
-                timeSent: Date.now(),
-                senderRef: senderRef,
-            });
+            sendMessage(inboxRef)
         }
-
-
     } catch (e) {
         console.error(e)
     }
+}
+async function sendMessage(ibRef) {
+    await updateDoc(ibRef, {
+        latestMessage: newMessage.value,
+        latestChange: Date.now()
+    })
+    const message = await addDoc(collection(ibRef, "messages"), {
+        content: newMessage.value,
+        timeSent: Date.now(),
+        senderRef: senderRef,
+    });
+    router.push('/inbox')
 }
 async function getUserInfo() {
     let userInfo = await getDoc(receiverRef)

@@ -119,6 +119,7 @@ import { computed, watch } from 'vue';
 import { useTheme } from 'vuetify'
 import { useCookies } from "vue3-cookies";
 import { useToast } from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
 import { signOut, getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'vue-router'
 import { storeToRefs } from "pinia";
@@ -129,7 +130,6 @@ import 'vue-advanced-cropper/dist/style.css';
 import { getStorage, ref as firebaseRef, uploadBytes, getDownloadURL } from "firebase/storage";
 const auth = getAuth()
 const router = useRouter()
-import 'vue-toast-notification/dist/theme-sugar.css';
 const toast = useToast();
 import { useUserStore } from '../stores/userStore';
 const user = ref()
