@@ -37,13 +37,13 @@
                                 <div
                                     style="overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 3;-webkit-box-orient: vertical;">
                                     {{ box.description }}</div>
-                                <div>{{ countMembers(box.members) }} </div>
+                                <div>{{ countMembers(box.members) }} members </div>
                             </div>
                         </div>
-                        <div style="width: 100%; display: flex; justify-content: flex-end;position: absolute;bottom:0;">
+                        <!-- <div style="width: 100%; display: flex; justify-content: flex-end;position: absolute;bottom:0;">
                             <v-btn v-if="!joined(box.members)" @click="joinBox(box.id)">Join</v-btn>
                             <v-btn disabled v-if="joined(box.members)">Joined</v-btn>
-                        </div>
+                        </div> -->
                     </v-card>
                 </template>
 
@@ -59,26 +59,10 @@
                             {{ box.description }}
                         </v-card-text>
 
-                        <v-card-actions>
-                            <v-btn color="orange-lighten-2" text="Explore"></v-btn>
-
-                            <v-spacer></v-spacer>
-
-                            <v-btn :icon="show ? 'mdi-chevron-up' : 'mdi-chevron-down'" @click="show = !show"></v-btn>
-                        </v-card-actions>
-
-                        <v-expand-transition>
-                            <div v-show="show">
-                                <v-divider></v-divider>
-
-                                <v-card-text>
-                                    I'm a thing. But, like most politicians, he promised more than he could deliver. You
-                                    won't have time for sleeping, soldier, not with all the bed making you'll be doing.
-                                    Then we'll go with that data file! Hey, you add a one and two zeros to that or we
-                                    walk! You're going to do his laundry? I've got to find a way to escape.
-                                </v-card-text>
-                            </div>
-                        </v-expand-transition>
+                        <div style="width: 100%; display: flex; justify-content: flex-end;position: absolute;bottom:0;">
+                            <v-btn v-if="!joined(box.members)" @click="joinBox(box.id)">Join</v-btn>
+                            <v-btn disabled v-if="joined(box.members)">Joined</v-btn>
+                        </div>
                     </v-card>
                 </template>
             </v-dialog>

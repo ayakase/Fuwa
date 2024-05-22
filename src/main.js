@@ -5,12 +5,12 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import ToastPlugin from 'vue-toast-notification';
+import language from './utils/language'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import ToastPlugin from 'vue-toast-notification';
-import language from './utils/language'
 const vuetify = createVuetify({
     components,
     directives,
