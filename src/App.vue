@@ -123,13 +123,50 @@ onMounted(() => {
 })
 
 const toggleSecond = ref(false)
+const selected = ref(1)
+const options = [
+  {
+    id: 1,
+    icon: "fa-solid fa-earth-americas",
+    title: "Explore",
+    // route: '/explore',
+    path: "/explore"
+  },
+  {
+    id: 2,
+    icon: "fa-solid fa-home",
+    title: "Home",
+    path: "/"
+  },
+  {
+    id: 3,
+    icon: "fa-solid fa-user-group",
+    title: "Groups",
+    path: '/groups',
+  },
+  {
+    id: 4,
+    icon: "fa-solid fa-inbox",
+    title: "Inbox",
+    path: '/inbox',
+  },
+  {
+    id: 5,
+    icon: "fa-solid fa-gear",
+    title: "Setting",
+    route: '/setting',
+    path: '/setting',
+  }
+];
+
 </script>
 <template>
+
   <div>
     <v-card>
       <v-layout>
-        <v-navigation-drawer v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" 
-          :image="bgImage">
+        <v-navigation-drawer v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" :image="bgImage"
+          class="nav-drawer">
           <v-list>
             <v-list-item v-if="!user">
               <v-menu location="end">
@@ -191,19 +228,33 @@ const toggleSecond = ref(false)
             <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="!rail" @click.stop="rail = true">
               <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
             </v-btn>
-
           </template>
         </v-navigation-drawer>
         <v-main class="main-container">
           <RouterView @changeBg="changeSideBar"></RouterView>
+          <CurvedBottomNavigation foreground-color='var(--main-color)' :options="options" v-model="selected" />
         </v-main>
+
       </v-layout>
     </v-card>
   </div>
+
 </template>
 <style scoped>
 .main-container {
   height: 100vh;
+}
+
+@media all and (min-width: 1000px) {
+  .mobile-menu {
+    display: none;
+  }
+}
+
+@media all and (max-width: 1000px) {
+  /* .nav-drawer {
+    display: none;
+  } */
 }
 
 /* .chat-title:hover {

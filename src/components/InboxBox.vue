@@ -2,17 +2,7 @@
   <div class="container" ref="bgContainer">
     <v-app-bar :elevation="2" density="compact">
       <div class="top-bar">
-        <!-- <v-card-title class="box-name">{{ props.boxName }}</v-card-title> -->
         <div>
-          <!-- <router-link to="/video-call" target="_blank">
-              <v-icon icon="mdi-phone"></v-icon>
-            </router-link> -->
-          <!-- <router-link :to="'/video-call/' + props.boxId" target="_blank">
-              <v-icon icon="fa-solid fa-video"></v-icon>
-            </router-link> -->
-          <!-- <v-btn icon="mdi-phone" @click="router.push('/video-call')" target="_blank">
-            </v-btn> -->
-          <!-- <v-btn icon="mdi-webcam" @click="showSetting = !showSetting"></v-btn> -->
           <v-btn icon="fa-solid fa-bars" @click="showSetting = !showSetting"></v-btn>
         </div>
       </div>
@@ -67,7 +57,6 @@
             <span v-if="message.messageType !== 'image'" v-html="parseMarkdown(message.content)"> </span>
             <v-dialog v-if="message.messageType == 'image'">
               <template v-slot:activator="{ props: activatorProps }">
-                <!-- <v-btn v-bind="activatorProps" color="surface-variant" text="Open Dialog" variant="flat"></v-btn> -->
                 <img class="" v-bind="activatorProps" style="max-width: 100%;" v-if="message.messageType == 'image'"
                   :src="message.content">
               </template>
@@ -118,11 +107,6 @@
       </div>
     </div>
     <v-card class="send-container">
-      <Transition name="slide-fade">
-        <div v-if="displayBot" style="width: 3rem;display:flex; justify-content: center;">
-          <v-icon icon="fa-solid fa-robot fa-bounce"></v-icon>
-        </div>
-      </Transition>
       <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" />
       <v-btn style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
           icon="fa-regular fa-image"></v-icon>
@@ -147,7 +131,6 @@
             <v-icon icon="fa-solid fa-cloud-arrow-up"></v-icon>
           </v-btn>
         </div>
-        <!-- <input class="img-input" accept="image/*" type="file" id="formFile" @change="processImg" /> -->
         <v-file-input class="img-input" id="formFile" @change="processImg" label="Image"
           accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" variant="solo-filled"
           prepend-icon="fa-solid fa-paperclip"></v-file-input>
@@ -157,18 +140,6 @@
       </v-card>
     </Transition>
     <v-navigation-drawer location="right" v-if="showSetting">
-
-      <!-- <v-divider></v-divider> -->
-
-      <!-- <v-list density="compact" nav>
-        <GroupInfo :box-id="props.boxId" :box-name="props.boxName" v-if="props.boxId" :isAdmin="props.isAdmin"
-          :description="props.description" :inviteId="props.inviteId"></GroupInfo>
-        <v-divider></v-divider>
-        <v-list-item prepend-icon="fa-solid fa-user-group" @click="toggleMember = !toggleMember" title="Members"
-          value="members" :append-icon="expandIcon()">
-        </v-list-item>
-        <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id"></UserProfile>
-      </v-list> -->
     </v-navigation-drawer>
     <div class="scroll-bottom">
       <Transition name="slide-fade-bottom">
@@ -343,7 +314,7 @@ async function fetchMembers() {
         const data = { ...doc.data(), id: doc.id };
         return data;
       });
-      memberMapArray.value = userDocs
+    memberMapArray.value = userDocs
   } catch (error) {
     console.error('Error fetching users:', error);
   }
@@ -431,14 +402,6 @@ function sendImg() {
     })
   });
 }
-const displayBot = ref(false)
-watch(() => messageContent.value, (newValue, oldValue) => {
-  if (newValue.includes('@bot')) {
-    displayBot.value = true;
-  } else {
-    displayBot.value = false;
-  }
-})
 let currentListener = ref(null);
 
 

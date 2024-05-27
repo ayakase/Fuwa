@@ -30,8 +30,9 @@
                             alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg"></v-img>
                         <div
                             style="display: flex;flex-direction: column; transform: translateY(-3rem);padding-left: 1rem;padding-right: 1rem;">
-                            <img style="width: 20%;border-radius: 1rem; background-color: whitesmoke;"
-                                :src="box.thumbnail" alt="">
+                            <v-card variant="flat" style="width: 20%;border-radius: 1rem;" border="background lg">
+                                <v-img :src="box.thumbnail" alt=""></v-img>
+                            </v-card>
                             <div>
                                 <h3>{{ box.title }}</h3>
                                 <div
@@ -234,7 +235,6 @@ onMounted(() => {
 }
 
 .cover-section {
-    background-color: red;
     margin-top: 1rem;
     border-radius: 1rem;
     width: 95%;

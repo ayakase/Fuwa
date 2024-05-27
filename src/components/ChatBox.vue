@@ -65,7 +65,8 @@
           </v-menu>
           <div v-if="message.messageType !== 'system' && (!isSender(message.sender) || message.messageType == 'bot')"
             class="triangle-left"></div>
-          <v-card style="display:flex;" :class="messageType(message.sender, message.messageType, message.botMessage)"
+          <v-card style="display:flex; flex-wrap: wrap;"
+            :class="messageType(message.sender, message.messageType, message.botMessage)"
             :variant="variantType(message.messageType)">
             <span v-if="message.messageType !== 'image'" v-html="parseMarkdown(message.content)"> </span>
             <v-dialog v-if="message.messageType == 'image'">

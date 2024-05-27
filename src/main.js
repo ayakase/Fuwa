@@ -11,6 +11,8 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import bottomNavigationVue from "bottom-navigation-vue";
+import "bottom-navigation-vue/dist/style.css";
 const vuetify = createVuetify({
     components,
     directives,
@@ -22,4 +24,5 @@ app.use(createPinia())
 app.use(router)
 app.use(ToastPlugin);
 app.use(language)
+app.use(bottomNavigationVue);
 app.mount('#app')

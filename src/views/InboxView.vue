@@ -196,7 +196,6 @@ async function fetchInboxes() {
                         return member.path !== userDocRef.path;
                     });
                     const receiver = await getDoc(member);
-                    console.log(receiver.data());
                     inboxesList.push({ receiver: receiver.data(), ...doc.data(), id: doc.id });
                 }));
                 inboxes.value = inboxesList;

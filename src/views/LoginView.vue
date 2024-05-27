@@ -4,7 +4,7 @@
         <div class="left-section">
             <img class="name-logo" src="../assets/logo.png" alt="">
 
-            <v-card width="450" elevation="5">
+            <v-card width="450" elevation="5" style="background-color: white;color:black">
                 <v-tabs v-model="tab" grow color="light-green-darken-1">
                     <v-tab value="one">Sign in</v-tab>
                     <v-tab value="two">Sign up</v-tab>
@@ -18,9 +18,27 @@
                                     hide-details></v-text-field>
                                 <v-text-field v-model="loginPassword" label="Password" variant="outlined" single-line
                                     hide-details></v-text-field>
-                                <a href="" @click.prevent="tab = 'one'">Forgot password ?</a>
+                                <v-dialog max-width="500">
+                                    <template v-slot:activator="{ props: activatorProps }">
+                                        <a v-bind="activatorProps" href="" @click.prevent="">Forgot password ?</a>
+                                    </template>
+                                    <template v-slot:default="{ isActive }">
+                                        <v-card title="Receive password reset link">
+                                            <v-card-item>
+                                                <v-text-field v-model="resetEmail" label="Your email" variant="outlined"
+                                                    single-line hide-details></v-text-field>
+                                            </v-card-item>
 
-                                <v-btn class="login-btn" @click="loginWithEmailAndPassword"> Sign in                                    
+                                            <v-card-actions>
+                                                <v-spacer></v-spacer>
+                                                <v-btn @click="sendResetLink" text="Send reset link"></v-btn>
+                                                <!-- <v-btn text="Close Dialog" @click="isActive.value = false"></v-btn> -->
+                                            </v-card-actions>
+                                        </v-card>
+                                    </template>
+                                </v-dialog>
+
+                                <v-btn class="login-btn" @click="loginWithEmailAndPassword"> Sign in
                                 </v-btn>
                                 <v-btn class=" login-btn" @click="signInWithGoogle"> Sign in with google
                                     <img src="../assets/google-icon.png" class="icon" alt="">
@@ -188,8 +206,12 @@ const loginWithEmailAndPassword = () => {
             });
         });
 }
-
-
+const resetEmail = ref('')
+const sendResetLink = () => {
+    toast.success(resetEmail.value, {
+        position: 'top-right'
+    });
+}
 </script>
 
 <style scoped>
@@ -201,6 +223,10 @@ const loginWithEmailAndPassword = () => {
     width: 100%;
     height: 100%;
     background-color: white;
+}
+
+a {
+    color: green;
 }
 
 .login-btn {
