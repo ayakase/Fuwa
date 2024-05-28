@@ -2,6 +2,7 @@
   <div class="container" ref="bgContainer">
     <v-app-bar :elevation="2" density="compact">
       <div class="top-bar">
+        <v-btn icon="fa-solid fa-bars" @click="emit('openMenu')"></v-btn>
         <v-avatar :image="props.thumbnail"></v-avatar>
         <v-card-title class="box-name">{{ props.boxName }}</v-card-title>
         <div>
@@ -16,7 +17,7 @@
           <!-- <v-btn icon="mdi-webcam" @click="showSetting = !showSetting"></v-btn> -->
           <!-- <v-btn icon="fa-solid fa-phone" @click="router.push('/video-call')" target="_blank"></v-btn>
           <v-btn icon="fa-solid fa-video" @click="router.push('/video-call')" target="_blank"></v-btn> -->
-          <v-btn icon="fa-solid fa-bars" @click="showSetting = !showSetting"></v-btn>
+          <v-btn icon="fa-solid fa-ellipsis" @click="showSetting = !showSetting"></v-btn>
         </div>
       </div>
     </v-app-bar>
@@ -131,7 +132,7 @@
       <v-btn style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
           icon="fa-regular fa-image"></v-icon>
       </v-btn>
-      <v-btn style="color: var(--main-color)" @click="toggleIcon = !toggleIcon"><v-icon
+      <v-btn class="icon-button" style="color: var(--main-color)" @click="toggleIcon = !toggleIcon"><v-icon
           icon="fa-regular fa-face-smile"></v-icon>
       </v-btn>
       <v-btn style="color: var(--main-color)" @click="sendMessage"><v-icon size="large"
@@ -235,6 +236,8 @@ const messageArray = ref([]);
 const toggleMember = ref(false);
 const toggleImageSelect = ref(false);
 const toast = useToast();
+const emit = defineEmits(['openMenu'])
+
 function expandIcon() {
   if (toggleMember.value) {
     return 'fa-solid fa-angle-up'
@@ -605,7 +608,6 @@ p {
 
 .top-bar {
   width: 100%;
-  padding-left: 1rem;
   display: flex !important;
   flex-direction: row !important;
   justify-content: space-between;
@@ -666,6 +668,12 @@ p {
   bottom: 4rem;
   right: 2rem;
   /* z-index: 99; */
+}
+
+@media all and (max-width: 600px) {
+  .icon-button {
+    display: none;
+  }
 }
 
 .image-send-board {

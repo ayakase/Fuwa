@@ -500,4 +500,10 @@ img {
     transform: scale(1.05);
     color: white;
 }
+
+@media all and (max-width: 1280px) {
+    .image-themes {
+        display: none;
+    }
+}
 </style>

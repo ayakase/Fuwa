@@ -1,14 +1,13 @@
 <template>
     <div class="container">
-        <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80">
-            <div class="message-top-bar">
+        <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80" v-model="showSidebar"
+            absolute="false" :mobile-breakpoint="sideBreakpoint">
+            <div class="message-top-bar" density="compact">
                 <v-dialog width="800">
                     <template v-slot:activator="{ props }">
                         <v-btn variant="text" icon="fa-solid fa-plus" class="add-box" v-bind="props">
                         </v-btn>
-
                     </template>
-
                     <template v-slot:default="{ isActive }">
                         <v-card class="new-dialog">
                             <div style="display:flex;flex-direction: column; gap: 1rem;">
@@ -104,6 +103,7 @@
                 </v-dialog>
                 <v-btn @click="boxes = []; reloadBoxes()" icon="fa-solid fa-arrow-rotate-right">
                 </v-btn>
+
             </div>
             <v-divider></v-divider>
             <v-list style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;">
@@ -183,10 +183,10 @@
                 </v-btn>
             </div>
         </v-navigation-drawer>
-        <ChatBox :box-id="boxId" :box-name="boxName" :existed-members="existedMembers" :box-members="boxMembers"
-            v-if="boxId" :isAdmin="isAdmin" :description="boxDescription" :inviteId="boxInviteId"
-            :thumbnail="boxThumbnail"></ChatBox>
-        <NoBox v-else></NoBox>
+        <ChatBox @openMenu="openGroups()" :box-id="boxId" :box-name="boxName" :existed-members="existedMembers"
+            :box-members="boxMembers" v-if="boxId" :isAdmin="isAdmin" :description="boxDescription"
+            :inviteId="boxInviteId" :thumbnail="boxThumbnail"></ChatBox>
+        <NoBox @openMenu="openGroups()" v-else></NoBox>
     </div>
 </template>
 <script setup>
@@ -244,6 +244,10 @@ function selectBox(id, title, members, existed, owner, description, invite, thum
     boxInviteId.value = invite
     boxThumbnail.value = thumbnail
     isAdmin.value = `users/${userId.value}` == owner.path
+    if (window.matchMedia("(max-width: 600px)").matches) {
+        showSidebar.value = false
+        console.log("Screen width is less than 600px");
+    }
 }
 async function fetchBoxes() {
     if (userId.value) {
@@ -513,16 +517,22 @@ function convertTime(timestamp) {
 
     return dateTime.toLocaleString('en-GB', options);
 }
+const showSidebar = ref(true)
+const sideBreakpoint = ref('md')
+function openGroups() {
+    showSidebar.value = true;
+    // sideBreakpoint.value = sideBreakpoint.value === 'md' ? '0' : 'md';
+    // rail.value = true;
+}
 onMounted(() => {
     onAuthStateChanged(auth, (firebaseUser) => {
         user.value = firebaseUser;
     });
 });
+
 </script>
 
 <style scoped>
-.box-view {}
-
 .container {
     width: 100%;
     height: 100%;

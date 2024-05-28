@@ -1,25 +1,18 @@
 <template>
-    <div class="container">
-        <v-app-bar :elevation="2" density="compact">
+    <div class="container" @click="emit('openMenu')">
+        <!-- <v-app-bar :elevation="2" density="compact">
             <div class="top-bar">
-                <!-- <v-card-title class="box-name">{{ props.boxName }}</v-card-title> -->
-                <!-- <div><v-btn icon="mdi-star"></v-btn>
-                    <v-btn icon="mdi-magnify"></v-btn>
-                    <v-btn icon="mdi-dots-vertical" @click="showSetting = !showSetting"></v-btn>
-                </div> -->
             </div>
-        </v-app-bar>
+        </v-app-bar> -->
         <div style="display:flex; flex-direction: column;align-items: center;padding-top:30vh;">
             <v-icon style="font-size: 8rem;color:gray;" icon="fa-regular fa-comment-dots"></v-icon>
-            <p class="noti-text">No box selected, select or join a box to begin conversation</p>
+            <p class="noti-text">No group selected, select or join a group to begin conversation</p>
         </div>
     </div>
 </template>
 
-<script>
-export default {
-
-}
+<script setup>
+const emit = defineEmits(['openMenu'])
 </script>
 
 <style scoped>

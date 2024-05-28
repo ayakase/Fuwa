@@ -118,6 +118,14 @@ theme.global.name.value = cookies.get('theme')
 
 let bgImage = ref(cookies.get('bgImage'))
 const colorCode = ref(cookies.get('main-color'))
+function backgroundColorTheme() {
+  return !theme.global.current.value.dark ? 'white' : '#212121'
+  // return 'red'
+}
+function textTheme() {
+  return theme.global.current.value.dark ? 'white' : '#212121'
+  // return 'red'
+}
 onMounted(() => {
   document.documentElement.style.setProperty('--main-color', colorCode.value);
 })
@@ -134,15 +142,16 @@ const options = [
   },
   {
     id: 2,
-    icon: "fa-solid fa-home",
-    title: "Home",
-    path: "/"
-  },
-  {
-    id: 3,
     icon: "fa-solid fa-user-group",
     title: "Groups",
     path: '/groups',
+  },
+
+  {
+    id: 3,
+    icon: "fa-solid fa-home",
+    title: "Home",
+    path: "/"
   },
   {
     id: 4,
@@ -165,7 +174,7 @@ const options = [
   <div>
     <v-card>
       <v-layout>
-        <v-navigation-drawer v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" :image="bgImage"
+        <v-navigation-drawer touchless v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" :image="bgImage"
           class="nav-drawer">
           <v-list>
             <v-list-item v-if="!user">
@@ -232,11 +241,14 @@ const options = [
         </v-navigation-drawer>
         <v-main class="main-container">
           <RouterView @changeBg="changeSideBar"></RouterView>
-          <CurvedBottomNavigation foreground-color='var(--main-color)' :options="options" v-model="selected" />
+          <div  style="height: 60px;">a</div>
         </v-main>
-
       </v-layout>
     </v-card>
+    <div class="mobile-menu">
+      <CurvedBottomNavigation :icon-color="textTheme()" :background-color="backgroundColorTheme()"
+        foreground-color='var(--main-color)' :options="options" v-model="selected" />
+    </div>
   </div>
 
 </template>
@@ -245,7 +257,7 @@ const options = [
   height: 100vh;
 }
 
-@media all and (min-width: 1000px) {
+@media all and (min-width: 1280px) {
   .mobile-menu {
     display: none;
   }
