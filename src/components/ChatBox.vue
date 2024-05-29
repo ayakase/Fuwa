@@ -128,7 +128,8 @@
           <v-icon icon="fa-solid fa-robot fa-bounce"></v-icon>
         </div>
       </Transition>
-      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" />
+      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id=""
+        placeholder="@bot to ask bot" />
       <v-btn style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
           icon="fa-regular fa-image"></v-icon>
       </v-btn>
@@ -142,7 +143,7 @@
       <EmojiPicker class="icon-board" v-show="toggleIcon" :native="true" @select="onSelectEmoji" />
     </Transition>
     <Transition name="slide-fade-bottom">
-      <v-card class="image-send-board" v-if="toggleImageSelect" variant="flat">
+      <v-card class="image-send-board" v-if="toggleImageSelect" variant="flat" style="width: 20rem;">
         <div style=" display: flex; width: 100%; justify-content: space-between;">
           <v-btn style="background-color: red;" @click="thumbnailImg = ''; thumbnailSrc = ''; toggleImageSelect = false
       ">
@@ -153,12 +154,23 @@
           </v-btn>
         </div>
         <!-- <input class="img-input" accept="image/*" type="file" id="formFile" @change="processImg" /> -->
-        <v-file-input class="img-input" id="formFile" @change="processImg" label="Image"
-          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" variant="solo-filled"
-          prepend-icon="fa-solid fa-paperclip"></v-file-input>
-        <div style="width: 20rem;">
-          <img :src="thumbnailSrc" alt="" style="width: 100%" />
+
+        <div
+          style='position: relative;border: dashed 2px gray;height: 10rem;display: flex;justify-content: center;align-items: center;overflow: hidden;'>
+          <input type="file" @change="processImg" label="Image"
+            accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+            style="height: 100%; width: 100%;position: absolute;top:0;opacity: 0;z-index:10;">
+          <div
+            style="height: 100%; width: 100%;position: absolute;top:0;display: flex;justify-content: center;align-items: center;">
+            <v-icon icon="fa-solid fa-paperclip" size="4rem" style="opacity: 70%;">
+            </v-icon>
+          </div>
+          <img v-if="thumbnailSrc" :src="thumbnailSrc" alt="" style="width: 100%; height: 100%;object-fit: contain;" />
         </div>
+        <!-- <v-file-input class="img-input" id="formFile" @change="processImg" label="Image" hide-input loading
+          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" variant="solo-filled"
+          prepend-icon="fa-solid fa-paperclip" style="border: dashed 2px gray;"></v-file-input> -->
+
       </v-card>
     </Transition>
     <v-navigation-drawer location="right" v-if="showSetting">
@@ -175,6 +187,33 @@
           value="members" :append-icon="expandIcon()">
         </v-list-item>
         <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id"></UserProfile>
+        <v-list-item prepend-icon="fa-solid fa-images" @click="fetchImages()" title="Images" value="images"
+          append-icon="fa-solid fa-arrows-rotate">
+        </v-list-item>
+        <v-list-item>
+          <div class="image-grid">
+            <div v-for="image in imageGrid" :key='image'>
+              <v-dialog>
+                <template v-slot:activator="{ props: activatorProps }">
+                  <v-img v-bind="activatorProps" :src="image.content" cover
+                    style="aspect-ratio: 1 / 1; cursor: pointer;">
+                  </v-img>
+                </template>
+                <template v-slot:default="{ isActive }">
+                  <v-card style="position:relative;" color="transparent">
+                    <img :src="image.content" alt="">
+                    <div @click="isActive.value = false"
+                      style="position:fixed; top:1rem;right:1.5rem;z-index: 99;display: flex; align-items: center;cursor:pointer;">
+                      <v-icon icon="fa-solid fa-x" size="x-large" color="error">
+                      </v-icon>
+                      <span style="font-size: 1.3rem"> &nbsp; or Esc</span>
+                    </div>
+                  </v-card>
+                </template>
+              </v-dialog>
+            </div>
+          </div>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <div class="scroll-bottom">
@@ -199,6 +238,7 @@ import {
   where,
   limit,
   getDoc,
+  getDocs
 } from "firebase/firestore";
 import EmojiPicker from "vue3-emoji-picker";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -468,6 +508,7 @@ function sendImg() {
             latestMessage: `${userInfo.value.displayName}: *image`,
             latestChange: Date.now()
           })
+          fetchImages()
         }).catch((error) => {
           console.error('Error adding message:', error);
           imgUploading.value = false
@@ -563,12 +604,29 @@ watch(
       getMessage(newBoxId)
       fetchMembers();
       fetchExisted();
+      fetchImages()
     }
 
   },
   { immediate: true }
 );
 const bgContainer = ref(null)
+const imageGrid = ref([])
+async function fetchImages() {
+  let imageArray = []
+  const imageQuery = query(
+    collection(db, "boxes", currenBoxId.value, 'messages'),
+    where('messageType', '==', 'image'),
+    orderBy("timeSent", "desc"),
+    limit(10)
+  );
+  const images = await getDocs(imageQuery)
+  images.forEach(element => {
+    imageArray.push(element.data());
+  });
+  imageGrid.value = imageArray
+}
+
 onMounted(() => {
   fetchMembers();
   fetchExisted();
@@ -811,5 +869,12 @@ a {
 
 .img-input {
   margin-top: 1rem;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  gap: 4px;
 }
 </style>

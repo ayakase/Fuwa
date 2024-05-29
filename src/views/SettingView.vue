@@ -9,33 +9,52 @@
                     <v-btn @click="toggleTheme" :icon="themeState">
                     </v-btn>
                 </div>
-                <div class="image-themes">
-                    <v-card @click="selectTheme(theme.id)" :class="{ 'selected-theme': (themeCheck == theme.id) }"
-                        class="each-theme" v-for="theme in  themesArray " variant="flat">
-                        <v-card-title>
-                            {{ theme.name }}
-                        </v-card-title>
-                        <v-img v-if="theme.image" cover height="120" :src="theme.image">
-                        </v-img>
-                    </v-card>
-                </div>
-                <div>
-                    <div style="width: 30%;display: flex; flex-direction: row; align-items: flex-start; gap: 2rem;">
-                        <!-- <v-btn @click="showColorPicker = !showColorPicker"> Change Primary color
-                        </v-btn> -->
-                        <div
-                            style="display: flex; flex-direction: column; align-items: center;gap: 1rem;padding:1rem; background-color: var(--main-color); border-radius:.5rem;">
-                            <div>Change primary color</div>
-                            <div>
-                                <v-color-picker v-model="colorCode" show-swatches elevation="15"></v-color-picker>
-                            </div>
-                            <v-btn @click="confirmColor()">
-                                Confirm color change
+                <div style="width: 30%;display: flex; flex-direction: row; align-items: center; gap: .5rem;">
+                    <p>Primary Color:</p>
+                    <v-menu location="end" :close-on-content-click="false">
+                        <template v-slot:activator="{ props }">
+                            <v-btn style="background-color: var(--main-color);" v-bind="props">
+                                Change
+                                &nbsp;
+                                <v-icon icon="fa-solid fa-palette"></v-icon>
                             </v-btn>
-                        </div>
-                    </div>
-                    <!-- <v-btn @click="showNotification()">Show Notification</v-btn> -->
+                        </template>
+                        <v-color-picker v-model="colorCode" show-swatches elevation="15"></v-color-picker>
+                        <v-btn @click="confirmColor()">
+                            Confirm color change
+                        </v-btn>
+                    </v-menu>
 
+                </div>
+                <!-- <v-btn @click="showNotification()">Show Notification</v-btn> -->
+                <div style="display: flex; flex-direction: row;;flex-wrap:wrap;align-items: center;gap: .5rem;">
+                    <p>Background theme:</p>
+                    <v-expansion-panels style="width:80%">
+                        <v-expansion-panel>
+                            <v-expansion-panel-title v-slot="{ expanded }">
+                                <v-fade-transition leave-absolute>
+                                    <span>
+                                        {{ themesArray[themeCheck].name }}
+                                        &nbsp;
+                                        <v-icon :icon="themesArray[themeCheck].icon"></v-icon>
+                                    </span>
+                                </v-fade-transition>
+                            </v-expansion-panel-title>
+                            <v-expansion-panel-text>
+                                <div class="image-themes">
+                                    <v-card @click="selectTheme(theme.id)"
+                                        :class="{ 'selected-theme': (themeCheck == theme.id) }" class="each-theme"
+                                        v-for="theme in  themesArray " variant="flat">
+                                        <v-card-title class="theme-title">
+                                            {{ theme.name }} &nbsp;
+                                            <v-icon :icon="theme.icon"></v-icon>
+                                        </v-card-title>
+                                        <v-img v-if="theme.image" cover :src="theme.image">
+                                        </v-img>
+                                    </v-card>
+                                </div>
+                            </v-expansion-panel-text>
+                        </v-expansion-panel></v-expansion-panels>
                 </div>
             </v-card>
             <v-card-title style="padding: 0;font-size: 1.5rem;"> Profile settings</v-card-title>
@@ -84,6 +103,7 @@
                                     <v-file-input accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
                                         style="width:50%" prepend-icon="" class="img-input" id="formFile"
                                         @change="processImg" label="Image" variant="solo-filled"></v-file-input>
+                                    
                                     <div style="max-width: 50%;">
                                         <cropper :src="thumbnailSrc" @change="change"
                                             :stencil-props="{ aspectRatio: 1 }" :stencil-component="CircleStencil" />
@@ -181,23 +201,6 @@ function uploadAvatar() {
     });
 
 }
-function showNotification() {
-    // Check if the browser supports notifications
-    if (!("Notification" in window)) {
-        alert("This browser does not support desktop notifications");
-    } else if (Notification.permission === "granted") {
-        // If notification permission is already granted, show the notification
-        var notification = new Notification("Hello, world!");
-    } else if (Notification.permission !== 'denied') {
-        // Otherwise, request permission from the user
-        Notification.requestPermission().then(function (permission) {
-            // If the user accepts, show the notification
-            if (permission === "granted") {
-                var notification = new Notification("Hello, world!");
-            }
-        });
-    }
-}
 
 function toggleTheme() {
     theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
@@ -222,66 +225,75 @@ function confirmColor() {
 
 const themesArray = [
     {
-        id: 0,
-        name: 'Basic Dark',
-        image: "",
-        themeMode: "dark"
+        "id": 0,
+        "name": "Basic Dark",
+        "image": "",
+        "themeMode": "dark",
+        "icon": "fas fa-moon"
     },
     {
-        id: 1,
-        name: 'Night City',
-        image: "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D",
-        themeMode: "dark"
+        "id": 1,
+        "name": "Night City",
+        "image": "https://images.unsplash.com/photo-1432847712612-926caafaa802?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D",
+        "themeMode": "dark",
+        "icon": "fas fa-city"
     },
     {
-        id: 2,
-        name: "Azure Mist",
-        image: "https://t4.ftcdn.net/jpg/04/61/47/03/360_F_461470323_6TMQSkCCs9XQoTtyer8VCsFypxwRiDGU.jpg",
-        themeMode: "dark"
+        "id": 2,
+        "name": "Azure Mist",
+        "image": "https://t4.ftcdn.net/jpg/04/61/47/03/360_F_461470323_6TMQSkCCs9XQoTtyer8VCsFypxwRiDGU.jpg",
+        "themeMode": "dark",
+        "icon": "fas fa-cloud"
     },
     {
-        id: 3,
-        name: "Retro",
-        image: "https://c4.wallpaperflare.com/wallpaper/1015/936/992/new-retro-wave-neon-synthwave-retro-style-wallpaper-preview.jpg",
-        themeMode: "dark"
+        "id": 3,
+        "name": "Retro",
+        "image": "https://c4.wallpaperflare.com/wallpaper/1015/936/992/new-retro-wave-neon-synthwave-retro-style-wallpaper-preview.jpg",
+        "themeMode": "dark",
+        "icon": "fas fa-record-vinyl"
     },
     {
-        id: 4,
-        name: "Monokai",
-        image: "https://i.pinimg.com/originals/7b/54/0f/7b540fe9d8a5f87b3388713f87c63ed7.jpg",
-        themeMode: "dark"
+        "id": 4,
+        "name": "Monokai",
+        "image": "https://i.pinimg.com/originals/7b/54/0f/7b540fe9d8a5f87b3388713f87c63ed7.jpg",
+        "themeMode": "dark",
+        "icon": "fas fa-paint-brush"
     },
     {
-        id: 5,
-        name: "Basic Light",
-        image: "",
-        themeMode: "light"
+        "id": 5,
+        "name": "Basic Light",
+        "image": "",
+        "themeMode": "light",
+        "icon": "far fa-sun"
     },
     {
-        id: 6,
-        name: "Luminosity",
-        image: "https://img.freepik.com/free-vector/abstract-style-bokeh-background_23-2148459410.jpg?size=626&ext=jpg&ga=GA1.1.553209589.1713830400&semt=ais",
-        themeMode: "light"
+        "id": 6,
+        "name": "Luminosity",
+        "image": "https://img.freepik.com/free-vector/abstract-style-bokeh-background_23-2148459410.jpg?size=626&ext=jpg&ga=GA1.1.553209589.1713830400&semt=ais",
+        "themeMode": "light",
+        "icon": "far fa-lightbulb"
     },
     {
-        id: 7,
-        name: "Arid expanse",
-        image: "https://images.pexels.com/photos/210307/pexels-photo-210307.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-        themeMode: "light"
+        "id": 7,
+        "name": "Arid expanse",
+        "image": "https://images.pexels.com/photos/210307/pexels-photo-210307.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "themeMode": "light",
+        "icon": "fas fa-hourglass"
     },
     {
-        id: 8,
-        name: "Aether",
-        image: "https://images6.alphacoders.com/132/1327974.png",
-        themeMode: "light"
+        "id": 8,
+        "name": "Aether",
+        "image": "https://images6.alphacoders.com/132/1327974.png",
+        "themeMode": "light",
+        "icon": "fas fa-cloud-moon"
     },
     {
-        id: 9,
-        name: "Marine",
-        image: "https://wallpapers.com/images/hd/water-background-74ofenln6env6puh.jpg",
-        themeMode: "light"
-    },
-
+        "id": 9,
+        "name": "Marine",
+        "image": "https://wallpapers.com/images/hd/water-background-74ofenln6env6puh.jpg",
+        "themeMode": "light",
+        "icon": "fas fa-water"
+    }
 ]
 async function saveName() {
     if (userInfo.value.displayName.length < 4 || userInfo.value.displayName.length > 30) {
@@ -416,8 +428,9 @@ onMounted(() => {
     font-size: larger;
     display: flex;
     align-items: center;
-    width: 10rem;
-    justify-content: space-between;
+    gap: .5rem;
+    width: 100%;
+    justify-content: start;
 }
 
 .system-setting {
@@ -503,7 +516,16 @@ img {
 
 @media all and (max-width: 1280px) {
     .image-themes {
-        display: none;
+        gap: 1rem;
+    }
+
+    .each-theme {
+        width: 45%;
+        padding: 2px;
+    }
+
+    .theme-title {
+        font-size: 13px;
     }
 }
 </style>

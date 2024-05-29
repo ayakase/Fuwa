@@ -92,11 +92,21 @@ import { db } from '../firebaseConfig';
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification';
+import { uniqueNamesGenerator, colors, animals } from 'unique-names-generator'
 const auth = getAuth()
 const toast = useToast();
 const router = useRouter()
 const userStore = useUserStore()
 const tab = ref('one')
+function generateName() {
+    const shortName = uniqueNamesGenerator({
+        dictionaries: [colors, animals], // colors can be omitted here as not used
+        length: 2,
+        separator: ' '
+    });
+    console.log(shortName)
+    return shortName
+}
 async function addUserToDb(user) {
     try {
         const querySnapshot = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
@@ -105,7 +115,7 @@ async function addUserToDb(user) {
         } else {
             const docRef = await addDoc(collection(db, "users"), {
                 uid: user.uid,
-                displayName: user.displayName,
+                displayName: user.displayName || generateName(),
                 email: user.email,
                 avatar: user.photoURL,
                 about: '',

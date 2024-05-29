@@ -2,9 +2,8 @@
   <div class="container" ref="bgContainer">
     <v-app-bar :elevation="2" density="compact">
       <div class="top-bar">
-        <div>
-          <v-btn icon="fa-solid fa-bars" @click="showSetting = !showSetting"></v-btn>
-        </div>
+        <v-btn icon="fa-solid fa-bars" @click="emit('openMenu')"></v-btn>
+
       </div>
     </v-app-bar>
     <div v-if="user" class="message-container" @scroll="handleScroll()" ref="messageContainer">
@@ -121,7 +120,7 @@
       <EmojiPicker class="icon-board" v-show="toggleIcon" :native="true" @select="onSelectEmoji" />
     </Transition>
     <Transition name="slide-fade-bottom">
-      <v-card class="image-send-board" v-if="toggleImageSelect" variant="flat">
+      <v-card class="image-send-board" v-if="toggleImageSelect" variant="flat" style="width: 20rem;">
         <div style=" display: flex; width: 100%; justify-content: space-between;">
           <v-btn style="background-color: red;" @click="thumbnailImg = ''; thumbnailSrc = ''; toggleImageSelect = false
       ">
@@ -131,12 +130,24 @@
             <v-icon icon="fa-solid fa-cloud-arrow-up"></v-icon>
           </v-btn>
         </div>
-        <v-file-input class="img-input" id="formFile" @change="processImg" label="Image"
-          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" variant="solo-filled"
-          prepend-icon="fa-solid fa-paperclip"></v-file-input>
-        <div style="width: 20rem;">
-          <img :src="thumbnailSrc" alt="" style="width: 100%" />
+        <!-- <input class="img-input" accept="image/*" type="file" id="formFile" @change="processImg" /> -->
+
+        <div
+          style='position: relative;border: dashed 2px gray;height: 10rem;display: flex;justify-content: center;align-items: center;overflow: hidden;'>
+          <input type="file" @change="processImg" label="Image"
+            accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+            style="height: 100%; width: 100%;position: absolute;top:0;opacity: 0;z-index:10;">
+          <div
+            style="height: 100%; width: 100%;position: absolute;top:0;display: flex;justify-content: center;align-items: center;">
+            <v-icon icon="fa-solid fa-paperclip" size="4rem" style="opacity: 70%;">
+            </v-icon>
+          </div>
+          <img v-if="thumbnailSrc" :src="thumbnailSrc" alt="" style="width: 100%; height: 100%;object-fit: contain;" />
         </div>
+        <!-- <v-file-input class="img-input" id="formFile" @change="processImg" label="Image" hide-input loading
+          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" variant="solo-filled"
+          prepend-icon="fa-solid fa-paperclip" style="border: dashed 2px gray;"></v-file-input> -->
+
       </v-card>
     </Transition>
     <v-navigation-drawer location="right" v-if="showSetting">
@@ -176,15 +187,12 @@ import BotLoading from "../components/BotLoading.vue";
 import { useToast } from 'vue-toast-notification';
 import UserProfile from "../components/UserProfile.vue";
 import GroupInfo from "../components/GroupInfo.vue";
-
 import MarkdownIt from 'markdown-it';
 import { useCookies } from "vue3-cookies";
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { getStorage, ref as firebaseRef, uploadBytes, getDownloadURL } from "firebase/storage";
 const router = useRouter()
-
 let { cookies } = useCookies()
-
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API);
 const userStore = useUserStore();
 const props = defineProps(["boxId", "boxMembers"]);
@@ -200,6 +208,8 @@ const messageArray = ref([]);
 const toggleMember = ref(false);
 const toggleImageSelect = ref(false);
 const toast = useToast();
+const emit = defineEmits(['openMenu'])
+
 function expandIcon() {
   if (toggleMember.value) {
     return 'fa-solid fa-angle-up'

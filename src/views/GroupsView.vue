@@ -1,186 +1,189 @@
 <template>
     <div class="container">
-        <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80" v-model="showSidebar"
-            absolute="false" :mobile-breakpoint="sideBreakpoint">
-            <div class="message-top-bar" density="compact">
-                <v-dialog width="800">
-                    <template v-slot:activator="{ props }">
-                        <v-btn variant="text" icon="fa-solid fa-plus" class="add-box" v-bind="props">
-                        </v-btn>
-                    </template>
-                    <template v-slot:default="{ isActive }">
-                        <v-card class="new-dialog">
-                            <div style="display:flex;flex-direction: column; gap: 1rem;">
-                                <v-card-title style="text-align: center">New Chat Box</v-card-title>
-                                <v-text-field variant="underlined" v-model="newBoxTitle" label="Box Name" required
-                                    hide-details></v-text-field>
-                                <v-text-field variant="underlined" v-model="newBoxDescription" label="Box Description"
-                                    required hide-details></v-text-field>
-                                <!-- <v-text-field variant="underlined" v-model="newBoxPassword"
+        <v-navigation-drawer :width="400" :rail="rail" rail-width="80" v-model="showSidebar" style="">
+            <div class="box-view">
+                <div class="message-top-bar" density="compact">
+                    <v-dialog width="800">
+                        <template v-slot:activator="{ props }">
+                            <v-btn variant="text" icon="fa-solid fa-plus" class="add-box" v-bind="props">
+                            </v-btn>
+                        </template>
+                        <template v-slot:default="{ isActive }">
+                            <v-card class="new-dialog">
+                                <div style="display:flex;flex-direction: column; gap: 1rem;">
+                                    <v-card-title style="text-align: center">New Chat Box</v-card-title>
+                                    <v-text-field variant="underlined" v-model="newBoxTitle" label="Box Name" required
+                                        hide-details></v-text-field>
+                                    <v-text-field variant="underlined" v-model="newBoxDescription"
+                                        label="Box Description" required hide-details></v-text-field>
+                                    <!-- <v-text-field variant="underlined" v-model="newBoxPassword"
                                     label="Password (leave blank if you want to let people join freely)" required
                                     hide-details></v-text-field> -->
-                                <div style="display:flex; flex-direction: row;align-items:center;gap:1rem;">
-                                    <v-text-field variant="underlined" v-model="newBoxInviteId" label="Invite ID"
-                                        required hide-details disabled></v-text-field>
-                                    <v-btn style="height:3rem;background-color:green;" @click="generateInviteId()">
-                                        Random Id</v-btn>
-                                    <v-btn style="height:3rem;background-color:red;"
-                                        @click="newBoxInviteId = ''">Cancel</v-btn>
+                                    <div style="display:flex; flex-direction: row;align-items:center;gap:1rem;">
+                                        <v-text-field variant="underlined" v-model="newBoxInviteId" label="Invite ID"
+                                            required hide-details disabled></v-text-field>
+                                        <v-btn style="height:3rem;background-color:green;" @click="generateInviteId()">
+                                            Random Id</v-btn>
+                                        <v-btn style="height:3rem;background-color:red;"
+                                            @click="newBoxInviteId = ''">Cancel</v-btn>
 
+                                    </div>
+                                    <div style="display:flex; flex-direction:column;align-items: center;gap:1rem">
+                                        <v-dialog>
+                                            <template v-slot:activator="{ props: activatorProps }">
+                                                <v-btn v-bind="activatorProps"
+                                                    style="background-color: green;color: white;width:15rem;">Select
+                                                    Thumbnail</v-btn>
+                                            </template>
+                                            <template v-slot:default="{ isActive }">
+                                                <v-card
+                                                    style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
+                                                    <v-file-input
+                                                        accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                                                        style="width:50%" prepend-icon="" class="img-input"
+                                                        id="formFile" @change="getThumbnailUrl" label="Image"
+                                                        variant="solo-filled"></v-file-input>
+                                                    <div style="max-width: 50%;">
+                                                        <cropper :src="thumbnailSrc" @change="getPreviewThumnail"
+                                                            :stencil-props="{ aspectRatio: 1 }"
+                                                            :stencil-component="CircleStencil" />
+                                                        <!-- <img :src="croppedThumbnail" alt=""> -->
+                                                    </div>
+                                                    <v-card-actions>
+                                                        <v-btn color="success" @click="isActive.value = false">
+                                                            Done
+                                                        </v-btn>
+
+                                                    </v-card-actions>
+                                                </v-card>
+                                            </template>
+                                        </v-dialog>
+                                        <img style="width: 50%;border-radius: 9999px;" :src="previewThumnail" alt="">
+                                    </div>
+                                    <div style="display:flex; flex-direction:column;align-items: center;gap:1rem">
+                                        <v-dialog>
+                                            <template v-slot:activator="{ props: activatorProps }">
+                                                <v-btn v-bind="activatorProps"
+                                                    style="background-color: green;color: white;width:15rem;">Select
+                                                    Banner</v-btn>
+                                            </template>
+                                            <template v-slot:default="{ isActive }">
+                                                <v-card
+                                                    style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
+                                                    <v-file-input
+                                                        accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                                                        style="width:50%" prepend-icon="" class="img-input"
+                                                        id="formFile" @change="getBannerUrl" label="Image"
+                                                        variant="solo-filled"></v-file-input>
+                                                    <div style="max-width: 50%;">
+                                                        <cropper :src="bannerSrc" @change="getPreviewBanner"
+                                                            :stencil-props="{ aspectRatio: 12 / 3 }" />
+                                                    </div>
+                                                    <v-card-actions>
+                                                        <v-btn color="success" @click="isActive.value = false">
+                                                            Done
+                                                        </v-btn>
+                                                    </v-card-actions>
+                                                </v-card>
+                                            </template>
+                                        </v-dialog>
+                                        <img style="width: 80%" :src="previewBanner" alt="">
+                                    </div>
+                                    <v-switch :label="newBoxPublicState" false-value="private" true-value="public"
+                                        v-model="newBoxPublicState" inset></v-switch>
                                 </div>
-                                <div style="display:flex; flex-direction:column;align-items: center;gap:1rem">
-                                    <v-dialog>
-                                        <template v-slot:activator="{ props: activatorProps }">
-                                            <v-btn v-bind="activatorProps"
-                                                style="background-color: green;color: white;width:15rem;">Select
-                                                Thumbnail</v-btn>
-                                        </template>
-                                        <template v-slot:default="{ isActive }">
-                                            <v-card
-                                                style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
-                                                <v-file-input
-                                                    accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-                                                    style="width:50%" prepend-icon="" class="img-input" id="formFile"
-                                                    @change="getThumbnailUrl" label="Image"
-                                                    variant="solo-filled"></v-file-input>
-                                                <div style="max-width: 50%;">
-                                                    <cropper :src="thumbnailSrc" @change="getPreviewThumnail"
-                                                        :stencil-props="{ aspectRatio: 1 }"
-                                                        :stencil-component="CircleStencil" />
-                                                    <!-- <img :src="croppedThumbnail" alt=""> -->
-                                                </div>
-                                                <v-card-actions>
-                                                    <v-btn color="success" @click="isActive.value = false">
-                                                        Done
-                                                    </v-btn>
-
-                                                </v-card-actions>
-                                            </v-card>
-                                        </template>
-                                    </v-dialog>
-                                    <img style="width: 50%;border-radius: 9999px;" :src="previewThumnail" alt="">
-                                </div>
-                                <div style="display:flex; flex-direction:column;align-items: center;gap:1rem">
-                                    <v-dialog>
-                                        <template v-slot:activator="{ props: activatorProps }">
-                                            <v-btn v-bind="activatorProps"
-                                                style="background-color: green;color: white;width:15rem;">Select
-                                                Banner</v-btn>
-                                        </template>
-                                        <template v-slot:default="{ isActive }">
-                                            <v-card
-                                                style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
-                                                <v-file-input
-                                                    accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-                                                    style="width:50%" prepend-icon="" class="img-input" id="formFile"
-                                                    @change="getBannerUrl" label="Image"
-                                                    variant="solo-filled"></v-file-input>
-                                                <div style="max-width: 50%;">
-                                                    <cropper :src="bannerSrc" @change="getPreviewBanner"
-                                                        :stencil-props="{ aspectRatio: 12 / 3 }" />
-                                                </div>
-                                                <v-card-actions>
-                                                    <v-btn color="success" @click="isActive.value = false">
-                                                        Done
-                                                    </v-btn>
-                                                </v-card-actions>
-                                            </v-card>
-                                        </template>
-                                    </v-dialog>
-                                    <img style="width: 80%" :src="previewBanner" alt="">
-                                </div>
-                                <v-switch :label="newBoxPublicState" false-value="private" true-value="public"
-                                    v-model="newBoxPublicState" inset></v-switch>
-                            </div>
-                            <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn :loading="btnLoading" variant="outlined" color="success" text="Create new chat"
-                                    @click="addBoxToDb()">
-                                </v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </template>
-                </v-dialog>
-                <v-btn @click="boxes = []; reloadBoxes()" icon="fa-solid fa-arrow-rotate-right">
-                </v-btn>
-
-            </div>
-            <v-divider></v-divider>
-            <v-list style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;">
-                <v-list-item :class="{ active: box.id == boxId }"
-                    @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite, box.thumbnail)"
-                    class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box" :value="box.id"
-                    style="overflow:hidden;border-radius: .5rem;">
-                    <img :src="box.banner" alt="" v-if="!rail"
-                        style="position:absolute;left:0;top:0;z-index: -1;width: 100%;filter:  brightness(40%)">
-                    <v-tooltip v-if="rail" activator="parent" location="end">
-                        <p>
-                            {{ box.title }}
-                        </p>
-                        <p>
-                            {{ box.latestMessage }}
-                        </p>
-                    </v-tooltip>
-                    <div class="chat-box">
-                        <div style="display:flex; align-items: center;gap:1rem;position:relative;color:whitesmoke;">
-                            <!-- <v-avatar :size="rail ? 40 : 65" :image="box.thumbnail"></v-avatar> -->
-                            <img :src="box.thumbnail" alt=""
-                                style="width:4rem;transition: width 0.3s ease;border-radius:9999px;"
-                                :style="getStyle(rail)">
-
-                            <div>
-                                <p class="box-title" v-if="!rail">{{ box.title }}</p>
-                                <p v-if="!rail"
-                                    style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 15rem;">
-                                    {{ box.latestMessage }}</p>
-                                <p style="font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
-                            </div>
-                        </div>
-                        <v-icon size="small" v-if="box.pinned"
-                            style="position: absolute; top:.5rem;left:.5rem;color:#f44336;"
-                            icon="fa-solid fa-thumbtack"></v-icon>
-
-                        <v-menu location="end" transition="scale-transition">
-                            <template v-slot:activator="{ props }">
-                                <v-btn v-bind="props" icon="fa-solid fa-ellipsis" size="small">
-                                </v-btn>
-                            </template>
-                            <v-card style="width:10rem;">
-                                <div style="width:100%">
-                                    <button class="leave-box-button" @click="pinBox(box.id)">
-                                        Pin to top
-                                        <v-icon size="small" icon="fa-solid fa-thumbtack"></v-icon>
-                                    </button>
-                                    <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
-                                        @click="deleteBox(box.title, box.id)">
-                                        Delete group
-                                        <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
-                                    </button>
-                                    <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button"
-                                        @click="leaveBox(box.title, box.id)">
-                                        Leave group
-                                        <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
-                                    </button>
-                                </div>
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn :loading="btnLoading" variant="outlined" color="success"
+                                        text="Create new chat" @click="addBoxToDb()">
+                                    </v-btn>
+                                </v-card-actions>
                             </v-card>
-                        </v-menu>
+                        </template>
+                    </v-dialog>
+                    <v-btn @click="boxes = []; reloadBoxes()" icon="fa-solid fa-arrow-rotate-right">
+                    </v-btn>
+                </div>
+                <v-divider></v-divider>
+                <!-- <div style="">
+                    <p v-for="x in 40">a</p>
+                </div> -->
+                <v-list
+                    style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;overflow:scroll;overflow-x: hidden;">
+                    <v-list-item :class="{ active: box.id == boxId }"
+                        @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite, box.thumbnail)"
+                        class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box"
+                        :value="box.id" style="overflow:hidden;border-radius: .5rem;">
+                        <img :src="box.banner" alt="" v-if="!rail"
+                            style="position:absolute;left:0;top:0;z-index: -1;width: 100%;filter:  brightness(40%)">
+                        <v-tooltip v-if="rail" activator="parent" location="end">
+                            <p>
+                                {{ box.title }}
+                            </p>
+                            <p>
+                                {{ box.latestMessage }}
+                            </p>
+                        </v-tooltip>
+                        <div class="chat-box">
+                            <div style="display:flex; align-items: center;gap:1rem;position:relative;color:whitesmoke;">
+                                <img :src="box.thumbnail" alt=""
+                                    style="width:4rem;transition: width 0.3s ease;border-radius:9999px;"
+                                    :style="getStyle(rail)">
 
-                    </div>
-                </v-list-item>
-                <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You have
-                    not
-                    joined any
-                    chat</v-card-subtitle>
-                <ChatLoading v-else></ChatLoading>
+                                <div>
+                                    <p class="box-title" v-if="!rail">{{ box.title }}</p>
+                                    <p v-if="!rail"
+                                        style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 12rem;">
+                                        {{ box.latestMessage }}</p>
+                                    <p style="font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
+                                </div>
+                            </div>
+                            <v-icon size="small" v-if="box.pinned"
+                                style="position: absolute; top:.5rem;left:.5rem;color:#f44336;"
+                                icon="fa-solid fa-thumbtack"></v-icon>
 
-            </v-list>
-            <div style="position:absolute;bottom:0;width:100%;">
-                <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">
-                    <v-icon size='large' icon="fa-solid fa-chevron-right"></v-icon>
-                </v-btn>
-                <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="!rail" @click.stop="rail = true">
-                    <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
-                </v-btn>
+                            <v-menu location="end" transition="scale-transition">
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" icon="fa-solid fa-ellipsis" size="small">
+                                    </v-btn>
+                                </template>
+                                <v-card style="width:10rem;">
+                                    <div style="width:100%">
+                                        <button class="leave-box-button" @click="pinBox(box.id)">
+                                            Pin to top
+                                            <v-icon size="small" icon="fa-solid fa-thumbtack"></v-icon>
+                                        </button>
+                                        <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
+                                            @click="deleteBox(box.title, box.id)">
+                                            Delete group
+                                            <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
+                                        </button>
+                                        <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button"
+                                            @click="leaveBox(box.title, box.id)">
+                                            Leave group
+                                            <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
+                                        </button>
+                                    </div>
+                                </v-card>
+                            </v-menu>
+
+                        </div>
+                    </v-list-item>
+                    <v-card-subtitle style="text-align: center;" v-else-if="boxes.length == 0 && hasBox == false">You
+                        have
+                        not
+                        joined any
+                        chat</v-card-subtitle>
+                    <ChatLoading v-else></ChatLoading>
+                </v-list>
+                <div style="width:100%;">
+                    <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">
+                        <v-icon size='large' icon="fa-solid fa-chevron-right"></v-icon>
+                    </v-btn>
+                    <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="!rail" @click.stop="rail = true">
+                        <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
+                    </v-btn>
+                </div>
             </div>
         </v-navigation-drawer>
         <ChatBox @openMenu="openGroups()" :box-id="boxId" :box-name="boxName" :existed-members="existedMembers"
@@ -246,7 +249,6 @@ function selectBox(id, title, members, existed, owner, description, invite, thum
     isAdmin.value = `users/${userId.value}` == owner.path
     if (window.matchMedia("(max-width: 600px)").matches) {
         showSidebar.value = false
-        console.log("Screen width is less than 600px");
     }
 }
 async function fetchBoxes() {
@@ -266,7 +268,6 @@ async function fetchBoxes() {
                     }
                 });
                 boxes.value = boxesList;
-
                 hasBox.value = true;
             } else {
                 boxes.value = [];
@@ -518,7 +519,6 @@ function convertTime(timestamp) {
     return dateTime.toLocaleString('en-GB', options);
 }
 const showSidebar = ref(true)
-const sideBreakpoint = ref('md')
 function openGroups() {
     showSidebar.value = true;
     // sideBreakpoint.value = sideBreakpoint.value === 'md' ? '0' : 'md';
@@ -594,5 +594,40 @@ onMounted(() => {
     animation-iteration-count: infinite; */
 
     transition: all .2s linear;
+}
+
+.box-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-x: hidden;
+    height: calc(100vh - 60px) !important;
+}
+
+@media all and (min-width: 1280px) {
+    .box-view {
+        height: 100vh !important;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    border-radius: 2px;
+    background-color: rgb(229, 229, 229);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: gray;
+    border-radius: 2px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    /* background: #579359; */
 }
 </style>

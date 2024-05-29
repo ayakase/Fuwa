@@ -23,6 +23,15 @@ const router = createRouter({
         showNav: true,
       }
     },
+    // {
+    //   path: '/home',
+    //   name: 'home',
+    //   component: HomeView,
+    //   meta: {
+    //     requiresAuth: true,
+    //     showNav: true,
+    //   }
+    // },
     {
       path: '/explore',
       name: 'explore',
@@ -51,26 +60,7 @@ const router = createRouter({
         showNav: true,
 
       }
-    }, {
-      path: '/video-call',
-      name: 'video call',
-      component: VideoRoom,
-      meta: {
-        requiresAuth: true,
-        showNav: false,
-
-      }
-    },
-    {
-      path: '/favorite',
-      name: 'favorite',
-      component: FavoriteView,
-      meta: {
-        requiresAuth: true,
-        showNav: true,
-
-      }
-    },
+    }, 
     {
       path: '/setting',
       name: 'setting',

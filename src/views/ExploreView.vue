@@ -1,8 +1,8 @@
 <template>
     <div class="container">
         <div class="cover-section">
-
-            <div style="width:100%; display: flex;justify-content: center;align-items:center;flex-wrap: wrap;">
+            <div
+                style="width:100%; display: flex;align-items:center;flex-wrap: wrap; flex-direction: column;gap: .2rem;">
                 <v-text-field v-model="searchTerm" class="search-box" label="Search" hide-details single-line
                     append-inner-icon="fa-solid fa-magnifying-glass" variant="solo-filled" @input="handleInput">
                     <template v-slot:loader>
@@ -35,8 +35,7 @@
                             </v-card>
                             <div>
                                 <h3>{{ box.title }}</h3>
-                                <div
-                                    style="overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 3;-webkit-box-orient: vertical;">
+                                <div class="box-description">
                                     {{ box.description }}</div>
                                 <div>{{ countMembers(box.members) }} members </div>
                             </div>
@@ -251,7 +250,7 @@ onMounted(() => {
 }
 
 .search-box {
-    max-width: 48%;
+    width: 48%;
     max-height: 5rem;
 }
 
@@ -296,8 +295,16 @@ onMounted(() => {
 
 }
 
+.box-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
 .each-box:hover .box-cover {
-    transform: scale(1.05);
+    /* transform: scale(1.05); */
 }
 
 
@@ -337,6 +344,35 @@ h2 {
 
     h2 {
         font-size: 1.5rem;
+    }
+}
+
+@media all and (max-width:1280px) {
+    .result-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .each-box {
+        height: 14rem;
+
+    }
+
+    .box-cover {
+        min-height: 6rem;
+        max-height: 6rem;
+    }
+
+    .box-description {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+    }
+
+    .search-box {
+        width: 80%;
     }
 }
 </style>

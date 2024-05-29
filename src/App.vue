@@ -131,40 +131,48 @@ onMounted(() => {
 })
 
 const toggleSecond = ref(false)
-const selected = ref(1)
+const selected = ref()
 const options = [
   {
     id: 1,
     icon: "fa-solid fa-earth-americas",
     title: "Explore",
     // route: '/explore',
-    path: "/explore"
+    path: { name: 'explore' }
+
   },
   {
     id: 2,
     icon: "fa-solid fa-user-group",
     title: "Groups",
     path: '/groups',
+    path: { name: 'groups' }
+
   },
 
   {
     id: 3,
     icon: "fa-solid fa-home",
     title: "Home",
-    path: "/"
+    path: "/",
+    path: { name: 'home' }
+
   },
   {
     id: 4,
     icon: "fa-solid fa-inbox",
     title: "Inbox",
     path: '/inbox',
+    path: { name: 'inbox' }
+
   },
   {
     id: 5,
     icon: "fa-solid fa-gear",
     title: "Setting",
-    route: '/setting',
     path: '/setting',
+    path: { name: 'setting' }
+
   }
 ];
 
@@ -172,94 +180,107 @@ const options = [
 <template>
 
   <div>
-    <v-card>
-      <v-layout>
-        <v-navigation-drawer touchless v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" :image="bgImage"
-          class="nav-drawer">
-          <v-list>
-            <v-list-item v-if="!user">
-              <v-menu location="end">
-                <template v-slot:activator="{ props }">
-                  <v-btn color="primary" dark v-bind="props">
-                    Login
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item>
-                    <v-btn @click="signInWithGoogle">Sign In With Google</v-btn>
-                  </v-list-item>
-                  <!-- <v-list-item>
+    <v-layout>
+      <v-navigation-drawer touchless v-if="user && route.meta.showNav" :rail="rail" v-model="drawer" :image="bgImage"
+        class="nav-drawer">
+        <v-list>
+          <v-list-item v-if="!user">
+            <v-menu location="end">
+              <template v-slot:activator="{ props }">
+                <v-btn color="primary" dark v-bind="props">
+                  Login
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item>
+                  <v-btn @click="signInWithGoogle">Sign In With Google</v-btn>
+                </v-list-item>
+                <!-- <v-list-item>
                     <v-btn @click="signInWithGithub">Sign In With Github</v-btn>
                   </v-list-item> -->
-                </v-list>
-              </v-menu>
-            </v-list-item>
-            <v-list-item v-if="userInfo" :prepend-avatar="userInfo.avatar" :title="userInfo.displayName"
-              :subtitle="user.email">
-            </v-list-item>
-          </v-list>
-          <v-divider></v-divider>
-          <v-list v-if="user" density="compact" nav>
-            <v-list-item prepend-icon="fa-solid fa-earth-americas" title="Explore" value="shared"
-              @click="router.push('/explore')">
-              <v-tooltip activator="parent" location="start">Explore</v-tooltip>
-            </v-list-item>
-            <v-list-item prepend-icon="fa-solid fa-home" title="Home" value="home" @click="router.push('/')">
-              <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
-            <v-list-item prepend-icon="fa-solid fa-user-group" title="Groups" value="message"
-              @click="router.push('/groups')">
-              <v-tooltip activator="parent" location="start">Groups</v-tooltip>
-            </v-list-item>
-            <v-list-item prepend-icon="fa-solid fa-inbox" title="Inbox" value="inbox" @click="router.push('/inbox')">
-              <v-tooltip activator="parent" location="start">Inbox</v-tooltip>
-            </v-list-item>
-            <!-- <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
+              </v-list>
+            </v-menu>
+          </v-list-item>
+          <v-list-item v-if="userInfo" :prepend-avatar="userInfo.avatar" :title="userInfo.displayName"
+            :subtitle="user.email">
+          </v-list-item>
+        </v-list>
+        <v-divider></v-divider>
+        <v-list v-if="user" density="compact" nav>
+          <v-list-item prepend-icon="fa-solid fa-earth-americas" title="Explore" value="shared"
+            @click="router.push('/explore')">
+            <v-tooltip activator="parent" location="start">Explore</v-tooltip>
+          </v-list-item>
+          <v-list-item prepend-icon="fa-solid fa-home" title="Home" value="home" @click="router.push('/')">
+            <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
+          <v-list-item prepend-icon="fa-solid fa-user-group" title="Groups" value="message"
+            @click="router.push('/groups')">
+            <v-tooltip activator="parent" location="start">Groups</v-tooltip>
+          </v-list-item>
+          <v-list-item prepend-icon="fa-solid fa-inbox" title="Inbox" value="inbox" @click="router.push('/inbox')">
+            <v-tooltip activator="parent" location="start">Inbox</v-tooltip>
+          </v-list-item>
+          <!-- <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
               @click="router.push('/chat-bot')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item> -->
-            <v-list-item prepend-icon="fa-solid fa-gear" title="Setting" value="setting"
-              @click="router.push('/setting')">
-              <v-tooltip activator="parent" location="start">Setting</v-tooltip>
-            </v-list-item>
-            <p>
-              <!-- {{ $t('message.hello') }} -->
-            </p>
-            <!-- <v-switch color="orange" label="Switch" v-model="state" @click="toggleTheme">
+          <v-list-item prepend-icon="fa-solid fa-gear" title="Setting" value="setting" @click="router.push('/setting')">
+            <v-tooltip activator="parent" location="start">Setting</v-tooltip>
+          </v-list-item>
+          <p>
+            <!-- {{ $t('message.hello') }} -->
+          </p>
+          <!-- <v-switch color="orange" label="Switch" v-model="state" @click="toggleTheme">
           </v-switch> -->
-            <!-- <v-list-item @click="toggleTheme" title="Dark Mode" :prepend-icon="themeState" value="mode">
+          <!-- <v-list-item @click="toggleTheme" title="Dark Mode" :prepend-icon="themeState" value="mode">
               <v-tooltip activator="parent" location="start">Dark Mode</v-tooltip>
             </v-list-item> -->
-          </v-list>
-          <template v-slot:append>
-            <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">
-              <v-icon size='large' icon="fa-solid fa-chevron-right"></v-icon>
-            </v-btn>
-            <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="!rail" @click.stop="rail = true">
-              <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
-            </v-btn>
-          </template>
-        </v-navigation-drawer>
-        <v-main class="main-container">
-          <RouterView @changeBg="changeSideBar"></RouterView>
-          <div  style="height: 60px;">a</div>
-        </v-main>
-      </v-layout>
-    </v-card>
-    <div class="mobile-menu">
-      <CurvedBottomNavigation :icon-color="textTheme()" :background-color="backgroundColorTheme()"
-        foreground-color='var(--main-color)' :options="options" v-model="selected" />
-    </div>
+        </v-list>
+        <template v-slot:append>
+          <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">
+            <v-icon size='large' icon="fa-solid fa-chevron-right"></v-icon>
+          </v-btn>
+          <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="!rail" @click.stop="rail = true">
+            <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
+          </v-btn>
+        </template>
+      </v-navigation-drawer>
+      <v-main class="main-container">
+        <RouterView @changeBg="changeSideBar"></RouterView>
+      </v-main>
+    </v-layout>
+  </div>
+  <!-- <div style="height: 60px;" class="mobile-menu"></div> -->
+  <div class="mobile-menu">
+    <CurvedBottomNavigation style="position: static;" icon-color="textTheme()"
+      :background-color="backgroundColorTheme()" foreground-color='var(--main-color)' :options="options"
+      v-model="selected" />
   </div>
 
 </template>
 <style scoped>
 .main-container {
-  height: 100vh;
+  height: calc(100vh - 60px);
+  /* height: 100vh; */
+
+}
+
+.mobile-menu /deep/ #sweep {
+  height: auto !important;
+}
+
+.mobile-menu {
+  position: relative;
+  z-index: 99999;
 }
 
 @media all and (min-width: 1280px) {
   .mobile-menu {
     display: none;
+  }
+
+  .main-container {
+    height: 100vh;
   }
 }
 

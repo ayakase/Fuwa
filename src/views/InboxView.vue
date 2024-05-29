@@ -1,6 +1,7 @@
 <template>
     <div class="container">
-        <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80">
+        <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80" v-model="showSidebar"
+            absolute="false">
             <div class="message-top-bar">
                 <!-- <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn> -->
 
@@ -89,8 +90,8 @@
                 </v-btn>
             </div>
         </v-navigation-drawer>
-        <InboxBox v-if="boxId" :box-id="boxId" :box-members="inboxMembers"></InboxBox>
-        <NoBox v-else></NoBox>
+        <InboxBox @openMenu="openGroups()" v-if="boxId" :box-id="boxId" :box-members="inboxMembers"></InboxBox>
+        <NoBox @openMenu="openGroups()" v-else></NoBox>
     </div>
 </template>
 <script setup>
@@ -175,7 +176,9 @@ async function findUsers() {
 function selectInbox(id, members) {
     boxId.value = id;
     inboxMembers.value = members
-    console.log(boxId.value)
+    if (window.matchMedia("(max-width: 600px)").matches) {
+        showSidebar.value = false
+    }
 }
 const inboxes = ref([]);
 
@@ -237,17 +240,17 @@ async function fetchInboxes() {
 //     }
 // }
 
-async function getUser(user) {
-    if (user) {
-        const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
-        querySnapshot.forEach((doc) => {
-            userInfo.value = doc.data();
-            userStore.changeUserInfo(userInfo.value);
-            userStore.changeUserId(doc.id);
-            userId.value = doc.id
-        });
-    }
-}
+// async function getUser(user) {
+//     if (user) {
+//         const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+//         querySnapshot.forEach((doc) => {
+//             userInfo.value = doc.data();
+//             userStore.changeUserInfo(userInfo.value);
+//             userStore.changeUserId(doc.id);
+//             userId.value = doc.id
+//         });
+//     }
+// }
 // async function reloadBoxes() {
 //     await getUser(user.value)
 //     await fetchBoxes();
@@ -477,6 +480,12 @@ function convertTime(timestamp) {
 
     return dateTime.toLocaleString('en-GB', options);
 }
+const showSidebar = ref(true)
+function openGroups() {
+    showSidebar.value = true;
+    // sideBreakpoint.value = sideBreakpoint.value === 'md' ? '0' : 'md';
+    // rail.value = true;
+}
 onMounted(() => {
     onAuthStateChanged(auth, (firebaseUser) => {
         user.value = firebaseUser;
@@ -547,5 +556,15 @@ onMounted(() => {
     /* animation: shake 5s;
     animation-iteration-count: infinite; */
     transition: all .2s linear;
+}
+
+.box-view {
+    height: calc(100vh - 60px) !important;
+}
+
+@media all and (min-width: 1280px) {
+    .box-view {
+        height: 100vh !important;
+    }
 }
 </style>
