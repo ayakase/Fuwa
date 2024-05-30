@@ -40,24 +40,6 @@ const signInWithGoogle = () => {
 function changeSideBar() {
   bgImage.value = cookies.get('bgImage')
 }
-// async function addUserToDb(user) {
-//   try {
-//     const querySnapshot = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
-//     if (!querySnapshot.empty) {
-//       return;
-//     } else {
-//       const docRef = await addDoc(collection(db, "users"), {
-//         uid: user.uid,
-//         displayName: user.displayName,
-//         email: user.email,
-//       });
-//     }
-//   }
-//   catch (e) {
-//     console.error("Error adding document: ", e);
-
-//   }
-// }
 const userInfo = ref()
 const userId = ref()
 async function getUser(user) {
@@ -207,34 +189,26 @@ const options = [
         </v-list>
         <v-divider></v-divider>
         <v-list v-if="user" density="compact" nav>
-          <v-list-item prepend-icon="fa-solid fa-earth-americas" title="Explore" value="shared"
+          <v-list-item prepend-icon="fa-solid fa-earth-americas" :title="$t('explore')" value="shared"
             @click="router.push('/explore')">
-            <v-tooltip activator="parent" location="start">Explore</v-tooltip>
+            <v-tooltip activator="parent" location="start">{{$t('explore')}}</v-tooltip>
           </v-list-item>
-          <v-list-item prepend-icon="fa-solid fa-home" title="Home" value="home" @click="router.push('/')">
+          <v-list-item prepend-icon="fa-solid fa-home" :title="$t('home')" value="home" @click="router.push('/')">
             <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
-          <v-list-item prepend-icon="fa-solid fa-user-group" title="Groups" value="message"
+          <v-list-item prepend-icon="fa-solid fa-user-group" :title="$t('groups')" value="message"
             @click="router.push('/groups')">
             <v-tooltip activator="parent" location="start">Groups</v-tooltip>
           </v-list-item>
-          <v-list-item prepend-icon="fa-solid fa-inbox" title="Inbox" value="inbox" @click="router.push('/inbox')">
+          <v-list-item prepend-icon="fa-solid fa-inbox" :title="$t('inbox')" value="inbox" @click="router.push('/inbox')">
             <v-tooltip activator="parent" location="start">Inbox</v-tooltip>
           </v-list-item>
           <!-- <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
               @click="router.push('/chat-bot')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item> -->
-          <v-list-item prepend-icon="fa-solid fa-gear" title="Setting" value="setting" @click="router.push('/setting')">
+          <v-list-item prepend-icon="fa-solid fa-gear" :title="$t('settings')" value="setting" @click="router.push('/setting')">
             <v-tooltip activator="parent" location="start">Setting</v-tooltip>
           </v-list-item>
-          <p>
-            <!-- {{ $t('message.hello') }} -->
-          </p>
-          <!-- <v-switch color="orange" label="Switch" v-model="state" @click="toggleTheme">
-          </v-switch> -->
-          <!-- <v-list-item @click="toggleTheme" title="Dark Mode" :prepend-icon="themeState" value="mode">
-              <v-tooltip activator="parent" location="start">Dark Mode</v-tooltip>
-            </v-list-item> -->
         </v-list>
         <template v-slot:append>
           <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">

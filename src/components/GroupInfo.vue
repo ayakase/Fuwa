@@ -32,6 +32,7 @@
                     <v-btn style="height:3rem;background-color:green;" @click="updateBoxInviteId()">
                         Update</v-btn>
                 </div>
+                <div>{{ props.isPublic}}</div>
                 <!-- <v-divider style="width: 100%;"></v-divider>
                 <v-card-text style="font-size: larger;">
                     {{ memberInfo.about }}
@@ -54,12 +55,11 @@
 
 <script setup>
 import { db } from "../firebaseConfig";
-import { getDoc, updateDoc, doc } from 'firebase/firestore';
+import { updateDoc, doc } from 'firebase/firestore';
 import { ref, onMounted } from 'vue';
-import LoadingComponent from '../components/LoadingComponent.vue'
 import { watch } from "vue";
 // const userDocRef = doc(db, 'users', props.id);
-const props = defineProps(["boxId", "boxName", "isAdmin", "description", "inviteId"]);
+const props = defineProps(["boxId", "boxName", "isAdmin", "description", "inviteId","isPublic"]);
 const showSetting = ref(false)
 const boxName = ref('')
 const boxDescription = ref('');

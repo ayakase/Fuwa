@@ -1,19 +1,112 @@
-import { createI18n } from 'vue-i18n'
 
+import { createI18n } from 'vue-i18n';
+import { useCookies } from 'vue3-cookies';
+const { cookies } = useCookies()
+let savedLang = cookies.get('lang')
+if (savedLang && savedLang !== undefined) {
+    console.log(savedLang)
+} else {
+    cookies.set('lang', 'en')
+    savedLang = 'en'
+}
 const language = createI18n({
-    locale: 'en',
-    fallbackLocale: 'en',
+    locale: savedLang || 'en',
     messages: {
         en: {
-            mesasge: {
-                hello: 'hello world',
-            },
+            display_name: 'Display Name',
+            connection_id: 'Connection Id',
+            about_me: 'About Me',
+            save: 'Save',
+            cancel: 'Cancel',
+            change_avatar: "Change Avatar",
+            sign_out: "Sign Out",
+            primary_color: "Primary Color",
+            color_theme: "Color Theme",
+            background_theme: "Background Theme",
+            system_setting: "System Settings",
+            profile_setting: "Profile Settings",
+            explore: "Explore",
+            home: "Home",
+            groups: "Groups",
+            inbox: "Inbox",
+            settings: "Settings",
+            invite_link: "Invite Link",
+            members_list: "Members",
+            images_grid: "Images",
+            load_more_msg: "Load More Message",
+            no_box: "No group selected, select or join a group to begin conversation",
+            explore_title: "Explore what people are talking about",
+            search_placeholder: "Search",
+            new_chat_title: "Create new chat group",
+            new_box_name: "New box name",
+            new_box_invite_id: "Invite Id",
+            random_id: "Random Id",
+            new_box_description: "New box description",
+            select_thumbnail: "Select thumbnail",
+            select_banner: "Select banner",
+            new_chat_btn: "Create"
+        },
+        vi: {
+            display_name: 'Tên hiển thị',
+            connection_id: 'ID kết nối',
+            about_me: 'Về tôi',
+            save: 'Lưu',
+            cancel: 'Hủy bỏ',
+            change_avatar: "Đổi hình đại diện",
+            sign_out: "Đăng xuất",
+            primary_color: "Màu chủ đạo",
+            color_theme: "Chủ đề màu",
+            background_theme: "Chủ đề nền",
+            system_setting: "Cài đặt hệ thống",
+            profile_setting: "Cài đặt hồ sơ",
+            explore: "Khám phá",
+            home: "Trang chủ",
+            groups: "Nhóm",
+            inbox: "Hộp thư đến",
+            settings: "Cài đặt",
+            invite_link: "Liên kết mời",
+            members_list: "Thành viên",
+            images_grid: "Hình ảnh",
+            load_more_msg: "Tải thêm tin nhắn",
+            no_box: "Chưa chọn nhóm, chọn hoặc tham gia nhóm để bắt đầu cuộc trò chuyện",
+            explore_title: "Khám phá những gì mọi người đang nói",
+            search_placeholder: "Tìm kiếm",
+            new_chat_title: "Tạo nhóm trò chuyện mới",
+            new_box_name: "Tên nhóm mới",
+            new_box_invite_id: "ID mời",
+            random_id: "ID ngẫu nhiên",
         },
         ja: {
-            message: {
-                hello: 'こんにちは、世界',
-            },
+            display_name: '表示名',
+            connection_id: '接続ID',
+            about_me: '自己紹介',
+            save: '保存',
+            cancel: 'キャンセル',
+            change_avatar: "アバターを変更",
+            sign_out: "サインアウト",
+            primary_color: "基本色",
+            color_theme: "カラーテーマ",
+            background_theme: "背景テーマ",
+            system_setting: "システム設定",
+            profile_setting: "プロフィール設定",
+            explore: "探索",
+            home: "ホーム",
+            groups: "グループ",
+            inbox: "受信トレイ",
+            settings: "設定",
+            invite_link: "招待リンク",
+            members_list: "メンバー",
+            images_grid: "画像",
+            load_more_msg: "さらにメッセージを読み込む",
+            no_box: "グループが選択されていません。会話を始めるにはグループを選択するか参加してください",
+            explore_title: "みんなが話していることを探る",
+            search_placeholder: "検索",
+            new_chat_title: "新しいチャットグループを作成",
+            new_box_name: "新しいグループ名",
+            new_box_invite_id: "招待ID",
+            random_id: "ランダムID",
         },
-    },
+    }
 });
-export default language;
+
+export default language

@@ -2,14 +2,8 @@
     <div class="container">
         <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80" v-model="showSidebar"
             absolute="false">
-            <div class="message-top-bar">
-                <!-- <v-btn v-if="!rail" icon="mdi-sort" variant="text"></v-btn> -->
-
-                <!-- <v-btn v-if="!rail" variant="text" icon="fa-solid fa-rotate-right" @click="reloadBoxes()"></v-btn> -->
-
-            </div>
-            <div style="padding-left: 1rem; padding-right:1rem;margin-top: 1rem;">
-                <v-text-field v-model="searchCid" label="Connection ID" prepend-icon="fa-solid fa-magnifying-glass"
+            <div style="padding-left: 1rem; padding-right:1rem;margin-top: .5rem;">
+                <v-text-field v-model="searchCid" label="Connection ID" prepend-icon="fa-solid fa-magnifying-glass" hide-details
                     variant="underlined" @input="handleInput"></v-text-field>
             </div>
             <v-list>
@@ -18,10 +12,6 @@
             </v-list>
             <v-divider></v-divider>
             <v-list style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;">
-                <!-- <v-list-item v-for="inbox in inboxes" :key="inbox" @click='selectInbox()'>
-                    <div>{{ inbox.id }}</div>
-                    <div>{{ inbox.receiver.displayName }}</div>
-                </v-list-item> -->
                 <v-list-item class="chat-box-container" v-if="inboxes.length > 0" v-for="inbox in  inboxes "
                     :key="inbox" :value="inbox.id" @click="selectInbox(inbox.id, inbox.members)"
                     style="overflow:hidden;border-radius: .5rem;">
@@ -47,37 +37,8 @@
 
                             </div>
                         </div>
-                        <!-- <v-menu location="end" transition="scale-transition">
-                            <template v-slot:activator="{ props }">
-                                <v-btn v-bind="props" icon="fa-solid fa-ellipsis" size="small">
-                                </v-btn>
-                            </template>
-<v-card style="width:10rem;">
-    <div style="width:100%">
-        <button class="leave-box-button" @click="pinBox(box.id)">
-            Pin to top
-            <v-icon size="small" icon="fa-solid fa-thumbtack"></v-icon>
-        </button>
-        <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
-            @click="deleteBox(box.title, box.id)">
-            Delete group
-            <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
-        </button>
-        <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button" @click="leaveBox(box.title, box.id)">
-            Leave group
-            <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
-        </button>
-    </div>
-</v-card>
-</v-menu> -->
-
                     </div>
                 </v-list-item>
-                <!-- <v-card-subtitle style="text-align: center;" v-else-if="inboxes.length == 0 && hasInboxes == false">You
-                    have
-                    not
-                    joined any
-                    chat</v-card-subtitle> -->
                 <ChatLoading v-else></ChatLoading>
 
             </v-list>

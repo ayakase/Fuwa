@@ -6,7 +6,7 @@
         </v-app-bar> -->
         <div style="display:flex; flex-direction: column;align-items: center;padding-top:30vh;">
             <v-icon style="font-size: 8rem;color:gray;" icon="fa-regular fa-comment-dots"></v-icon>
-            <p class="noti-text">No group selected, select or join a group to begin conversation</p>
+            <p class="noti-text">{{ $t('no_box') }}</p>
         </div>
     </div>
 </template>

@@ -2,15 +2,15 @@
     <div class="container">
         <!-- <h1 class="setting-title">Settings</h1> -->
         <div class="setting-container">
-            <v-card-title style="padding: 0;font-size: 1.5rem;"> System settings</v-card-title>
+            <v-card-title style="padding: 0;font-size: 1.5rem;"> {{ $t('system_setting') }}</v-card-title>
             <v-card class="system-setting" variant="tonal">
                 <div class="theme-mode">
-                    <p>Color theme:</p>
+                    <p>{{ $t('color_theme') }}</p>
                     <v-btn @click="toggleTheme" :icon="themeState">
                     </v-btn>
                 </div>
                 <div style="width: 30%;display: flex; flex-direction: row; align-items: center; gap: .5rem;">
-                    <p>Primary Color:</p>
+                    <p>{{ $t('primary_color') }}</p>
                     <v-menu location="end" :close-on-content-click="false">
                         <template v-slot:activator="{ props }">
                             <v-btn style="background-color: var(--main-color);" v-bind="props">
@@ -28,7 +28,7 @@
                 </div>
                 <!-- <v-btn @click="showNotification()">Show Notification</v-btn> -->
                 <div style="display: flex; flex-direction: row;;flex-wrap:wrap;align-items: center;gap: .5rem;">
-                    <p>Background theme:</p>
+                    <p>{{ $t('background_theme') }}</p>
                     <v-expansion-panels style="width:80%">
                         <v-expansion-panel>
                             <v-expansion-panel-title v-slot="{ expanded }">
@@ -56,8 +56,13 @@
                             </v-expansion-panel-text>
                         </v-expansion-panel></v-expansion-panels>
                 </div>
+                <v-list>
+                    <v-list-item v-for="each in langs">
+                        <v-btn @click="changeLanguage(each.value)">{{ each.title }}</v-btn>
+                    </v-list-item>
+                </v-list>
             </v-card>
-            <v-card-title style="padding: 0;font-size: 1.5rem;"> Profile settings</v-card-title>
+            <v-card-title style="padding: 0;font-size: 1.5rem;"> {{ $t('profile_setting') }}</v-card-title>
 
             <v-card class="profile-setting" variant="tonal" v-if="userStore.userInfo">
                 <div style="flex:1">
@@ -67,26 +72,27 @@
                     <v-text-field class="email-field" :model-value="userInfo.email" variant="underlined"
                         disabled></v-text-field>
                     <div class="name-setting">
-                        Display Name:
+                        {{ $t('display_name') }}
                     </div>
                     <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
                         <v-text-field class="name-field" v-model="userInfo.displayName"
                             variant="underlined"></v-text-field>
-                        <v-btn style="background-color: green;color: white;" @click="saveName">Save</v-btn>
+                        <v-btn style="background-color: green;color: white;" @click="saveName">
+                            {{ $t('save') }}</v-btn>
                     </div>
                     <div class="name-setting">
-                        Connection ID:
+                        {{ $t('connection_id') }}
                     </div>
                     <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
                         <v-text-field class="name-field" v-model="userInfo.cid" variant="underlined"></v-text-field>
-                        <v-btn style="background-color: green;color: white;" @click="saveCid">Save</v-btn>
+                        <v-btn style="background-color: green;color: white;" @click="saveCid">{{ $t('save') }}</v-btn>
                     </div>
                     <div class="about-setting">
-                        About Me:
+                        {{ $t('about_me') }}
                     </div>
                     <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
                         <v-textarea class="name-field" v-model="userInfo.about" variant="underlined"></v-textarea>
-                        <v-btn style="background-color: green;color: white;" @click="saveAbout">Save</v-btn>
+                        <v-btn style="background-color: green;color: white;" @click="saveAbout">{{ $t('save') }}</v-btn>
                     </div>
 
                 </div>
@@ -95,15 +101,13 @@
                         <img v-if="userInfo.avatar" :src="userInfo.avatar" style="width: 100%;aspect-ratio:1;">
                         <v-dialog>
                             <template v-slot:activator="{ props: activatorProps }">
-                                <v-btn v-bind="activatorProps" style="background-color: green;color: white;">Change
-                                    avatar</v-btn>
+                                <v-btn v-bind="activatorProps" style="background-color: green;color: white;">{{ $t('change_avatar') }}</v-btn>
                             </template>
                             <template v-slot:default="{ isActive }">
                                 <v-card style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
                                     <v-file-input accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
                                         style="width:50%" prepend-icon="" class="img-input" id="formFile"
                                         @change="processImg" label="Image" variant="solo-filled"></v-file-input>
-                                    
                                     <div style="max-width: 50%;">
                                         <cropper :src="thumbnailSrc" @change="change"
                                             :stencil-props="{ aspectRatio: 1 }" :stencil-component="CircleStencil" />
@@ -127,7 +131,7 @@
         </div>
         <div class="pa-2 sign-out">
             <v-btn color="error" v-if="user" @click="handleSignOut()" block>
-                Sign Out
+                {{ $t('sign_out') }}
             </v-btn>
         </div>
     </div>
@@ -361,7 +365,7 @@ const handleSignOut = () => {
         console.log(error)
     });
 }
-let themeCheck = ref(cookies.get('themeId'))
+let themeCheck = ref(cookies.get('themeId') || 0)
 function selectTheme(id) {
     cookies.set('themeId', id, 60 * 60 * 24 * 30);
     cookies.set('theme', themesArray[id].themeMode, 60 * 60 * 24 * 30)
@@ -389,8 +393,20 @@ async function getUser(user) {
         });
     }
 }
+import lang from '../utils/language';
+function changeLanguage(lng) {
+    console.log('lang')
+    lang.global.locale = lng
+    cookies.set('lang', lng)
+}
+
+const langs = [
+    { title: "English", value: "en" },
+    { title: "日本語", value: "ja" },
+    { title: "Tiếng Việt", value: "vi" },
+]
+
 onMounted(() => {
-    console.log(userInfo.displayName)
     const themeValue = cookies.get('theme');
     if (themeValue === null) {
         cookies.set('theme', 'light', 60 * 60 * 24 * 30);

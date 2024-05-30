@@ -25,8 +25,8 @@
       <div
         style="position:absolute; display:flex; flex-direction: row; justify-content:center;width:100%; top: 1rem;z-index: 999;">
         <Transition name="slide-fade-bottom">
-          <v-btn v-show="showLoadMore" @click="loadMoreMessages()" prepend-icon="fa-solid fa-angles-up"> Load More
-            Message
+          <v-btn v-show="showLoadMore" @click="loadMoreMessages()" prepend-icon="fa-solid fa-angles-up">
+            {{ $t('load_more_msg') }}
           </v-btn>
         </Transition>
       </div>
@@ -128,8 +128,7 @@
           <v-icon icon="fa-solid fa-robot fa-bounce"></v-icon>
         </div>
       </Transition>
-      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id=""
-        placeholder="@bot to ask bot" />
+      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" placeholder="@bot" />
       <v-btn style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
           icon="fa-regular fa-image"></v-icon>
       </v-btn>
@@ -179,15 +178,15 @@
 
       <v-list density="compact" nav>
         <GroupInfo :box-id="props.boxId" :box-name="props.boxName" v-if="props.boxId" :isAdmin="props.isAdmin"
-          :description="props.description" :inviteId="props.inviteId"></GroupInfo>
+          :description="props.description" :inviteId="props.inviteId" :isPublic="props.isPublic"></GroupInfo>
         <v-list-item prepend-icon="fa-solid fa-link" v-if="props.inviteId !== ''" @click="getInvite(props.inviteId)"
-          title="Get Invite link" value="account"></v-list-item>
+          :title="$t('invite_link')" value="account"></v-list-item>
         <v-divider></v-divider>
-        <v-list-item prepend-icon="fa-solid fa-user-group" @click="toggleMember = !toggleMember" title="Members"
-          value="members" :append-icon="expandIcon()">
+        <v-list-item prepend-icon="fa-solid fa-user-group" @click="toggleMember = !toggleMember"
+          :title="$t('members_list')" value="members" :append-icon="expandIcon()">
         </v-list-item>
         <UserProfile v-if="toggleMember" v-for="member in memberArray" :id="member.id"></UserProfile>
-        <v-list-item prepend-icon="fa-solid fa-images" @click="fetchImages()" title="Images" value="images"
+        <v-list-item prepend-icon="fa-solid fa-images" @click="fetchImages()" :title="$t('images_grid')" value="images"
           append-icon="fa-solid fa-arrows-rotate">
         </v-list-item>
         <v-list-item>
@@ -263,7 +262,7 @@ let { cookies } = useCookies()
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API);
 const userStore = useUserStore();
-const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin", "description", "inviteId", "thumbnail"]);
+const props = defineProps(["boxId", "boxName", "boxMembers", "existedMembers", "isAdmin", "description", "inviteId", "thumbnail", "isPublic"]);
 const user = ref();
 const { userId, userInfo } = storeToRefs(userStore);
 

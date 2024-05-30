@@ -3,8 +3,8 @@
         <div class="cover-section">
             <div
                 style="width:100%; display: flex;align-items:center;flex-wrap: wrap; flex-direction: column;gap: .2rem;">
-                <v-text-field v-model="searchTerm" class="search-box" label="Search" hide-details single-line
-                    append-inner-icon="fa-solid fa-magnifying-glass" variant="solo-filled" @input="handleInput">
+                <v-text-field v-model="searchTerm" class="search-box" :label="$t('search_placeholder')
+                    " hide-details single-line append-inner-icon="fa-solid fa-magnifying-glass" variant="solo-filled" @input="handleInput">
                     <template v-slot:loader>
                         <v-progress-linear :active="progressBar" :model-value="progress" height="2"
                             indeterminate></v-progress-linear>
@@ -18,7 +18,9 @@
         </div>
         <div style="display:flex; align-items: center;gap:1rem;width: 95%;">
             <h2>
-                Explore what people are talking about
+                {{
+                    $t('explore_title')
+                }}
             </h2>
             <v-icon icon="fa-regular fa-compass fa-shake" style="font-size:2rem;color:#ff1744;"></v-icon>
         </div>

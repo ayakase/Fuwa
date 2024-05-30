@@ -11,29 +11,27 @@
                         <template v-slot:default="{ isActive }">
                             <v-card class="new-dialog">
                                 <div style="display:flex;flex-direction: column; gap: 1rem;">
-                                    <v-card-title style="text-align: center">New Chat Box</v-card-title>
-                                    <v-text-field variant="underlined" v-model="newBoxTitle" label="Box Name" required
-                                        hide-details></v-text-field>
+                                    <v-card-title style="text-align: center">{{ $t('new_chat_title') }}</v-card-title>
+                                    <v-text-field variant="underlined" v-model="newBoxTitle" :label="$t('new_box_name')"
+                                        required hide-details></v-text-field>
                                     <v-text-field variant="underlined" v-model="newBoxDescription"
-                                        label="Box Description" required hide-details></v-text-field>
-                                    <!-- <v-text-field variant="underlined" v-model="newBoxPassword"
-                                    label="Password (leave blank if you want to let people join freely)" required
-                                    hide-details></v-text-field> -->
+                                        :label="$t('new_box_description')" required hide-details></v-text-field>
                                     <div style="display:flex; flex-direction: row;align-items:center;gap:1rem;">
-                                        <v-text-field variant="underlined" v-model="newBoxInviteId" label="Invite ID"
-                                            required hide-details disabled></v-text-field>
+                                        <v-text-field variant="underlined" v-model="newBoxInviteId"
+                                            :label="$t('new_box_invite_id')" required hide-details
+                                            disabled></v-text-field>
                                         <v-btn style="height:3rem;background-color:green;" @click="generateInviteId()">
-                                            Random Id</v-btn>
-                                        <v-btn style="height:3rem;background-color:red;"
-                                            @click="newBoxInviteId = ''">Cancel</v-btn>
+                                            {{ $t('random_id') }}</v-btn>
+                                        <v-btn style="height:3rem;background-color:red;" @click="newBoxInviteId = ''">{{
+            $t('cancel') }}</v-btn>
 
                                     </div>
                                     <div style="display:flex; flex-direction:column;align-items: center;gap:1rem">
                                         <v-dialog>
                                             <template v-slot:activator="{ props: activatorProps }">
                                                 <v-btn v-bind="activatorProps"
-                                                    style="background-color: green;color: white;width:15rem;">Select
-                                                    Thumbnail</v-btn>
+                                                    style="background-color: green;color: white;width:15rem;">{{
+            $t('select_thumbnail') }}</v-btn>
                                             </template>
                                             <template v-slot:default="{ isActive }">
                                                 <v-card
@@ -51,7 +49,7 @@
                                                     </div>
                                                     <v-card-actions>
                                                         <v-btn color="success" @click="isActive.value = false">
-                                                            Done
+                                                            {{ $t('save') }}
                                                         </v-btn>
 
                                                     </v-card-actions>
@@ -64,8 +62,8 @@
                                         <v-dialog>
                                             <template v-slot:activator="{ props: activatorProps }">
                                                 <v-btn v-bind="activatorProps"
-                                                    style="background-color: green;color: white;width:15rem;">Select
-                                                    Banner</v-btn>
+                                                    style="background-color: green;color: white;width:15rem;">
+                                                    {{ $t('select_banner') }}</v-btn>
                                             </template>
                                             <template v-slot:default="{ isActive }">
                                                 <v-card
@@ -81,7 +79,7 @@
                                                     </div>
                                                     <v-card-actions>
                                                         <v-btn color="success" @click="isActive.value = false">
-                                                            Done
+                                                            {{ $t('save') }}
                                                         </v-btn>
                                                     </v-card-actions>
                                                 </v-card>
@@ -89,13 +87,19 @@
                                         </v-dialog>
                                         <img style="width: 80%" :src="previewBanner" alt="">
                                     </div>
-                                    <v-switch :label="newBoxPublicState" false-value="private" true-value="public"
-                                        v-model="newBoxPublicState" inset></v-switch>
+                                    <div style="display: flex; align-items: center;gap: 1rem;">
+                                        <v-switch :label="newBoxPublicState" false-value="Private" true-value="Public" hide-details
+                                            v-model="newBoxPublicState" inset></v-switch>
+                                        <v-icon v-if="newBoxPublicState == 'Private'" icon="fa-solid fa-lock">
+                                        </v-icon>
+                                        <v-icon v-else icon="fa-solid fa-earth-americas"></v-icon>
+                                    </div>
+
                                 </div>
                                 <v-card-actions>
                                     <v-spacer></v-spacer>
                                     <v-btn :loading="btnLoading" variant="outlined" color="success"
-                                        text="Create new chat" @click="addBoxToDb()">
+                                        :text="$t('new_chat_btn')" @click="addBoxToDb()">
                                     </v-btn>
                                 </v-card-actions>
                             </v-card>
@@ -104,14 +108,14 @@
                     <v-btn @click="boxes = []; reloadBoxes()" icon="fa-solid fa-arrow-rotate-right">
                     </v-btn>
                 </div>
-                <v-divider></v-divider>
                 <!-- <div style="">
                     <p v-for="x in 40">a</p>
                 </div> -->
                 <v-list
                     style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;overflow:scroll;overflow-x: hidden;">
+                    <v-divider></v-divider>
                     <v-list-item :class="{ active: box.id == boxId }"
-                        @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite, box.thumbnail)"
+                        @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite, box.thumbnail, box.isPublic)"
                         class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box"
                         :value="box.id" style="overflow:hidden;border-radius: .5rem;">
                         <img :src="box.banner" alt="" v-if="!rail"
@@ -187,7 +191,7 @@
             </div>
         </v-navigation-drawer>
         <ChatBox @openMenu="openGroups()" :box-id="boxId" :box-name="boxName" :existed-members="existedMembers"
-            :box-members="boxMembers" v-if="boxId" :isAdmin="isAdmin" :description="boxDescription"
+            :box-members="boxMembers" v-if="boxId" :isAdmin="isAdmin" :description="boxDescription" :isPublic="isPublic"
             :inviteId="boxInviteId" :thumbnail="boxThumbnail"></ChatBox>
         <NoBox @openMenu="openGroups()" v-else></NoBox>
     </div>
@@ -238,7 +242,8 @@ const boxInviteId = ref("");
 const boxThumbnail = ref("");
 const hasBox = ref(true);
 const isAdmin = ref(false)
-function selectBox(id, title, members, existed, owner, description, invite, thumbnail) {
+const isPublic = ref(false)
+function selectBox(id, title, members, existed, owner, description, invite, thumbnail, publicState) {
     boxId.value = id;
     boxName.value = title;
     boxMembers.value = members;
@@ -246,6 +251,7 @@ function selectBox(id, title, members, existed, owner, description, invite, thum
     boxDescription.value = description;
     boxInviteId.value = invite
     boxThumbnail.value = thumbnail
+    isPublic.value = publicState
     isAdmin.value = `users/${userId.value}` == owner.path
     if (window.matchMedia("(max-width: 600px)").matches) {
         showSidebar.value = false
@@ -305,7 +311,7 @@ watch(
 );
 const toggleBox = ref(true);
 
-const newBoxPublicState = ref("private");
+const newBoxPublicState = ref("Private");
 const newBoxTitle = ref("");
 const newBoxDescription = ref("");
 const newBoxPassword = ref("");
@@ -399,7 +405,7 @@ async function addBoxToDb() {
                     members: [userDocRef],
                     existed: [userDocRef],
                     description: newBoxDescription.value,
-                    isPublic: (newBoxPublicState.value === 'public') ? true : false,
+                    isPublic: (newBoxPublicState.value === 'Public') ? true : false,
                     password: newBoxPassword.value,
                     invite: newBoxInviteId.value,
                     thumbnail: newBoxThumbnail.value,
@@ -611,7 +617,7 @@ onMounted(() => {
 }
 
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 4px;
 }
 
 /* Track */
