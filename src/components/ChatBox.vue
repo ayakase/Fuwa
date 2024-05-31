@@ -128,7 +128,8 @@
           <v-icon icon="fa-solid fa-robot fa-bounce"></v-icon>
         </div>
       </Transition>
-      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" placeholder="@bot" />
+      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id=""
+        placeholder="@bot" />
       <v-btn style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
           icon="fa-regular fa-image"></v-icon>
       </v-btn>
@@ -143,17 +144,6 @@
     </Transition>
     <Transition name="slide-fade-bottom">
       <v-card class="image-send-board" v-if="toggleImageSelect" variant="flat" style="width: 20rem;">
-        <div style=" display: flex; width: 100%; justify-content: space-between;">
-          <v-btn style="background-color: red;" @click="thumbnailImg = ''; thumbnailSrc = ''; toggleImageSelect = false
-      ">
-            <v-icon icon="fa-solid fa-x"></v-icon>
-          </v-btn>
-          <v-btn :loading='imgUploading' style="background-color: green;" @click="sendImg()">
-            <v-icon icon="fa-solid fa-cloud-arrow-up"></v-icon>
-          </v-btn>
-        </div>
-        <!-- <input class="img-input" accept="image/*" type="file" id="formFile" @change="processImg" /> -->
-
         <div
           style='position: relative;border: dashed 2px gray;height: 10rem;display: flex;justify-content: center;align-items: center;overflow: hidden;'>
           <input type="file" @change="processImg" label="Image"
@@ -165,6 +155,15 @@
             </v-icon>
           </div>
           <img v-if="thumbnailSrc" :src="thumbnailSrc" alt="" style="width: 100%; height: 100%;object-fit: contain;" />
+        </div>
+        <div style=" display: flex; width: 100%; justify-content: space-between;">
+          <v-btn style="background-color: red;flex:1;" @click="thumbnailImg = ''; thumbnailSrc = ''; toggleImageSelect = false
+      ">
+            <v-icon icon="fa-solid fa-x"></v-icon>
+          </v-btn>
+          <v-btn :loading='imgUploading' style="background-color: green;flex:1;" @click="sendImg()">
+            <v-icon icon="fa-solid fa-cloud-arrow-up"></v-icon>
+          </v-btn>
         </div>
         <!-- <v-file-input class="img-input" id="formFile" @change="processImg" label="Image" hide-input loading
           accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" variant="solo-filled"
@@ -251,11 +250,12 @@ import BotLoading from "../components/BotLoading.vue";
 import { useToast } from 'vue-toast-notification';
 import UserProfile from "../components/UserProfile.vue";
 import GroupInfo from "../components/GroupInfo.vue";
-
 import MarkdownIt from 'markdown-it';
 import { useCookies } from "vue3-cookies";
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { getStorage, ref as firebaseRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import imageCompression from 'browser-image-compression';
+
 const router = useRouter()
 
 let { cookies } = useCookies()
@@ -472,55 +472,53 @@ function nameMap(member) {
 // }
 let thumbnailImg = ref(null);
 const thumbnailSrc = ref();
+const storage = getStorage();
+const imgUploading = ref(false)
 function processImg(event) {
   if (event.target.files.length) {
     thumbnailSrc.value = URL.createObjectURL(event.target.files[0]);
   }
   thumbnailImg.value = event.target.files[0];
 }
-const storage = getStorage();
-const imgUploading = ref(false)
-function sendImg() {
+async function sendImg() {
   imgUploading.value = true
   let now = new Date();
   let time = now.getTime().toString();
-  const storageRef = firebaseRef(storage, 'images/' + time + '.png')
-  uploadBytes(storageRef, thumbnailImg.value).then((snapshot) => {
-    console.log('Uploaded a blob or file!');
-    getDownloadURL(snapshot.ref).then((downloadURL) => {
-      console.log('File available at', downloadURL);
-      try {
-        const userDocRef = doc(db, 'users', userStore.userId);
-        const boxDocRef = doc(db, "boxes", props.boxId);
-        const messageCollectionRef = collection(boxDocRef, "messages");
-        addDoc(messageCollectionRef, {
-          content: downloadURL,
-          timeSent: Date.now(),
-          senderRef: userDocRef,
-          messageType: 'image',
-        }).then(async () => {
-          toggleImageSelect.value = false
-          thumbnailImg.value = '';
-          thumbnailSrc.value = ''
-          imgUploading.value = false
-          await updateDoc(boxDocRef, {
-            latestMessage: `${userInfo.value.displayName}: *image`,
-            latestChange: Date.now()
-          })
-          fetchImages()
-        }).catch((error) => {
-          console.error('Error adding message:', error);
-          imgUploading.value = false
-        });
-      } catch (e) {
-        console.error('Error:', e);
-        imgUploading.value = false
-      }
+  const storageRef = firebaseRef(storage, 'images/' + time + '.png');
+  try {
+    const compressed = await imageCompression(thumbnailImg.value, {
+      maxSizeMB: 1,
+      useWebWorker: true,
     })
-  });
-  // console.log(thumbnailImg.value);
-  // console.log(thumbnailSrc.value);
+    const snapshot = await uploadBytes(storageRef, compressed);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    const userDocRef = doc(db, 'users', userStore.userId);
+    const boxDocRef = doc(db, "boxes", props.boxId);
+    const messageCollectionRef = collection(boxDocRef, "messages");
+    await addDoc(messageCollectionRef, {
+      content: downloadURL,
+      timeSent: Date.now(),
+      senderRef: userDocRef,
+      messageType: 'image',
+    });
+
+    toggleImageSelect.value = false;
+    thumbnailImg.value = '';
+    thumbnailSrc.value = '';
+    imgUploading.value = false;
+
+    await updateDoc(boxDocRef, {
+      latestMessage: `${userInfo.value.displayName}: *image*`,
+      latestChange: Date.now(),
+    });
+
+    fetchImages();
+  } catch (error) {
+    console.error('Error:', error);
+    imgUploading.value = false;
+  }
 }
+
 const displayBot = ref(false)
 watch(() => messageContent.value, (newValue, oldValue) => {
   if (newValue.includes('@bot')) {

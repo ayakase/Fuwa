@@ -88,8 +88,8 @@
                                         <img style="width: 80%" :src="previewBanner" alt="">
                                     </div>
                                     <div style="display: flex; align-items: center;gap: 1rem;">
-                                        <v-switch :label="newBoxPublicState" false-value="Private" true-value="Public" hide-details
-                                            v-model="newBoxPublicState" inset></v-switch>
+                                        <v-switch :label="newBoxPublicState" false-value="Private" true-value="Public"
+                                            hide-details v-model="newBoxPublicState" inset></v-switch>
                                         <v-icon v-if="newBoxPublicState == 'Private'" icon="fa-solid fa-lock">
                                         </v-icon>
                                         <v-icon v-else icon="fa-solid fa-earth-americas"></v-icon>
@@ -224,6 +224,8 @@ import { storeToRefs } from "pinia";
 import { Cropper, CircleStencil } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { getStorage, ref as firebaseRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import imageCompression from 'browser-image-compression';
+
 const storage = getStorage();
 
 const $toast = useToast();
@@ -327,6 +329,7 @@ function generateInviteId() {
     }
     newBoxInviteId.value = result
 }
+
 const thumbnailSrc = ref();
 const previewThumnail = ref();
 const croppedThumbnail = ref()
@@ -349,7 +352,11 @@ async function uploadThumbnail() {
     let time = now.getTime().toString();
     const storageRef = firebaseRef(storage, 'thumbnails/' + time + '.png');
     try {
-        const snapshot = await uploadBytes(storageRef, croppedThumbnail.value);
+        const compressed = await imageCompression(croppedThumbnail.value, {
+            maxSizeMB: .1,
+            useWebWorker: true,
+        })
+        const snapshot = await uploadBytes(storageRef, compressed);
         const downloadURL = await getDownloadURL(snapshot.ref);
         return downloadURL;
     } catch (error) {
@@ -371,14 +378,18 @@ function getPreviewBanner({ coordinates, canvas }) {
         croppedBanner.value = blob;
     });
     previewBanner.value = canvas.toDataURL();
-
 }
+
 async function uploadBanner() {
     let now = new Date();
     let time = now.getTime().toString();
-    const storageRef = firebaseRef(storage, 'thumbnails/' + time + '.png');
+    const storageRef = firebaseRef(storage, 'banners/' + time + '.png');
     try {
-        const snapshot = await uploadBytes(storageRef, croppedBanner.value);
+        const compressed = await imageCompression(croppedBanner.value, {
+            maxSizeMB: .5,
+            useWebWorker: true,
+        })
+        const snapshot = await uploadBytes(storageRef, compressed);
         const downloadURL = await getDownloadURL(snapshot.ref);
         return downloadURL;
     } catch (error) {

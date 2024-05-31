@@ -101,7 +101,8 @@
                         <img v-if="userInfo.avatar" :src="userInfo.avatar" style="width: 100%;aspect-ratio:1;">
                         <v-dialog>
                             <template v-slot:activator="{ props: activatorProps }">
-                                <v-btn v-bind="activatorProps" style="background-color: green;color: white;">{{ $t('change_avatar') }}</v-btn>
+                                <v-btn v-bind="activatorProps" style="background-color: green;color: white;">{{
+                $t('change_avatar') }}</v-btn>
                             </template>
                             <template v-slot:default="{ isActive }">
                                 <v-card style="display: flex; flex-direction: column;align-items: center;padding:1rem;">
@@ -159,6 +160,7 @@ import { useUserStore } from '../stores/userStore';
 const user = ref()
 const userStore = useUserStore()
 const { userId, userInfo } = storeToRefs(userStore);
+import imageCompression from 'browser-image-compression';
 
 // const {  } = storeToRefs(userStore);
 let { cookies } = useCookies()
@@ -184,25 +186,32 @@ function change({ coordinates, canvas }) {
 }
 const storage = getStorage();
 
-function uploadAvatar() {
+async function uploadAvatar() {
     //   imgUploading.value = true
     let now = new Date();
     let time = now.getTime().toString();
     const storageRef = firebaseRef(storage, 'avatars/' + time + '.png')
-    uploadBytes(storageRef, cropImg.value).then((snapshot) => {
-        getDownloadURL(snapshot.ref).then(async (downloadURL) => {
-            const userRef = doc(db, 'users', userStore.userId);
-            await updateDoc(userRef, {
-                avatar: downloadURL
-            })
-            toast.success("Successfully changed avatar", {
-                position: 'top-right'
-            });
-            setTimeout(() => {
-                window.location.reload()
-            }, 1000);
+    try {
+        const compressed = await imageCompression(cropImg.value, {
+            maxSizeMB: .1,
+            useWebWorker: true,
         })
-    });
+        const snapshot = await uploadBytes(storageRef, cropImg.value)
+        const downloadURL = await getDownloadURL(snapshot.ref)
+        const userRef = doc(db, 'users', userStore.userId);
+        await updateDoc(userRef, {
+            avatar: downloadURL
+        })
+        toast.success("Successfully changed avatar", {
+            position: 'top-right'
+        });
+        setTimeout(() => {
+            window.location.reload()
+        }, 1000);
+    } catch (e) {
+        console.error(e)
+    }
+
 
 }
 
