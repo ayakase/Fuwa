@@ -56,11 +56,21 @@
                             </v-expansion-panel-text>
                         </v-expansion-panel></v-expansion-panels>
                 </div>
-                <v-list>
-                    <v-list-item v-for="each in langs">
-                        <v-btn @click="changeLanguage(each.value)">{{ each.title }}</v-btn>
-                    </v-list-item>
-                </v-list>
+                <div style="display:flex;align-items: center;">
+                    <p>{{ $t('language_setting') }}: &nbsp;</p>
+                    <v-menu>
+                        <template v-slot:activator="{ props }">
+                            <v-btn variant="text" v-bind="props">
+                                {{ getTitleByValue() }}
+                            </v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item v-for="each in langs">
+                                <v-btn @click="changeLanguage(each.value)">{{ each.title }}</v-btn>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
+                </div>
             </v-card>
             <v-card-title style="padding: 0;font-size: 1.5rem;"> {{ $t('profile_setting') }}</v-card-title>
 
@@ -75,24 +85,26 @@
                         {{ $t('display_name') }}
                     </div>
                     <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
-                        <v-text-field class="name-field" v-model="userInfo.displayName"
-                            variant="underlined"></v-text-field>
-                        <v-btn style="background-color: green;color: white;" @click="saveName">
-                            {{ $t('save') }}</v-btn>
+                        <v-text-field class="name-field" v-model="userInfo.displayName" variant="underlined"
+                            @input="saveName"></v-text-field>
+                        <!-- <v-btn style="background-color: green;color: white;" @click="saveName">
+                            {{ $t('save') }}</v-btn> -->
                     </div>
                     <div class="name-setting">
                         {{ $t('connection_id') }}
                     </div>
                     <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
-                        <v-text-field class="name-field" v-model="userInfo.cid" variant="underlined"></v-text-field>
-                        <v-btn style="background-color: green;color: white;" @click="saveCid">{{ $t('save') }}</v-btn>
+                        <v-text-field class="name-field" v-model="userInfo.cid" variant="underlined"
+                            @input="saveCid"></v-text-field>
+                        <!-- <v-btn style="background-color: green;color: white;" @click="saveCid">{{ $t('save') }}</v-btn> -->
                     </div>
                     <div class="about-setting">
                         {{ $t('about_me') }}
                     </div>
                     <div style="display: flex; flex-direction: row;align-items: center;gap: 1rem;">
-                        <v-textarea class="name-field" v-model="userInfo.about" variant="underlined"></v-textarea>
-                        <v-btn style="background-color: green;color: white;" @click="saveAbout">{{ $t('save') }}</v-btn>
+                        <v-textarea class="name-field" v-model="userInfo.about" variant="underlined"
+                            @input="saveAbout"></v-textarea>
+                        <!-- <v-btn style="background-color: green;color: white;" @click="saveAbout">{{ $t('save') }}</v-btn> -->
                     </div>
 
                 </div>
@@ -308,58 +320,70 @@ const themesArray = [
         "icon": "fas fa-water"
     }
 ]
+let saveNameTimeout
 async function saveName() {
-    if (userInfo.value.displayName.length < 4 || userInfo.value.displayName.length > 30) {
-        toast.error("Display name must have more than 4 characters and less than 30 characters", {
-            position: 'top-right'
-        });
-    } else {
-        const userRef = doc(db, "users", userId.value)
-        await updateDoc(userRef, {
-            displayName: userInfo.value.displayName
-        })
-        toast.success("Successfully changed your display name", {
-            position: 'top-right'
-        });
-    }
+    clearTimeout(saveNameTimeout);
+    saveNameTimeout = setTimeout(async () => {
+        if (userInfo.value.displayName.length < 4 || userInfo.value.displayName.length > 30) {
+            toast.error("Display name must have more than 4 characters and less than 30 characters", {
+                position: 'top-right'
+            });
+        } else {
+            const userRef = doc(db, "users", userId.value)
+            await updateDoc(userRef, {
+                displayName: userInfo.value.displayName
+            })
+            toast.success("Successfully changed your display name", {
+                position: 'top-right'
+            });
+        }
+    }, 1000);
 }
+
+let saveCidTimeout
 async function saveCid() {
-    const regex = /^[a-zA-Z]+#\d+$/;
-    const connectionId = userInfo.value.cid.trim();
-
-    if (connectionId === "") {
-        const userRef = doc(db, "users", userId.value);
-        await updateDoc(userRef, { cid: "" });
-        toast.success("Successfully cleared your Connection Id", {
-            position: 'top-right'
-        });
-    } else if (!regex.test(connectionId)) {
-        toast.error("Connection Id must follow text#number format", {
-            position: 'top-right'
-        });
-    } else {
-        const userRef = doc(db, "users", userId.value);
-        await updateDoc(userRef, { cid: connectionId });
-        toast.success("Successfully changed your Connection Id", {
-            position: 'top-right'
-        });
-    }
+    clearTimeout(saveCidTimeout);
+    saveCidTimeout = setTimeout(async () => {
+        const regex = /^[a-zA-Z]+#\d+$/;
+        const connectionId = userInfo.value.cid.trim();
+        if (connectionId === "") {
+            const userRef = doc(db, "users", userId.value);
+            await updateDoc(userRef, { cid: "" });
+            toast.success("Successfully cleared your Connection Id", {
+                position: 'top-right'
+            });
+        } else if (!regex.test(connectionId)) {
+            toast.error("Connection Id must follow text#number format", {
+                position: 'top-right'
+            });
+        } else {
+            const userRef = doc(db, "users", userId.value);
+            await updateDoc(userRef, { cid: connectionId });
+            toast.success("Successfully changed your Connection Id", {
+                position: 'top-right'
+            });
+        }
+    }, 1000)
 }
 
+let saveAboutTimeout
 async function saveAbout() {
-    if (userInfo.value.about.length < 2 || userInfo.value.about.length > 1000) {
-        toast.error("Description must have more than 1 characters and less than 1000 characters", {
-            position: 'top-right'
-        });
-    } else {
-        const userRef = doc(db, "users", userId.value)
-        await updateDoc(userRef, {
-            about: userInfo.value.about
-        })
-        toast.success("Successfully changed your about profile", {
-            position: 'top-right'
-        });
-    }
+    clearTimeout(saveAboutTimeout);
+    saveAboutTimeout = setTimeout(async () => {
+        if (userInfo.value.about.length < 2 || userInfo.value.about.length > 1000) {
+            toast.error("Description must have more than 1 characters and less than 1000 characters", {
+                position: 'top-right'
+            });
+        } else {
+            const userRef = doc(db, "users", userId.value)
+            await updateDoc(userRef, {
+                about: userInfo.value.about
+            })
+            toast.success("Successfully changed your about profile", {
+                position: 'top-right'
+            });
+        }
+    }, 1000)
 }
 const handleSignOut = () => {
     signOut(auth).then(() => {
@@ -386,29 +410,32 @@ function selectTheme(id) {
     });
     themeCheck.value = cookies.get('themeId')
 }
-async function getUser(user) {
-    if (user) {
-        const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
-        if (querySnapshot.empty) {
-            await new Promise(resolve => setTimeout(resolve, 200));
-            await getUser(user);
-            return;
-        }
+// async function getUser(user) {
+//     if (user) {
+//         const querySnapshot = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+//         if (querySnapshot.empty) {
+//             await new Promise(resolve => setTimeout(resolve, 200));
+//             await getUser(user);
+//             return;
+//         }
 
-        querySnapshot.forEach((doc) => {
-            userInfo.value = doc.data();
-            userStore.changeUserInfo(userInfo.value);
-            userStore.changeUserId(doc.id);
-        });
-    }
-}
+//         querySnapshot.forEach((doc) => {
+//             userInfo.value = doc.data();
+//             userStore.changeUserInfo(userInfo.value);
+//             userStore.changeUserId(doc.id);
+//         });
+//     }
+// }
 import lang from '../utils/language';
 function changeLanguage(lng) {
     console.log('lang')
     lang.global.locale = lng
     cookies.set('lang', lng)
 }
-
+function getTitleByValue() {
+    const lang = langs.find(lang => lang.value === cookies.get('lang'));
+    return lang ? lang.title : null;
+}
 const langs = [
     { title: "English", value: "en" },
     { title: "日本語", value: "ja" },

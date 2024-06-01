@@ -29,7 +29,7 @@
             :image="avatarMap(message.sender)"></v-avatar>
           <v-avatar class="avatar" v-if="message.messageType == 'bot'"
             image="https://i.imgur.com/horI1zX.png"></v-avatar>
-          <v-card-subtitle
+          <v-card-subtitle class="time"
             v-if="isSender(message.sender) && message.messageType !== 'system' && message.messageType !== 'bot'"
             style="margin-left: auto;">{{
       convertTime(message.time)
@@ -44,7 +44,7 @@
               <v-list-item class="message-option" @click="deleteMessage(message.id)">
                 <v-list-item-title>Unsend Message</v-list-item-title>
               </v-list-item>
-              <v-list-item class="message-option">
+              <v-list-item class="message-option" @click="copyMessage(message.content)">
                 <v-list-item-title>Copy Message</v-list-item-title>
               </v-list-item>
             </v-list>
@@ -87,12 +87,12 @@
               <v-list-item class="message-option" @click="deleteMessage(message.id)">
                 <v-list-item-title>Unsend Message</v-list-item-title>
               </v-list-item>
-              <v-list-item class="message-option">
+              <v-list-item class="message-option" @click="copyMessage(message.content)">
                 <v-list-item-title>Copy Message</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
-          <v-card-subtitle
+          <v-card-subtitle class="time"
             v-if="(!isSender(message.sender) && message.messageType == 'common') || message.messageType == 'bot'">{{
       convertTime(message.time)
     }}</v-card-subtitle>
@@ -106,7 +106,8 @@
       </div>
     </div>
     <v-card class="send-container">
-      <input @keydown.enter="sendMessage()" type="text" class="message-box" v-model="messageContent" id="" />
+      <input @input="handleInput" @keyup.down="onKeyDown" @keyup.up="onKeyUp" @keydown.enter="sendMessage()" type="text"
+        class="message-box" v-model="messageContent" id="" />
       <v-btn style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
           icon="fa-regular fa-image"></v-icon>
       </v-btn>
@@ -477,12 +478,49 @@ function handleScroll() {
 }
 function scrollToBottom() {
   bottomEl.value?.scrollIntoView({ behavior: "smooth" });
-
 }
+function copyMessage(text) {
+  navigator.clipboard.writeText(text)
+}
+
+let typingTimeout
+function handleInput() {
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    cookies.set('current_message', messageContent.value)
+  }, 200);
+}
+
+const messageIndex = ref(0)
+function onKeyUp() {
+  console.log('onKeyUp')
+  if (messageIndex.value == 0) {
+    messageContent.value = messageArray.value.slice().reverse()[0].content;
+    messageIndex.value += 1
+  } else if (messageIndex.value > 0 && messageIndex.value < messageArray.value.length) {
+    messageContent.value = messageArray.value.slice().reverse()[messageIndex.value].content;
+    messageIndex.value += 1
+  } else if (messageIndex.value == messageArray.value.length) {
+    messageIndex.value = 0
+    messageContent.value = cookies.get('current_message') || ''
+  }
+}
+function onKeyDown() {
+  if (messageIndex.value == 0) {
+    messageContent.value = messageArray.value.slice().reverse()[messageArray.value.length - 1].content;
+    messageIndex.value = messageArray.value.length - 1
+  } else if (messageIndex.value > 0 && messageIndex.value <= messageArray.value.length) {
+    messageContent.value = messageArray.value.slice().reverse()[messageIndex.value - 1].content;
+    messageIndex.value -= 1
+  }
+}
+
+
 watch(
   () => props.boxId,
   (newBoxId, oldBoxId) => {
     if (newBoxId) {
+      messageIndex.value = 0
       getMessage(newBoxId)
       fetchMembers();
     }
@@ -725,5 +763,11 @@ a {
 
 .img-input {
   margin-top: 1rem;
+}
+
+@media all and (max-width: 1280px) {
+  .time {
+    display: none;
+  }
 }
 </style>

@@ -61,7 +61,6 @@ async function getUser(user) {
 setInterval(async () => {
   if (userId.value) {
     const userRef = doc(db, 'users', userId.value);
-    console.log(userId.value)
     await updateDoc(userRef, {
       lastOnline: Date.now()
     })
@@ -191,7 +190,7 @@ const options = [
         <v-list v-if="user" density="compact" nav>
           <v-list-item prepend-icon="fa-solid fa-earth-americas" :title="$t('explore')" value="shared"
             @click="router.push('/explore')">
-            <v-tooltip activator="parent" location="start">{{$t('explore')}}</v-tooltip>
+            <v-tooltip activator="parent" location="start">{{ $t('explore') }}</v-tooltip>
           </v-list-item>
           <v-list-item prepend-icon="fa-solid fa-home" :title="$t('home')" value="home" @click="router.push('/')">
             <v-tooltip activator="parent" location="start">Home</v-tooltip></v-list-item>
@@ -199,14 +198,16 @@ const options = [
             @click="router.push('/groups')">
             <v-tooltip activator="parent" location="start">Groups</v-tooltip>
           </v-list-item>
-          <v-list-item prepend-icon="fa-solid fa-inbox" :title="$t('inbox')" value="inbox" @click="router.push('/inbox')">
+          <v-list-item prepend-icon="fa-solid fa-inbox" :title="$t('inbox')" value="inbox"
+            @click="router.push('/inbox')">
             <v-tooltip activator="parent" location="start">Inbox</v-tooltip>
           </v-list-item>
           <!-- <v-list-item prepend-icon="mdi-robot-happy-outline" title="Chat Bot" value="chat-bot"
               @click="router.push('/chat-bot')">
               <v-tooltip activator="parent" location="start">Setting</v-tooltip>
             </v-list-item> -->
-          <v-list-item prepend-icon="fa-solid fa-gear" :title="$t('settings')" value="setting" @click="router.push('/setting')">
+          <v-list-item prepend-icon="fa-solid fa-gear" :title="$t('settings')" value="setting"
+            @click="router.push('/setting')">
             <v-tooltip activator="parent" location="start">Setting</v-tooltip>
           </v-list-item>
         </v-list>
@@ -226,7 +227,7 @@ const options = [
   </div>
   <!-- <div style="height: 60px;" class="mobile-menu"></div> -->
   <div class="mobile-menu">
-    <CurvedBottomNavigation style="position: static;" icon-color="textTheme()"
+    <CurvedBottomNavigation v-if="route.meta.showNav" style="position: static;" icon-color="textTheme()"
       :background-color="backgroundColorTheme()" foreground-color='var(--main-color)' :options="options"
       v-model="selected" />
   </div>
@@ -258,10 +259,10 @@ const options = [
   }
 }
 
-@media all and (max-width: 1000px) {
-  /* .nav-drawer {
+@media all and (max-width: 1280px) {
+  .nav-drawer {
     display: none;
-  } */
+  }
 }
 
 /* .chat-title:hover {

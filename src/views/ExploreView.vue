@@ -4,16 +4,13 @@
             <div
                 style="width:100%; display: flex;align-items:center;flex-wrap: wrap; flex-direction: column;gap: .2rem;">
                 <v-text-field v-model="searchTerm" class="search-box" :label="$t('search_placeholder')
-                    " hide-details single-line append-inner-icon="fa-solid fa-magnifying-glass" variant="solo-filled" @input="handleInput">
+                    " hide-details single-line append-inner-icon="fa-solid fa-magnifying-glass" variant="solo-filled"
+                    @input="handleInput">
                     <template v-slot:loader>
                         <v-progress-linear :active="progressBar" :model-value="progress" height="2"
                             indeterminate></v-progress-linear>
                     </template>
                 </v-text-field>
-                <v-select clearable label="Category" style="max-width:15rem;margin:0;" :items="categoryIcons"
-                    return-object single-line hide-details variant="solo-inverted" v-model="category"
-                    :append-inner-icon="iconSelect()">
-                </v-select>
             </div>
         </div>
         <div style="display:flex; align-items: center;gap:1rem;width: 95%;">
@@ -83,17 +80,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { getAuth } from 'firebase/auth';
-import ChatLoading from '@/components/ChatLoading.vue';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import { db } from '../firebaseConfig';
-import { collection, addDoc, doc, getDocs, arrayUnion, query, where, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, arrayUnion, updateDoc } from 'firebase/firestore';
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/userStore';
 import Typesense from 'typesense'
-const user = ref()
-// const auth = getAuth()
 const toast = useToast();
 
 const searchTerm = ref("")
@@ -107,19 +100,19 @@ const progressBar = ref(false)
 const progress = computed(() => {
     return Math.min(100, value.value.length * 10)
 })
-const category = ref({ id: 'all', title: 'All', icon: 'fa-solid fa-earch' })
-const categoryIcons = [
-    { id: 'all', title: 'All', icon: 'fa-solid fa-earth' },
-    { id: 'gaming', title: 'Gaming', icon: 'fa-solid fa-gamepad' },
-    { id: 'music', title: 'Music', icon: 'fa-solid fa-music' },
-    { id: 'entertainment', title: 'Entertainment', icon: 'fa-solid fa-tv' },
-    { id: 'tech', title: 'Science & Tech', icon: 'fa-solid fa-atom' },
-    { id: 'education', title: 'Education', icon: 'fa-solid fa-graduation-cap' }
-];
-function iconSelect() {
-    const select = categoryIcons.find(cat => cat.id === category.value.id);
-    return select ? select.icon : null;
-}
+// const category = ref({ id: 'all', title: 'All', icon: 'fa-solid fa-earch' })
+// const categoryIcons = [
+//     { id: 'all', title: 'All', icon: 'fa-solid fa-earth' },
+//     { id: 'gaming', title: 'Gaming', icon: 'fa-solid fa-gamepad' },
+//     { id: 'music', title: 'Music', icon: 'fa-solid fa-music' },
+//     { id: 'entertainment', title: 'Entertainment', icon: 'fa-solid fa-tv' },
+//     { id: 'tech', title: 'Science & Tech', icon: 'fa-solid fa-atom' },
+//     { id: 'education', title: 'Education', icon: 'fa-solid fa-graduation-cap' }
+// ];
+// function iconSelect() {
+//     const select = categoryIcons.find(cat => cat.id === category.value.id);
+//     return select ? select.icon : null;
+// }
 let client = new Typesense.Client({
     'nodes': [{
         'host': import.meta.env.VITE_TYPESENSE_HOST,
@@ -129,10 +122,7 @@ let client = new Typesense.Client({
     'apiKey': import.meta.env.VITE_TYPESENSE_API,
     'connectionTimeoutSeconds': 2
 })
-function performSearch() {
 
-
-}
 async function fetchBoxes() {
     let resultArray = []
     let search = {

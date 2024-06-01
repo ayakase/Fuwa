@@ -3,8 +3,8 @@
         <v-navigation-drawer :width="400" class="box-view" :rail="rail" rail-width="80" v-model="showSidebar"
             absolute="false">
             <div style="padding-left: 1rem; padding-right:1rem;margin-top: .5rem;">
-                <v-text-field v-model="searchCid" label="Connection ID" prepend-icon="fa-solid fa-magnifying-glass" hide-details
-                    variant="underlined" @input="handleInput"></v-text-field>
+                <v-text-field v-model="searchCid" label="Connection ID, text#number" prepend-icon="fa-solid fa-magnifying-glass"
+                    hide-details variant="underlined" @input="handleInput"></v-text-field>
             </div>
             <v-list>
                 <UserProfile v-if="userResult" v-for="user in userResult" :id="user.id" :name="user.name"
@@ -25,7 +25,6 @@
                             <img :src="inbox.receiver.avatar" alt=""
                                 style="width:4rem;transition: width 0.3s ease;border-radius:9999px;"
                                 :style="getStyle(rail)">
-
                             <div>
                                 <p class="box-title" v-if="!rail">
                                     {{ inbox.receiver.displayName }}
@@ -353,80 +352,9 @@ async function addBoxToDb() {
     }
 }
 function getStyle(rail) {
-    return { width: rail ? '2.5rem' : '4rem' }
-}
-function showDeleteBtn(owner) {
-    return (`users/${userId.value}` == owner.path)
-}
-function showLeaveBtn(owner) {
-    return !(`users/${userId.value}` == owner.path)
+    return { width: rail ? '2.2rem' : '4rem' }
 }
 
-async function pinBox(id) {
-    const boxDocRef = doc(db, 'boxes', id)
-    const userDocRef = doc(db, 'users', userStore.userId);
-    try {
-        await updateDoc(userDocRef, {
-            pin: boxDocRef
-        })
-        reloadBoxes()
-    } catch (e) {
-        console.log(e)
-    }
-}
-
-async function deleteBox(title, id) {
-    if (confirm("Delete box: " + title + " ?") == true) {
-        const boxDocRef = doc(db, 'boxes', id)
-        try {
-            await deleteDoc(boxDocRef);
-            // await updateDoc(doc(db, "users", userId.value), {
-            //     boxes: arrayRemove(doc(db, "boxes", id))
-            // })
-            await updateDoc(boxDocRef, {
-                latestMessage: `${userInfo.value.displayName} deleted this chat`,
-                latestChange: Date.now()
-            })
-        } catch (e) {
-            console.error(e.message)
-        }
-        // fetchBoxes();
-        $toast.info("Deleted box chat " + title, {
-            position: 'top-right'
-        });
-    } else {
-        console.log("Deletion cancelled");
-    }
-}
-async function leaveBox(title, id) {
-    if (confirm("Delete box: " + title + " ?") == true) {
-        const userDocRef = doc(db, `users/${userStore.userId}`);
-        const boxDocRef = doc(db, "boxes", id);
-        const messageCollectionRef = collection(boxDocRef, "messages");
-
-        // await updateDoc(doc(db, "users", userId.value), {
-        //     boxes: arrayRemove(doc(db, "boxes", id))
-        // })
-
-        await updateDoc(boxDocRef, {
-            members: arrayRemove(doc(db, "users", userId.value)),
-            latestMessage: `${userInfo.value.displayName} left this chat`,
-            latestChange: Date.now()
-        })
-        const newMessage = await addDoc(messageCollectionRef, {
-            content: userInfo.value.displayName + " left this Group ",
-            timeSent: Date.now(),
-            senderRef: userDocRef,
-            messageType: 'system',
-        });
-        // fetchBoxes();
-        $toast.info("Left " + title, {
-            position: 'top-right'
-        });
-    } else {
-        console.log("Deletion cancelled");
-    }
-}
 function convertTime(timestamp) {
     const dateTime = new Date(timestamp);
     const today = new Date();
@@ -446,6 +374,13 @@ function openGroups() {
     showSidebar.value = true;
     // sideBreakpoint.value = sideBreakpoint.value === 'md' ? '0' : 'md';
     // rail.value = true;
+}
+function online(lastOnline) {
+    if (((Date.now() - lastOnline) / 1000) > 60) {
+        return false
+    } else {
+        return true
+    }
 }
 onMounted(() => {
     onAuthStateChanged(auth, (firebaseUser) => {

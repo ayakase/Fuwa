@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <v-navigation-drawer :width="400" :rail="rail" rail-width="80" v-model="showSidebar" style="">
+        <v-navigation-drawer :width="400" :rail="rail" rail-width="80" v-model="showSidebar">
             <div class="box-view">
                 <div class="message-top-bar" density="compact">
                     <v-dialog width="800">
@@ -24,14 +24,14 @@
                                             {{ $t('random_id') }}</v-btn>
                                         <v-btn style="height:3rem;background-color:red;" @click="newBoxInviteId = ''">{{
             $t('cancel') }}</v-btn>
-
                                     </div>
                                     <div style="display:flex; flex-direction:column;align-items: center;gap:1rem">
                                         <v-dialog>
                                             <template v-slot:activator="{ props: activatorProps }">
                                                 <v-btn v-bind="activatorProps"
                                                     style="background-color: green;color: white;width:15rem;">{{
-            $t('select_thumbnail') }}</v-btn>
+            $t('select_thumbnail')
+        }}</v-btn>
                                             </template>
                                             <template v-slot:default="{ isActive }">
                                                 <v-card
@@ -105,14 +105,14 @@
                             </v-card>
                         </template>
                     </v-dialog>
-                    <v-btn @click="boxes = []; reloadBoxes()" icon="fa-solid fa-arrow-rotate-right">
+                    <v-btn variant="text" @click="boxes = []; reloadBoxes()" icon="fa-solid fa-arrow-rotate-right">
                     </v-btn>
                 </div>
                 <!-- <div style="">
                     <p v-for="x in 40">a</p>
                 </div> -->
                 <v-list
-                    style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;overflow:scroll;overflow-x: hidden;">
+                    style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;overflow:scroll;overflow-x: hidden;flex:1;">
                     <v-divider></v-divider>
                     <v-list-item :class="{ active: box.id == boxId }"
                         @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite, box.thumbnail, box.isPublic)"
@@ -135,7 +135,8 @@
                                     :style="getStyle(rail)">
 
                                 <div>
-                                    <p class="box-title" v-if="!rail">{{ box.title }}</p>
+                                    <p style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 12rem;"
+                                        class="box-title" v-if="!rail">{{ box.title }}</p>
                                     <p v-if="!rail"
                                         style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 12rem;">
                                         {{ box.latestMessage }}</p>
@@ -340,7 +341,6 @@ function getThumbnailUrl(event) {
     }
 }
 function getPreviewThumnail({ coordinates, canvas }) {
-    console.log(coordinates, canvas);
     canvas.toBlob((blob) => {
         croppedThumbnail.value = blob;
     });
@@ -373,7 +373,6 @@ function getBannerUrl(event) {
     }
 }
 function getPreviewBanner({ coordinates, canvas }) {
-    console.log(coordinates, canvas);
     canvas.toBlob((blob) => {
         croppedBanner.value = blob;
     });
@@ -447,7 +446,7 @@ async function addBoxToDb() {
 }
 
 function getStyle(rail) {
-    return { width: rail ? '2.5rem' : '4rem' }
+    return { width: rail ? '2.2rem' : '4rem' }
 }
 function showDeleteBtn(owner) {
     return (`users/${userId.value}` == owner.path)

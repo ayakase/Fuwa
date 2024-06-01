@@ -204,7 +204,7 @@ const loginWithEmailAndPassword = () => {
             userStore.checkUser(result.user)
             addUserToDb(auth.currentUser)
             // console.log(auth.currentUser)
-            toast.success('Logged in as ' + result.user.displayName, {
+            toast.success('Logged in', {
                 position: 'top-right'
             });
             // window.location.reload();
