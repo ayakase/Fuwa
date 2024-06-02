@@ -51,7 +51,10 @@ const language = createI18n({
             image_upload: "Drag & Drop or click to upload",
             theme_toast: "Theme changed to ",
             greeting: "Greeting",
-            message_placeholder: "{'@'}bot to ask bot, arrow key ⌃ or ⌄ to navigate between messages"
+            message_placeholder: "{'@'}bot to ask bot, arrow key ⌃ or ⌄ to navigate between messages",
+            join: 'Join chat',
+            joined: 'Joined',
+
         },
         ja: {
             display_name: '表示名',

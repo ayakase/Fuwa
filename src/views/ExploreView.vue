@@ -21,61 +21,83 @@
             </h2>
             <v-icon icon="fa-regular fa-compass fa-shake" style="font-size:2rem;color:#ff1744;"></v-icon>
         </div>
-        <div class="result-container">
-            <v-dialog max-width="800" v-if="resultBoxes" v-for="box in resultBoxes">
+        <div class="result-container" v-if="resultBoxes">
+            <v-dialog max-width="800" v-for="box in resultBoxes">
                 <template v-slot:activator="{ props: activatorProps }">
                     <v-card class="each-box" elevation="3" variant="elevated" hover link v-bind="activatorProps">
                         <v-img class="box-cover" :src="box.banner" cover
                             alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg"></v-img>
                         <div
                             style="display: flex;flex-direction: column; transform: translateY(-3rem);padding-left: 1rem;padding-right: 1rem;">
-                            <v-card variant="flat" style="width: 20%;border-radius: 1rem;" border="background lg">
+                            <v-card class="preview-thumbnail" variant="flat" border="background lg">
                                 <v-img :src="box.thumbnail" alt=""></v-img>
                             </v-card>
                             <div>
                                 <h3>{{ box.title }}</h3>
                                 <div class="box-description">
                                     {{ box.description }}</div>
-                                <div>{{ countMembers(box.members) }} members </div>
                             </div>
                         </div>
-                        <!-- <div style="width: 100%; display: flex; justify-content: flex-end;position: absolute;bottom:0;">
-                            <v-btn v-if="!joined(box.members)" @click="joinBox(box.id)">Join</v-btn>
-                            <v-btn disabled v-if="joined(box.members)">Joined</v-btn>
-                        </div> -->
+                        <div
+                            style="display: flex;align-items: center; justify-content:space-between;position: absolute;bottom:.6rem;padding-left: 1rem;padding-right: 1rem;width:100%;">
+                            <div>
+                                <v-icon icon="fas fa-user-group" size="xm"></v-icon>
+                                <span style="margin-left: .8rem">{{ countMembers(box.members) }} members</span>
+                            </div>
+                            <div v-if="joined(box.members)"
+                                style="color: chartreuse;background-color: green;padding-left: .6rem;padding-right: .6rem;border-radius: 1rem;">
+                                Joined
+                            </div>
+
+                        </div>
                     </v-card>
                 </template>
 
                 <template v-slot:default="{ isActive }">
                     <v-card class="mx-auto" style="width:100%">
-                        <v-img :src="box.banner" cover></v-img>
-
-                        <v-card-title>
-                            {{ box.title }}
-                        </v-card-title>
-
-                        <v-card-text>
-                            {{ box.description }}
-                        </v-card-text>
-
-                        <div style="width: 100%; display: flex; justify-content: flex-end;position: absolute;bottom:0;">
-                            <v-btn v-if="!joined(box.members)" @click="joinBox(box.id)">Join</v-btn>
-                            <v-btn disabled v-if="joined(box.members)">Joined</v-btn>
+                        <v-img class="" :src="box.banner" cover
+                            alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg"></v-img>
+                        <div
+                            style="display: flex;flex-direction: column; transform: translateY(-7rem);padding-left: 1rem;padding-right: 1rem;">
+                            <div style="width:100%;display: flex;justify-content: center;">
+                                <v-card variant="flat" style="width: 25%;border-radius: 9999px;" border="background xl">
+                                    <!-- <v-img :src="box.thumbnail" alt="s"></v-img> -->
+                                    <img :src="box.thumbnail" alt=""
+                                        style="width: 100%;height: 100%;object-fit: cover;">
+                                </v-card>
+                            </div>
+                            <div>
+                                <h3>{{ box.title }}</h3>
+                                <div>
+                                    {{ box.description }}</div>
+                                <div style="display: flex;align-items: center;gap: 1rem;"> <v-icon
+                                        icon="fas fa-user-group" size="xm"></v-icon>{{
+                    countMembers(box.members)
+                }} members </div>
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%; display: flex; justify-content: center;position: absolute;bottom:1rem;">
+                            <v-btn style="height: 4rem;font-size: large;" v-if="!joined(box.members)"
+                                @click="joinBox(box.id)">
+                                {{ $t('join') }}
+                                &nbsp; <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                            </v-btn>
+                            <v-btn style="height: 4rem;font-size: large;" disabled
+                                v-if="joined(box.members)">Joined</v-btn>
                         </div>
                     </v-card>
                 </template>
             </v-dialog>
 
-
-            <!-- <v-skeleton-loader 
-        v-for="x in 10" :key='x'
-          class="mx-auto border"
-          type="image, article"
-          style="width: 48%"
-        ></v-skeleton-loader> -->
         </div>
+        <div class="result-container" v-else>
+            <v-skeleton-loader v-for="x in perPage" :key='x' class="mx-auto border"
+                style="width: 100%; border-radius: .6rem;overflow: hidden" type="image, article"></v-skeleton-loader>
+        </div>
+        <v-pagination v-if="totalPages" prev-icon="fa-solid fa-chevron-left" next-icon="fa-solid fa-chevron-right"
+            v-model="page" :length="totalPages" class="my-4" @click="fetchBoxes" :total-visible="2"></v-pagination>
     </div>
-
 </template>
 
 <script setup>
@@ -87,14 +109,14 @@ import { collection, addDoc, doc, arrayUnion, updateDoc } from 'firebase/firesto
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/userStore';
 import Typesense from 'typesense'
+import router from '@/router';
 const toast = useToast();
 
 const searchTerm = ref("")
-const resultBoxes = ref([])
+const resultBoxes = ref()
 const userStore = useUserStore()
 const { userId } = storeToRefs(userStore)
 const { userInfo } = storeToRefs(userStore);
-
 const value = ref('')
 const progressBar = ref(false)
 const progress = computed(() => {
@@ -122,44 +144,31 @@ let client = new Typesense.Client({
     'apiKey': import.meta.env.VITE_TYPESENSE_API,
     'connectionTimeoutSeconds': 2
 })
-
+const page = ref(1)
+const totalPages = ref(0)
+const perPage = ref(8)
 async function fetchBoxes() {
+    resultBoxes.value = null
     let resultArray = []
     let search = {
         'q': searchTerm.value,
         'preset': 'default',
+        'per_page': perPage.value,
+        'page': page.value
         // 'filter_by': 'isPublic:true'
     }
     client.collections('boxes')
         .documents()
         .search(search)
         .then(function (searchResults) {
-            // console.log(searchResults.hits)
+            console.log(Math.ceil(searchResults.found / perPage.value))
             searchResults.hits.forEach(result => {
                 resultArray.push(result.document)
             });
+            totalPages.value = Math.ceil(searchResults.found / perPage.value)
             resultBoxes.value = resultArray
             progressBar.value = false
         })
-    // const response = []
-    // const querySnapshot = await getDocs(
-    //     query(
-    //         collection(db, "boxes"),
-    //         where("isPublic", "==", true),
-    //         // where("title", "array-contains", searchTerm.value)
-    //         where("title", ">=", searchTerm.value),
-    //         where("title", "<=", searchTerm.value + '\uf8ff')
-    //     )
-    // );
-    // querySnapshot.forEach((doc) => {
-    //     response.push({
-    //         title: doc.data().title,
-    //         description: doc.data().description,
-    //         id: doc.id
-
-    //     });
-    // });
-    // resultBoxes.value = response
 }
 async function joinBox(id) {
     const boxRef = doc(db, "boxes", id)
@@ -189,6 +198,7 @@ async function joinBox(id) {
         toast.success("Joined", {
             position: 'top-right'
         });
+        router.push('/groups')
     } catch (e) {
         console.error(e);
     }
@@ -247,11 +257,13 @@ onMounted(() => {
 }
 
 .result-container {
+    padding: auto;
     width: 95%;
     display: grid;
     grid-template-columns: repeat(auto-fill, 25rem);
     justify-content: space-between;
     gap: 2rem;
+
 }
 
 .each-box {
@@ -326,6 +338,12 @@ h2 {
     }
 }
 
+.preview-thumbnail {
+    width: 20%;
+    border-radius: 1rem;
+
+}
+
 @media (max-width: 800px) {
     .cover-section {
         border-radius: 0;
@@ -341,8 +359,7 @@ h2 {
 
 @media all and (max-width:1280px) {
     .result-container {
-        display: flex;
-        flex-direction: column;
+        justify-content: center;
     }
 
     .each-box {
@@ -354,6 +371,8 @@ h2 {
         min-height: 6rem;
         max-height: 6rem;
     }
+
+
 
     .box-description {
         overflow: hidden;

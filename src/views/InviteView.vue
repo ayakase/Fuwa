@@ -1,10 +1,11 @@
 <template>
     <div class="container">
-        <v-card style="width: 80%;height: 50%;position: relative;" v-if="boxInfo" elevation="20">
-            <img style="top:0; height: 50%; width: 100%; object-fit: cover;filter: brightness(70%)"
+        <v-card style="width: 80%;height: 100%;position: relative;" v-if="boxInfo" elevation="20">
+            <img style="top:0; height: 30%; width: 100%; object-fit: cover;filter: brightness(70%)"
                 :src="boxInfo.banner" alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg">
-            <img style="left:0;margin-left: 5%;width: 20%;border-radius: 9999px; background-color: whitesmoke; position:absolute"
-                :src="boxInfo.thumbnail" alt="">
+            <div style="display: flex;justify-content: center; transform: translateY(-10rem)">
+                <img class="thumbnail" :src="boxInfo.thumbnail" alt="">
+            </div>
             <v-card-title style="font-size: xx-large;">
                 {{ boxInfo.title }}
             </v-card-title>
@@ -101,5 +102,11 @@ onMounted(() => {
     100% {
         transform: rotate(1turn)
     }
+}
+
+.thumbnail {
+    width: 20%;
+    border-radius: 9999px;
+    background-color: whitesmoke;
 }
 </style>

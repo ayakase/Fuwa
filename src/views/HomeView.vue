@@ -1,8 +1,43 @@
 <template>
-    <v-infinite-scroll :items="news" :onLoad="load" class="news-container">
-        <h1 style="text-align: center;"> {{ $t('greeting') }}, {{ userInfo.displayName }} !
-        </h1>
-        <p style="text-align: center;">{{ currentTime }}</p>
+    <v-card style="width: 100%; height: 100%;padding-top: 1rem;">
+        <Transition name="slide-fade">
+            <div v-if="show" style="display: flex;flex-direction: column;justify-content: center;align-items:center;">
+                <p style="text-align: center;">{{ currentTime }}</p>
+                <img class="illustration" src="../assets/illustration.png" alt="">
+                <h1 style="text-align: center;"> {{ $t('greeting') }}, {{ userInfo.displayName }}!
+                </h1>
+            </div>
+        </Transition>
+        <Transition name="slide-fade">
+            <div class="button-container" v-if="showBtn">
+                <v-card class="nav-button" id="btn1" @click="router.push('/groups')">
+                    <v-card-title style="font-size: x-large; font-weight: bolder;color: black;">Groups</v-card-title>
+                    <v-icon icon="fas fa-arrow-right" style="color:black"></v-icon>
+                </v-card>
+                <v-card class="nav-button" id="btn2" @click="router.push('/inbox')">
+                    <v-card-title style="font-size: x-large; font-weight: bolder;color: white;">Inboxes</v-card-title>
+                    <v-icon icon="fas fa-arrow-right" style="color:white"></v-icon>
+                </v-card>
+                <v-card class="nav-button" id="btn3" @click="router.push('/explore')">
+                    <v-card-title style="font-size: x-large; font-weight: bolder;color: white;">Explore</v-card-title>
+                    <v-icon icon="fas fa-arrow-right" style="color:white"></v-icon>
+                </v-card>
+                <v-card class="nav-button" id="btn4" @click="router.push('/setting')">
+                    <v-card-title style="font-size: x-large; font-weight: bolder;color: black;">Settings</v-card-title>
+                    <v-icon icon="fas fa-arrow-right" style="color:black"></v-icon>
+                </v-card>
+            </div>
+        </Transition>
+        <!-- <div v-if="quote" style="padding-left: 1rem;padding-bottom: 1rem;">
+            <p> {{ quote.quote }}</p>
+            <p> ~ {{ quote.author }} ~</p>
+        </div>
+        <v-skeleton-loader v-else class="mx-auto" type="list-item-three-line"></v-skeleton-loader> -->
+    </v-card>
+
+
+    <!-- <v-infinite-scroll :items="news" :onLoad="load" class="news-container">
+       
         <template v-for="(item, index) in news" :key="item">
             <div>
                 <v-card class="each-post">
@@ -12,46 +47,53 @@
                         <v-card-subtitle>
                             {{ item.description }}
                         </v-card-subtitle>
+                        <v-card-subtitle>
+                            {{ item.author }}
+                        </v-card-subtitle>
+                        <v-card-subtitle>
+                            {{ item.publishedAt }}
+                        </v-card-subtitle>
                     </div>
                 </v-card>
             </div>
         </template>
-        <template v-slot:loading>
+<template v-slot:loading>
             <div style="width: 100%; display:flex;flex-direction: column;gap:1rem">
                 <v-skeleton-loader v-for="x in 5" :key='x' class="mx-auto border" style="width: 100%;"
                     type="image, article"></v-skeleton-loader>
             </div>
         </template>
 
-    </v-infinite-scroll>
+</v-infinite-scroll> -->
 </template>
 <script setup>
 import { storeToRefs } from "pinia";
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/userStore';
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore);
 import axios from "axios";
 import { ref, onMounted } from "vue";
-import { languages } from "unique-names-generator";
-const news = ref([])
-const currentPage = ref(1)
-async function load({ done }) {
-    console.log('he')
-    const response = await axios.get('https://newsapi.org/v2/top-headlines', {
-        params: {
-            // country: 'en',
-            language: 'en',
-            pageSize: 5,
-            page: currentPage.value,
-        },
-        headers: {
-            'X-Api-Key': import.meta.env.VITE_NEWS_API
-        }
-    })
-    news.value.push(...response.data.articles)
-    currentPage.value += 1
-    done('ok')
-}
+const router = useRouter()
+// const news = ref([])
+// const currentPage = ref(1)
+// async function load({ done }) {
+//     console.log('he')
+//     const response = await axios.get('https://newsapi.org/v2/top-headlines', {
+//         params: {
+//             // country: 'en',
+//             language: 'en',
+//             pageSize: 5,
+//             page: currentPage.value,
+//         },
+//         headers: {
+//             'X-Api-Key': import.meta.env.VITE_NEWS_API
+//         }
+//     })
+//     news.value.push(...response.data.articles)
+//     currentPage.value += 1
+//     done('ok')
+// }
 const currentTime = ref('')
 function getTime() {
     var currentdate = new Date();
@@ -63,8 +105,26 @@ function getTime() {
         + currentdate.getMinutes() + ":"
         + currentdate.getSeconds();
 }
+const show = ref(false)
+const showBtn = ref(false)
+const quote = ref('')
+// function getQuote() {
+//     axios.get('https://api.api-ninjas.com/v1/quotes', {
+//         headers: {
+//             'X-Api-Key': import.meta.env.VITE_NEWS_API
+//         }
+//     }).then((response) => {
+//         console.log(response.data);
+//         quote.value = response.data[0]
+//     })
+// }
 onMounted(() => {
     getTime()
+    // getQuote()
+    setTimeout(() => {
+        show.value = true
+        showBtn.value = true
+    }, 200);
 })
 let update = [
     {
@@ -204,6 +264,8 @@ let update = [
 
 
 .news-container {
+    /* background-image: url('../assets/home-bg.jpg');
+    background-size: cover; */
     width: 100%;
     height: 100vh;
     padding: 1rem;
@@ -253,5 +315,98 @@ let update = [
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     /* background: #579359; */
+}
+
+
+.bounce-enter-active {
+    animation: bounce-in 0.5s;
+}
+
+.bounce-leave-active {
+    animation: bounce-in 0.5s reverse;
+}
+
+@keyframes bounce-in {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.25);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+.illustration {
+    width: 30%;
+}
+
+.button-container {
+    width: 35%;
+    margin-top: 2rem !important;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin: auto;
+    gap: 1rem;
+}
+
+.nav-button {
+    border-radius: 1rem;
+    background-size: cover;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 6rem;
+    width: 100%;
+}
+
+#btn1 {
+    background-image: url('../assets/group.jpg');
+}
+
+#btn2 {
+    background-image: url('../assets/inbox.jpg');
+}
+
+#btn3 {
+    background-image: url('../assets/search.jpg');
+}
+
+#btn4 {
+    background-image: url('../assets/setting.jpg');
+}
+
+@media all and (max-width: 1000px) {
+    .illustration {
+        width: 50%;
+    }
+
+    .button-container {
+        width: 95%;
+    }
+}
+
+@media all and (max-width: 600px) {
+    .illustration {
+        width: 90%;
+    }
 }
 </style>

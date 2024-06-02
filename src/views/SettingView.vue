@@ -9,8 +9,9 @@
                     <v-btn @click="toggleTheme" :icon="themeState">
                     </v-btn>
                 </div>
-                <div style="width: 30%;display: flex; flex-direction: row; align-items: center; gap: .5rem;">
-                    <p>{{ $t('primary_color') }}</p>
+                <div class="primary-color"
+                    style="width: 30%;display: flex; flex-direction: row; align-items: center; gap: .5rem;">
+                    <p>{{ $t('primary_color') }}:</p>
                     <v-menu location="end" :close-on-content-click="false">
                         <template v-slot:activator="{ props }">
                             <v-btn style="background-color: var(--main-color);" v-bind="props">
@@ -463,17 +464,17 @@ onMounted(() => {
     overflow-x: hidden;
     height: 100%;
     width: 100%;
-    padding: 2rem;
 }
 
 .sign-out {
-    width: 10%;
+    width: 10rem;
 }
 
 .setting-container {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    padding: .5rem;
 }
 
 .theme-mode {
@@ -501,6 +502,7 @@ onMounted(() => {
 .profile-setting {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 2rem;
     padding: 1rem;
 }
@@ -578,6 +580,10 @@ img {
 
     .theme-title {
         font-size: 13px;
+    }
+
+    .primary-color {
+        width: 100% !important;
     }
 }
 </style>
