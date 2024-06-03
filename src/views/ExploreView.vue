@@ -50,7 +50,7 @@
                             </div>
                             <div v-if="joined(box.members)"
                                 style="color: chartreuse;background-color: green;padding-left: .6rem;padding-right: .6rem;border-radius: 1rem;">
-                                Joined
+                                {{ $t('joined') }}
                             </div>
 
                         </div>
@@ -60,7 +60,7 @@
                 <template v-slot:default="{ isActive }">
                     <v-card class="mx-auto" style="width:100%;">
                         <div style="display: flex; flex-direction: row;position: relative;">
-                                <!-- <img :src="box.thumbnail" alt="" style="width:100%;height:100%;filter: brightness(80%)"> -->
+                            <!-- <img :src="box.thumbnail" alt="" style="width:100%;height:100%;filter: brightness(80%)"> -->
                             <v-img style="filter: brightness(80%);width:100%;" :src="box.banner" cover
                                 alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg"></v-img>
                             <h3 class="box-title">
@@ -97,7 +97,9 @@
                                     &nbsp; <i class="fa-solid fa-arrow-right-to-bracket"></i>
                                 </v-btn>
                                 <v-btn variant="flat" style="height: 2rem;font-size: large;" disabled
-                                    v-if="joined(box.members)">Joined</v-btn>
+                                    v-if="joined(box.members)">
+                                    {{ $t('joined') }}
+                                </v-btn>
                             </div>
                         </div>
                     </v-card>

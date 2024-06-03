@@ -15,14 +15,15 @@
                     <v-menu location="end" :close-on-content-click="false">
                         <template v-slot:activator="{ props }">
                             <v-btn style="background-color: var(--main-color);" v-bind="props">
-                                Change
+                                {{ $t('change') }}
+
                                 &nbsp;
                                 <v-icon icon="fa-solid fa-palette"></v-icon>
                             </v-btn>
                         </template>
-                        <v-color-picker v-model="colorCode" show-swatches elevation="15"></v-color-picker>
+                        <v-color-picker hide-canvas how-swatches v-model="colorCode" elevation="15"></v-color-picker>
                         <v-btn @click="confirmColor()">
-                            Confirm color change
+                            {{$t('cfcolor')}}
                         </v-btn>
                     </v-menu>
 

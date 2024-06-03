@@ -8,7 +8,7 @@
                     <v-dialog width="800" v-if="!rail">
                         <template v-slot:activator="{ props }">
                             <v-btn style="height: 100%;flex:1;" variant="flat" class="add-box" v-bind="props">
-                                Create
+                                {{ $t('create') }} &nbsp;
                                 <v-icon icon="fa-solid fa-plus"></v-icon>
                             </v-btn>
                         </template>
@@ -113,11 +113,10 @@
                         </template>
                     </v-dialog>
                     <v-btn variant="text" @click="boxes = []; reloadBoxes()" style="height:100%;flex:1;" v-if="!rail">
-                        Reload
+                        {{ $t('reload') }} &nbsp;
                         <v-icon icon="fa-solid fa-arrow-rotate-right">
                         </v-icon>
                     </v-btn>
-
                 </div>
                 <v-list
                     style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;overflow:scroll;overflow-x: hidden;flex:1;padding:0;">
@@ -161,18 +160,17 @@
                                 </template>
                                 <v-card style="width:10rem;">
                                     <div style="width:100%">
-                                        <button class="leave-box-button" @click="pinBox(box.id)">
-                                            Pin to top
+                                        <button class="leave-box-button" @click="pinBox(box.id)">{{ $t('pin') }}
                                             <v-icon size="small" icon="fa-solid fa-thumbtack"></v-icon>
                                         </button>
                                         <button v-if="showDeleteBtn(box.owner) && !rail" class="delete-box-button"
                                             @click="deleteBox(box.title, box.id)">
-                                            Delete group
+                                            {{ $t('delete') }}
                                             <v-icon size="small" icon="fa-regular fa-trash-can"></v-icon>
                                         </button>
                                         <button v-if="showLeaveBtn(box.owner) && !rail" class="leave-box-button"
                                             @click="leaveBox(box.title, box.id)">
-                                            Leave group
+                                            {{ $t('leave') }}
                                             <v-icon size="small" icon="fa-solid fa-arrow-right-from-bracket"></v-icon>
                                         </button>
                                     </div>
