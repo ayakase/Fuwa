@@ -54,7 +54,8 @@ const language = createI18n({
             message_placeholder: "{'@'}bot to ask bot, arrow key ⌃ or ⌄ to navigate between messages",
             join: 'Join chat',
             joined: 'Joined',
-
+            exit: 'Exit',
+            member_count: "members"
         },
         ja: {
             display_name: '表示名',

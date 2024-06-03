@@ -216,7 +216,7 @@ async function uploadAvatar() {
             avatar: downloadURL
         })
         toast.success("Successfully changed avatar", {
-            position: 'top-right'
+            position: 'top'
         });
         setTimeout(() => {
             window.location.reload()
@@ -231,7 +231,7 @@ async function uploadAvatar() {
 function toggleTheme() {
     theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
     toast.info("Theme changed to " + theme.global.name.value, {
-        position: 'top-right'
+        position: 'top'
     });
     cookies.set('theme', theme.global.name.value, 60 * 60 * 24 * 30)
 }
@@ -327,7 +327,7 @@ async function saveName() {
     saveNameTimeout = setTimeout(async () => {
         if (userInfo.value.displayName.length < 4 || userInfo.value.displayName.length > 30) {
             toast.error("Display name must have more than 4 characters and less than 30 characters", {
-                position: 'top-right'
+                position: 'top'
             });
         } else {
             const userRef = doc(db, "users", userId.value)
@@ -335,7 +335,7 @@ async function saveName() {
                 displayName: userInfo.value.displayName
             })
             toast.success("Successfully changed your display name", {
-                position: 'top-right'
+                position: 'top'
             });
         }
     }, 1000);
@@ -351,17 +351,17 @@ async function saveCid() {
             const userRef = doc(db, "users", userId.value);
             await updateDoc(userRef, { cid: "" });
             toast.success("Successfully cleared your Connection Id", {
-                position: 'top-right'
+                position: 'top'
             });
         } else if (!regex.test(connectionId)) {
             toast.error("Connection Id must follow text#number format", {
-                position: 'top-right'
+                position: 'top'
             });
         } else {
             const userRef = doc(db, "users", userId.value);
             await updateDoc(userRef, { cid: connectionId });
             toast.success("Successfully changed your Connection Id", {
-                position: 'top-right'
+                position: 'top'
             });
         }
     }, 1000)
@@ -373,7 +373,7 @@ async function saveAbout() {
     saveAboutTimeout = setTimeout(async () => {
         if (userInfo.value.about.length < 2 || userInfo.value.about.length > 1000) {
             toast.error("Description must have more than 1 characters and less than 1000 characters", {
-                position: 'top-right'
+                position: 'top'
             });
         } else {
             const userRef = doc(db, "users", userId.value)
@@ -381,7 +381,7 @@ async function saveAbout() {
                 about: userInfo.value.about
             })
             toast.success("Successfully changed your about profile", {
-                position: 'top-right'
+                position: 'top'
             });
         }
     }, 1000)
@@ -390,7 +390,7 @@ const handleSignOut = () => {
     signOut(auth).then(() => {
         user.value = null
         toast.info('Signed Out, redirecting in 3s', {
-            position: 'top-right'
+            position: 'top'
         });
         setTimeout(() => {
             location.reload();
@@ -407,7 +407,7 @@ function selectTheme(id) {
     cookies.set('bgImage', themesArray[id].image, 60 * 60 * 24 * 30)
     emit('changeBg')
     toast.success(`Theme changed to ${themesArray[id].name}`, {
-        position: 'top-right'
+        position: 'top'
     });
     themeCheck.value = cookies.get('themeId')
 }

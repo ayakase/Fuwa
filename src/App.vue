@@ -1,14 +1,16 @@
 <script setup>
-import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
+import { RouterView, useRouter, useRoute } from 'vue-router'
+import { SwipeBottomNavigation } from "bottom-navigation-vue";
+import { CurvedBottomNavigation } from "bottom-navigation-vue";
+import "bottom-navigation-vue/dist/style.css";
 import { useTheme } from 'vuetify'
 import { ref } from 'vue';
 import { onMounted } from 'vue';
 import { useCookies } from "vue3-cookies";
-import { computed } from 'vue';
-import { getAuth, GoogleAuthProvider, GithubAuthProvider, onAuthStateChanged, signOut, signInWithPopup } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from 'firebase/auth';
 import { useUserStore } from './stores/userStore';
 import { db } from './firebaseConfig';
-import { doc, collection, addDoc, setDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
+import { doc, collection, getDocs, query, where, updateDoc } from 'firebase/firestore';
 const userStore = useUserStore()
 let { cookies } = useCookies()
 const user = ref()
@@ -31,7 +33,7 @@ const signInWithGoogle = () => {
       user.value = result.user
       addUserToDb(auth.currentUser)
       $toast.success("Logged in as " + auth.currentUser.displayName, {
-        position: 'top-right'
+        position: 'top'
       });
     }).catch((error) => {
       console.log(error);
@@ -227,9 +229,10 @@ const options = [
   </div>
   <!-- <div style="height: 60px;" class="mobile-menu"></div> -->
   <div class="mobile-menu">
-    <CurvedBottomNavigation v-if="route.meta.showNav" style="position: static;" icon-color="textTheme()"
+    <CurvedBottomNavigation v-if="route.meta.showNav" :icon-color="textTheme()"
       :background-color="backgroundColorTheme()" foreground-color='var(--main-color)' :options="options"
-      v-model="selected" />
+      v-model="selected">
+    </CurvedBottomNavigation>
   </div>
 
 </template>

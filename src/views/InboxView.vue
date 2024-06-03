@@ -341,7 +341,7 @@ async function addBoxToDb() {
         btnLoading.value = false
 
         $toast.success("Created box chat " + newBoxTitle.value, {
-            position: 'top-right'
+            position: 'top'
         });
         // setTimeout(() => {
         //     fetchBoxes()

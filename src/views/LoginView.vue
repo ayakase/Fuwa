@@ -145,7 +145,7 @@ const signInWithGoogle = () => {
             addUserToDb(auth.currentUser)
             // console.log(auth.currentUser)
             toast.success('Logged in as ' + result.user.displayName, {
-                position: 'top-right'
+                position: 'top'
             });
             // window.location.reload();
             router.push('/explore')
@@ -161,7 +161,7 @@ const signInWithGithub = () => {
             addUserToDb(auth.currentUser)
             // console.log(auth.currentUser)
             toast.success('Logged in as ' + result.user.displayName, {
-                position: 'top-right'
+                position: 'top'
             });
             // window.location.reload();
             router.push('/explore')
@@ -174,7 +174,7 @@ const registerEmail = ref('')
 const registerPassword = ref('')
 const registerWithEmailAndPassword = () => {
     // toast.success(registerEmail.value + ' ' + registerPassword.value, {
-    //     position: 'top-right'
+    //     position: 'top'
     // });
     createUserWithEmailAndPassword(getAuth(), registerEmail.value, registerPassword.value)
         .then((result) => {
@@ -182,14 +182,14 @@ const registerWithEmailAndPassword = () => {
             addUserToDb(auth.currentUser)
             // console.log(auth.currentUser)
             toast.success('Logged in as ' + result.user.displayName, {
-                position: 'top-right'
+                position: 'top'
             });
             // window.location.reload();
             router.push('/explore')
         }).catch((error) => {
             console.log(error.message);
             toast.error(error.message, {
-                position: 'top-right'
+                position: 'top'
             });
         });
 }
@@ -197,7 +197,7 @@ const loginEmail = ref('')
 const loginPassword = ref('')
 const loginWithEmailAndPassword = () => {
     // toast.success(registerEmail.value + ' ' + registerPassword.value, {
-    //     position: 'top-right'
+    //     position: 'top'
     // });
     signInWithEmailAndPassword(getAuth(), loginEmail.value, loginPassword.value)
         .then((result) => {
@@ -205,21 +205,21 @@ const loginWithEmailAndPassword = () => {
             addUserToDb(auth.currentUser)
             // console.log(auth.currentUser)
             toast.success('Logged in', {
-                position: 'top-right'
+                position: 'top'
             });
             // window.location.reload();
             router.push('/explore')
         }).catch((error) => {
             console.log(error.message);
             toast.error(error.message, {
-                position: 'top-right'
+                position: 'top'
             });
         });
 }
 const resetEmail = ref('')
 const sendResetLink = () => {
     toast.success(resetEmail.value, {
-        position: 'top-right'
+        position: 'top'
     });
 }
 </script>

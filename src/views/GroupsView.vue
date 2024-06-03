@@ -2,10 +2,14 @@
     <div class="container">
         <v-navigation-drawer :width="400" :rail="rail" rail-width="80" v-model="showSidebar">
             <div class="box-view">
-                <div class="message-top-bar" density="compact">
-                    <v-dialog width="800">
+                <div class="message-top-bar" style='height: 3rem;'>
+                    <v-btn variant="flat" icon="fa-solid fa-bars" @click="showSidebar = false" style="height:100%">
+                    </v-btn>
+                    <v-dialog width="800" v-if="!rail">
                         <template v-slot:activator="{ props }">
-                            <v-btn variant="text" icon="fa-solid fa-plus" class="add-box" v-bind="props">
+                            <v-btn style="height: 100%;flex:1;" variant="flat" class="add-box" v-bind="props">
+                                Create
+                                <v-icon icon="fa-solid fa-plus"></v-icon>
                             </v-btn>
                         </template>
                         <template v-slot:default="{ isActive }">
@@ -16,10 +20,11 @@
                                         required hide-details></v-text-field>
                                     <v-text-field variant="underlined" v-model="newBoxDescription"
                                         :label="$t('new_box_description')" required hide-details></v-text-field>
-                                    <div style="display:flex; flex-direction: row;align-items:center;gap:1rem;">
-                                        <v-text-field variant="underlined" v-model="newBoxInviteId"
-                                            :label="$t('new_box_invite_id')" required hide-details
-                                            disabled></v-text-field>
+                                    <div
+                                        style="display:flex; flex-direction: row;align-items:center;gap:1rem;flex-wrap: wrap;">
+                                        <v-text-field style="min-width: 50%" variant="underlined"
+                                            v-model="newBoxInviteId" :label="$t('new_box_invite_id')" required
+                                            hide-details disabled></v-text-field>
                                         <v-btn style="height:3rem;background-color:green;" @click="generateInviteId()">
                                             {{ $t('random_id') }}</v-btn>
                                         <v-btn style="height:3rem;background-color:red;" @click="newBoxInviteId = ''">{{
@@ -97,7 +102,9 @@
 
                                 </div>
                                 <v-card-actions>
-                                    <v-spacer></v-spacer>
+                                    <v-btn variant="outlined" color="error" :text="$t('cancel')"
+                                        @click="isActive.value = false">
+                                    </v-btn>
                                     <v-btn :loading="btnLoading" variant="outlined" color="success"
                                         :text="$t('new_chat_btn')" @click="addBoxToDb()">
                                     </v-btn>
@@ -105,21 +112,22 @@
                             </v-card>
                         </template>
                     </v-dialog>
-                    <v-btn variant="text" @click="boxes = []; reloadBoxes()" icon="fa-solid fa-arrow-rotate-right">
+                    <v-btn variant="text" @click="boxes = []; reloadBoxes()" style="height:100%;flex:1;" v-if="!rail">
+                        Reload
+                        <v-icon icon="fa-solid fa-arrow-rotate-right">
+                        </v-icon>
                     </v-btn>
+
                 </div>
-                <!-- <div style="">
-                    <p v-for="x in 40">a</p>
-                </div> -->
                 <v-list
-                    style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;overflow:scroll;overflow-x: hidden;flex:1;">
-                    <v-divider></v-divider>
+                    style="display: flex; flex-direction: column;gap:.2rem; padding-left: .2rem;padding-right: .2rem;overflow:scroll;overflow-x: hidden;flex:1;padding:0;">
+                    <!-- <v-divider></v-divider> -->
                     <v-list-item :class="{ active: box.id == boxId }"
                         @click="selectBox(box.id, box.title, box.members, box.existed, box.owner, box.description, box.invite, box.thumbnail, box.isPublic)"
                         class="chat-box-container" v-if="boxes.length > 0" v-for="box in  boxes " :key="box"
                         :value="box.id" style="overflow:hidden;border-radius: .5rem;">
                         <img :src="box.banner" alt="" v-if="!rail"
-                            style="position:absolute;left:0;top:0;z-index: -1;width: 100%;filter:  brightness(40%)">
+                            style="position:absolute;left:0;top:0;z-index: -1;width: 100%;filter:  brightness(40%);background-color: gray;">
                         <v-tooltip v-if="rail" activator="parent" location="end">
                             <p>
                                 {{ box.title }}
@@ -133,7 +141,6 @@
                                 <img :src="box.thumbnail" alt=""
                                     style="width:4rem;transition: width 0.3s ease;border-radius:9999px;"
                                     :style="getStyle(rail)">
-
                                 <div>
                                     <p style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 12rem;"
                                         class="box-title" v-if="!rail">{{ box.title }}</p>
@@ -400,7 +407,7 @@ const btnLoading = ref(false)
 async function addBoxToDb() {
     if (!newBoxTitle.value || !newBoxDescription.value || !croppedThumbnail.value || !croppedBanner.value) {
         $toast.error("Do not leave title, description, thumbnail and banner empty", {
-            position: 'top-right'
+            position: 'top'
         });
     } else {
         try {
@@ -436,7 +443,7 @@ async function addBoxToDb() {
             });
             btnLoading.value = false;
             $toast.success("Created box chat " + newBoxTitle.value, {
-                position: 'top-right'
+                position: 'top'
             });
         } catch (e) {
             btnLoading.value = false;
@@ -485,7 +492,7 @@ async function deleteBox(title, id) {
         }
         // fetchBoxes();
         $toast.info("Deleted box chat " + title, {
-            position: 'top-right'
+            position: 'top'
         });
     } else {
         console.log("Deletion cancelled");
@@ -514,7 +521,7 @@ async function leaveBox(title, id) {
         });
         // fetchBoxes();
         $toast.info("Left " + title, {
-            position: 'top-right'
+            position: 'top'
         });
     } else {
         console.log("Deletion cancelled");
@@ -562,6 +569,7 @@ onMounted(() => {
 .new-dialog {
     padding: 1rem;
     padding-top: 0;
+    max-height: 80vh !important;
 }
 
 .chat-box {
@@ -590,6 +598,7 @@ onMounted(() => {
     flex-direction: row;
     width: 100%;
     justify-content: space-between;
+    align-items: center;
 }
 
 .box-title {

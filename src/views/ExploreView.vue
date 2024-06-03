@@ -1,5 +1,6 @@
 <template>
     <div class="container">
+
         <div class="cover-section">
             <div
                 style="width:100%; display: flex;align-items:center;flex-wrap: wrap; flex-direction: column;gap: .2rem;">
@@ -21,8 +22,11 @@
             </h2>
             <v-icon icon="fa-regular fa-compass fa-shake" style="font-size:2rem;color:#ff1744;"></v-icon>
         </div>
+        <v-pagination v-if="totalPages" prev-icon="fa-solid fa-chevron-left" next-icon="fa-solid fa-chevron-right"
+            v-model="page" :length="totalPages" class="my-4 top-pagination" style="display: none;" @click="fetchBoxes"
+            :total-visible="2"></v-pagination>
         <div class="result-container" v-if="resultBoxes">
-            <v-dialog max-width="800" v-for="box in resultBoxes">
+            <v-dialog v-for="box in resultBoxes">
                 <template v-slot:activator="{ props: activatorProps }">
                     <v-card class="each-box" elevation="3" variant="elevated" hover link v-bind="activatorProps">
                         <v-img class="box-cover" :src="box.banner" cover
@@ -54,37 +58,47 @@
                 </template>
 
                 <template v-slot:default="{ isActive }">
-                    <v-card class="mx-auto" style="width:100%">
-                        <v-img class="" :src="box.banner" cover
-                            alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg"></v-img>
-                        <div
-                            style="display: flex;flex-direction: column; transform: translateY(-7rem);padding-left: 1rem;padding-right: 1rem;">
+                    <v-card class="mx-auto" style="width:100%;">
+                        <div style="display: flex; flex-direction: row;position: relative;">
+                                <!-- <img :src="box.thumbnail" alt="" style="width:100%;height:100%;filter: brightness(80%)"> -->
+                            <v-img style="filter: brightness(80%);width:100%;" :src="box.banner" cover
+                                alt="https://ceblog.s3.amazonaws.com/wp-content/uploads/2012/03/cupcakeIpsum.jpg"></v-img>
+                            <h3 class="box-title">
+                                {{ box.title }}</h3>
+                        </div>
+                        <div style="display: flex;flex-direction: column; padding-left: 1rem;padding-right: 1rem;">
                             <div style="width:100%;display: flex;justify-content: center;">
                                 <v-card variant="flat" style="width: 25%;border-radius: 9999px;" border="background xl">
                                     <!-- <v-img :src="box.thumbnail" alt="s"></v-img> -->
-                                    <img :src="box.thumbnail" alt=""
-                                        style="width: 100%;height: 100%;object-fit: cover;">
+
                                 </v-card>
                             </div>
                             <div>
-                                <h3>{{ box.title }}</h3>
-                                <div>
+
+                                <div style="max-height: 50vh !important;overflow-y:scroll;">
                                     {{ box.description }}</div>
                                 <div style="display: flex;align-items: center;gap: 1rem;"> <v-icon
                                         icon="fas fa-user-group" size="xm"></v-icon>{{
                     countMembers(box.members)
-                }} members </div>
+                }}{{ $t('member_count') }} </div>
                             </div>
                         </div>
-                        <div
-                            style="width: 100%; display: flex; justify-content: center;position: absolute;bottom:1rem;">
-                            <v-btn style="height: 4rem;font-size: large;" v-if="!joined(box.members)"
-                                @click="joinBox(box.id)">
-                                {{ $t('join') }}
-                                &nbsp; <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <div style="width: 100%; display: flex; justify-content: flex-end;">
+
+                            <v-btn variant="flat" style="height: 2rem;font-size: large;"
+                                @click="isActive.value = false">
+                                {{ $t('exit') }}
+                                &nbsp; <i class=""></i>
                             </v-btn>
-                            <v-btn style="height: 4rem;font-size: large;" disabled
-                                v-if="joined(box.members)">Joined</v-btn>
+                            <div>
+                                <v-btn variant="flat" style="height: 2rem;font-size: large;" v-if="!joined(box.members)"
+                                    @click="joinBox(box.id)">
+                                    {{ $t('join') }}
+                                    &nbsp; <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                </v-btn>
+                                <v-btn variant="flat" style="height: 2rem;font-size: large;" disabled
+                                    v-if="joined(box.members)">Joined</v-btn>
+                            </div>
                         </div>
                     </v-card>
                 </template>
@@ -196,7 +210,7 @@ async function joinBox(id) {
         await updateDoc(boxRef, 'latestMessage', `${userInfo.value.displayName}: joined this chat`)
         await updateDoc(boxRef, 'latestChange', Date.now())
         toast.success("Joined", {
-            position: 'top-right'
+            position: 'top'
         });
         router.push('/groups')
     } catch (e) {
@@ -344,6 +358,22 @@ h2 {
 
 }
 
+.box-title {
+    font-size: 3rem;
+    width: 100%;
+    color: white;
+    text-shadow:
+        -2px -2px 0 black,
+        2px -2px 0 black,
+        -2px 2px 0 black,
+        2px 2px 0 black;
+    position: absolute;
+    bottom: 0;
+    padding-left: .2rem;
+    padding-right: .2rem;
+    text-align: center;
+}
+
 @media (max-width: 800px) {
     .cover-section {
         border-radius: 0;
@@ -355,16 +385,22 @@ h2 {
     h2 {
         font-size: 1.5rem;
     }
+
+    .result-container {
+        justify-content: center;
+        grid-template-columns: 22rem;
+    }
+
+    .box-title {
+        font-size: 1.5rem;
+    }
 }
 
 @media all and (max-width:1280px) {
-    .result-container {
-        justify-content: center;
-    }
+
 
     .each-box {
         height: 14rem;
-
     }
 
     .box-cover {
@@ -372,6 +408,9 @@ h2 {
         max-height: 6rem;
     }
 
+    .top-pagination {
+        display: block !important;
+    }
 
 
     .box-description {

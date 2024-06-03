@@ -4,7 +4,7 @@
             <div v-if="show" style="display: flex;flex-direction: column;justify-content: center;align-items:center;">
                 <p style="text-align: center;">{{ currentTime }}</p>
                 <img class="illustration" src="../assets/illustration.png" alt="">
-                <h1 style="text-align: center;"> {{ $t('greeting') }}, {{ userInfo.displayName }}!
+                <h1 style="text-align: center;margin: 0;padding: 0;"> {{ $t('greeting') }}, {{ userInfo.displayName }}!
                 </h1>
             </div>
         </Transition>
@@ -360,7 +360,7 @@ let update = [
 
 .button-container {
     width: 35%;
-    margin-top: 2rem !important;
+    margin-top: 1rem !important;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     margin: auto;

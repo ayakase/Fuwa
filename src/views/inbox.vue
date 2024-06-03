@@ -272,7 +272,7 @@ async function addBoxToDb() {
             messageType: 'system',
         });
         $toast.success("Created box chat " + boxTitle.value, {
-            position: 'top-right'
+            position: 'top'
         });
         setTimeout(() => {
             fetchBoxes()
@@ -299,7 +299,7 @@ async function deleteBox(title, id) {
             console.error(e.message)
         }
         $toast.info("Deleted box chat " + title, {
-            position: 'top-right'
+            position: 'top'
         });
     } else {
         console.log("Deletion cancelled");
@@ -325,7 +325,7 @@ async function leaveBox(title, id) {
 
         });
         $toast.info("Left " + title, {
-            position: 'top-right'
+            position: 'top'
         });
     } else {
         console.log("Deletion cancelled");

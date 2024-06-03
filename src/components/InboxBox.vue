@@ -8,7 +8,7 @@
     </v-app-bar>
     <div v-if="user" class="message-container" @scroll="handleScroll()" ref="messageContainer">
       <div
-        style="position:absolute; display:flex; flex-direction: row; justify-content:center;width:100%; top: 1rem;z-index: 999;">
+        style="display:flex; flex-direction: row; justify-content:center;width:100%; padding-top: 1rem;z-index: 999;">
         <Transition name="slide-fade-bottom">
           <v-btn v-show="showLoadMore" @click="loadMoreMessages()" prepend-icon="fa-solid fa-angles-up"> Load More
             Message
@@ -29,11 +29,9 @@
             :image="avatarMap(message.sender)"></v-avatar>
           <v-avatar class="avatar" v-if="message.messageType == 'bot'"
             image="https://i.imgur.com/horI1zX.png"></v-avatar>
-          <v-card-subtitle class="time"
+          <v-card-subtitle
             v-if="isSender(message.sender) && message.messageType !== 'system' && message.messageType !== 'bot'"
-            style="margin-left: auto;">{{
-      convertTime(message.time)
-    }}</v-card-subtitle>
+            style="margin-left: auto;"><span class="time">{{ convertTime(message.time) }}</span></v-card-subtitle>
           <v-menu transition="scale-transition" location="start"
             v-if="isSender(message.sender) && message.messageType !== 'system' && message.messageType !== 'bot'">
             <template v-slot:activator="{ props }">
@@ -92,10 +90,9 @@
               </v-list-item>
             </v-list>
           </v-menu>
-          <v-card-subtitle class="time"
-            v-if="(!isSender(message.sender) && message.messageType == 'common') || message.messageType == 'bot'">{{
-      convertTime(message.time)
-    }}</v-card-subtitle>
+          <v-card-subtitle
+            v-if="(!isSender(message.sender) && message.messageType == 'common') || message.messageType == 'bot'"><span
+              class="time">{{ convertTime(message.time) }}</span></v-card-subtitle>
         </div>
       </div>
       <div>
@@ -293,7 +290,7 @@ async function deleteMessage(id) {
       latestChange: Date.now()
     })
     toast.info('Message unsent', {
-      position: 'top-right'
+      position: 'top'
     });
   } else {
     console.log("Deletion cancelled");

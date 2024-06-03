@@ -23,8 +23,8 @@
 
                 </div>
 
-                <div style="width:100%;display:flex; flex-direction: row;align-items:center;gap:1rem;">
-                    <v-text-field variant="outlined" v-model="boxInviteId" label="Invite ID" required hide-details
+                <div style="width:100%;display:flex; flex-direction: row;align-items:center;gap:1rem;flex-wrap:wrap;">
+                    <v-text-field variant="outlined" style="width:50%" v-model="boxInviteId" label="Invite ID" required hide-details
                         disabled></v-text-field>
                     <v-btn style="height:3rem;background-color:green;" @click="generateInviteId()">
                         Random Id</v-btn>

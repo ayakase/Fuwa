@@ -2,7 +2,7 @@
   <div class="container" ref="bgContainer">
     <v-app-bar :elevation="2" density="compact">
       <div class="top-bar">
-        <v-btn icon="fa-solid fa-bars" @click="emit('openMenu')"></v-btn>
+        <v-btn variant="flat" icon="fa-solid fa-bars" @click="emit('openMenu')"></v-btn>
         <v-avatar :image="props.thumbnail"></v-avatar>
         <v-card-title class="box-name">{{ props.boxName }}</v-card-title>
         <div>
@@ -23,9 +23,9 @@
     </v-app-bar>
     <div v-if="user" class="message-container" @scroll="handleScroll()" ref="messageContainer">
       <div
-        style="position:absolute; display:flex; flex-direction: row; justify-content:center;width:100%; top: 1rem;z-index: 999;">
+        style=" display:flex; flex-direction: row; justify-content:center;width:100%; z-index: 999;padding-top: 1rem;">
         <Transition name="slide-fade-bottom">
-          <v-btn v-show="showLoadMore" @click="loadMoreMessages()" prepend-icon="fa-solid fa-angles-up">
+          <v-btn v-if="showLoadMore" @click="loadMoreMessages()" prepend-icon="fa-solid fa-angles-up">
             {{ $t('load_more_msg') }}
           </v-btn>
         </Transition>
@@ -127,13 +127,13 @@
       </Transition>
       <input @input="handleInput" @keyup.down="onKeyDown" @keyup.up="onKeyUp" @keydown.enter="sendMessage()" type="text"
         class="message-box" v-model="messageContent" id="" :placeholder="$t('message_placeholder')" />
-      <v-btn style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
+      <v-btn variant="flat" style="color: var(--main-color)" @click="toggleImageSelect = !toggleImageSelect"><v-icon
           icon="fa-regular fa-image"></v-icon>
       </v-btn>
-      <v-btn class="icon-button" style="color: var(--main-color)" @click="toggleIcon = !toggleIcon"><v-icon
-          icon="fa-regular fa-face-smile"></v-icon>
+      <v-btn variant="flat" class="icon-button" style="color: var(--main-color)"
+        @click="toggleIcon = !toggleIcon"><v-icon icon="fa-regular fa-face-smile"></v-icon>
       </v-btn>
-      <v-btn style="color: var(--main-color)" @click="sendMessage"><v-icon size="large"
+      <v-btn variant="flat" style="color: var(--main-color)" @click="sendMessage"><v-icon size="large"
           icon="fa-solid fa-paper-plane"></v-icon></v-btn>
     </v-card>
     <Transition name="slide-fade-bottom">
@@ -155,11 +155,11 @@
           <img v-if="thumbnailSrc" :src="thumbnailSrc" alt="" style="width: 100%; height: 100%;object-fit: contain;" />
         </div>
         <div style=" display: flex; width: 100%; justify-content: space-between;">
-          <v-btn style="background-color: red;flex:1;" @click="thumbnailImg = ''; thumbnailSrc = ''; toggleImageSelect = false
+          <v-btn variant="tonal" color="error" style="flex:1;" @click="thumbnailImg = ''; thumbnailSrc = ''; toggleImageSelect = false
       ">
             <v-icon icon="fa-solid fa-x"></v-icon>
           </v-btn>
-          <v-btn :loading='imgUploading' style="background-color: green;flex:1;" @click="sendImg()">
+          <v-btn variant="tonal" color="success" :loading='imgUploading' style="flex:1;" @click="sendImg()">
             <v-icon icon="fa-solid fa-cloud-arrow-up"></v-icon>
           </v-btn>
         </div>
@@ -374,7 +374,7 @@ async function deleteMessage(id) {
       latestChange: Date.now()
     })
     toast.info('Message unsent', {
-      position: 'top-right'
+      position: 'top'
     });
   } else {
     console.log("Deletion cancelled");
@@ -432,7 +432,7 @@ function getInvite(id) {
   console.log(`${window.location.host}/invite/${id}`)
   navigator.clipboard.writeText(`${window.location.host}/invite/${id}`)
   toast.info('Invite link copied to the clipboard', {
-    position: 'bottom-right'
+    position: 'top'
   });
 }
 const memberArray = ref()
