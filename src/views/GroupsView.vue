@@ -1,9 +1,16 @@
 <template>
     <div class="container">
-        <v-navigation-drawer :width="400" :rail="rail" rail-width="80" v-model="showSidebar">
+        <v-navigation-drawer :width="400" :rail="rail" rail-width="100" v-model="showSidebar">
             <div class="box-view">
                 <div class="message-top-bar" style='height: 3rem;'>
                     <v-btn variant="flat" icon="fa-solid fa-bars" @click="showSidebar = false" style="height:100%">
+                    </v-btn>
+                    <v-btn icon="fa-solid fa-chevron-right" style="height:3rem;" variant="flat" v-if="rail"
+                        @click.stop="rail = false">
+                    </v-btn>
+                    <v-btn icon="fa-solid fa-chevron-left" style="height:3rem;" variant="flat" v-if="!rail"
+                        @click.stop="rail = true">
+                        <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
                     </v-btn>
                     <v-dialog width="800" v-if="!rail">
                         <template v-slot:activator="{ props }">
@@ -138,22 +145,21 @@
                         <div class="chat-box">
                             <div style="display:flex; align-items: center;gap:1rem;position:relative;color:whitesmoke;">
                                 <img :src="box.thumbnail" alt=""
-                                    style="width:4rem;transition: width 0.3s ease;border-radius:9999px;"
-                                    :style="getStyle(rail)">
+                                    style="transition: width 0.3s ease;border-radius:9999px;" :style="getStyle(rail)">
                                 <div>
                                     <p style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 12rem;"
                                         class="box-title" v-if="!rail">{{ box.title }}</p>
                                     <p v-if="!rail"
                                         style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 12rem;">
                                         {{ box.latestMessage }}</p>
-                                    <p style="font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
+                                    <p v-if="!rail" style="font-size: 12px;"> at {{ convertTime(box.latestChange) }}</p>
                                 </div>
                             </div>
                             <v-icon size="small" v-if="box.pinned"
                                 style="position: absolute; top:.5rem;left:.5rem;color:#f44336;"
                                 icon="fa-solid fa-thumbtack"></v-icon>
 
-                            <v-menu location="end" transition="scale-transition">
+                            <v-menu v-if="!rail" location="end" transition="scale-transition">
                                 <template v-slot:activator="{ props }">
                                     <v-btn v-bind="props" icon="fa-solid fa-ellipsis" size="small">
                                     </v-btn>
@@ -187,12 +193,7 @@
                     <ChatLoading v-else></ChatLoading>
                 </v-list>
                 <div style="width:100%;">
-                    <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="rail" @click.stop="rail = false">
-                        <v-icon size='large' icon="fa-solid fa-chevron-right"></v-icon>
-                    </v-btn>
-                    <v-btn style="width:100%;height:3rem;" variant="tonal" v-if="!rail" @click.stop="rail = true">
-                        <v-icon size='large' icon="fa-solid fa-chevron-left"></v-icon>
-                    </v-btn>
+
                 </div>
             </div>
         </v-navigation-drawer>
@@ -451,7 +452,7 @@ async function addBoxToDb() {
 }
 
 function getStyle(rail) {
-    return { width: rail ? '2.2rem' : '4rem' }
+    return { width: rail ? '4rem' : '4rem' }
 }
 function showDeleteBtn(owner) {
     return (`users/${userId.value}` == owner.path)
@@ -465,6 +466,7 @@ async function pinBox(id) {
     const userDocRef = doc(db, 'users', userStore.userId);
     try {
         await updateDoc(userDocRef, {
+
             pin: boxDocRef
         })
         reloadBoxes()

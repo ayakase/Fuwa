@@ -21,7 +21,7 @@
                                 <v-icon icon="fa-solid fa-palette"></v-icon>
                             </v-btn>
                         </template>
-                        <v-color-picker hide-canvas how-swatches v-model="colorCode" elevation="15"></v-color-picker>
+                        <v-color-picker hide-canvas show-swatches v-model="colorCode" elevation="15"></v-color-picker>
                         <v-btn @click="confirmColor()">
                             {{$t('cfcolor')}}
                         </v-btn>
