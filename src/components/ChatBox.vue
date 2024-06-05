@@ -792,7 +792,7 @@ p {
 }
 
 .received-message {
-  max-width: 70%;
+  max-width: 90%;
   padding: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -800,7 +800,7 @@ p {
 }
 
 .sender-message {
-  max-width: 70%;
+  max-width: 90%;
   padding: 0.5rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;

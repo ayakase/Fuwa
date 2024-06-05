@@ -238,7 +238,7 @@ const options = [
 </template>
 <style scoped>
 .main-container {
-  height: calc(100vh - 60px);
+  height: calc(100vh - 60px) !important;
   /* height: 100vh; */
 
 }

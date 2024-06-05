@@ -1,5 +1,5 @@
 <template>
-    <v-card style="width: 100%; height: 100%;padding-top: 1rem;">
+    <div style="width: 100%; height: 100%;padding-top: 1rem;overflow-y: scroll;">
         <Transition name="slide-fade">
             <div v-if="show" style="display: flex;flex-direction: column;justify-content: center;align-items:center;">
                 <p style="text-align: center;">{{ currentTime }}</p>
@@ -33,7 +33,7 @@
             <p> ~ {{ quote.author }} ~</p>
         </div>
         <v-skeleton-loader v-else class="mx-auto" type="list-item-three-line"></v-skeleton-loader> -->
-    </v-card>
+    </div>
 
 
     <!-- <v-infinite-scroll :items="news" :onLoad="load" class="news-container">

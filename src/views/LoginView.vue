@@ -1,10 +1,10 @@
 <template>
     <div class="container">
         <img class="login-bg" src="../assets/login-bg.png">
-        <div class="left-section">
+        <div class="right-section">
             <img class="name-logo" src="../assets/logo.png" alt="">
 
-            <v-card width="450" elevation="5" style="background-color: white;color:black">
+            <v-card class="action-form" elevation="5" style="background-color: white;color:black">
                 <v-tabs v-model="tab" grow color="light-green-darken-1">
                     <v-tab value="one">Sign in</v-tab>
                     <v-tab value="two">Sign up</v-tab>
@@ -17,27 +17,7 @@
                                 <v-text-field v-model="loginEmail" label="Email" variant="outlined" single-line
                                     hide-details></v-text-field>
                                 <v-text-field v-model="loginPassword" label="Password" variant="outlined" single-line
-                                    hide-details></v-text-field>
-                                <v-dialog max-width="500">
-                                    <template v-slot:activator="{ props: activatorProps }">
-                                        <a v-bind="activatorProps" href="" @click.prevent="">Forgot password ?</a>
-                                    </template>
-                                    <template v-slot:default="{ isActive }">
-                                        <v-card title="Receive password reset link">
-                                            <v-card-item>
-                                                <v-text-field v-model="resetEmail" label="Your email" variant="outlined"
-                                                    single-line hide-details></v-text-field>
-                                            </v-card-item>
-
-                                            <v-card-actions>
-                                                <v-spacer></v-spacer>
-                                                <v-btn @click="sendResetLink" text="Send reset link"></v-btn>
-                                                <!-- <v-btn text="Close Dialog" @click="isActive.value = false"></v-btn> -->
-                                            </v-card-actions>
-                                        </v-card>
-                                    </template>
-                                </v-dialog>
-
+                                    hide-details @keydown.enter="loginWithEmailAndPassword"></v-text-field>
                                 <v-btn class="login-btn" @click="loginWithEmailAndPassword"> Sign in
                                 </v-btn>
                                 <v-btn class=" login-btn" @click="signInWithGoogle"> Sign in with google
@@ -231,7 +211,7 @@ const sendResetLink = () => {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background-color: white;
 }
 
@@ -254,17 +234,18 @@ a {
 .login-bg {
     height: 100vh;
     width: 50%;
+    object-fit: cover;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
-.left-section {
+.right-section {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     gap: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 5%;
+    /* padding-top: 5%; */
 }
 
 
@@ -281,6 +262,9 @@ a {
 
     /* When the animation is finished, start again */
     animation-iteration-count: infinite;
+}
+.action-form {
+    width: 50%;
 }
 
 @keyframes shake {
@@ -328,10 +312,15 @@ a {
         transform: translate(1px, -2px) rotate(-1deg);
     }
 }
-
-@media only screen and (max-width: 800px) {
+@media all and (max-width: 800px) {
     .login-bg {
         display: none;
+    }
+}
+@media all and (max-width: 1280px) {
+    
+    .action-form {
+        width: 90%;
     }
 }
 </style>
