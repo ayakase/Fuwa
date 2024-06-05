@@ -238,7 +238,7 @@ const options = [
 </template>
 <style scoped>
 .main-container {
-  height: calc(100vh - 60px) !important;
+  height: 100vh;
   /* height: 100vh; */
 
 }
@@ -250,6 +250,7 @@ const options = [
 .mobile-menu {
   position: relative;
   z-index: 99999;
+  height: 60px;
 }
 
 @media all and (min-width: 1280px) {
