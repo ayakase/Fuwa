@@ -14,6 +14,7 @@
                     <v-tabs-window v-model="tab">
                         <v-tabs-window-item value="one">
                             <div style="display: flex;flex-direction: column;gap:1rem;padding-bottom: .2rem;">
+                                Demo account: a@a.com, 12345678
                                 <v-text-field v-model="loginEmail" label="Email" variant="outlined" single-line
                                     hide-details></v-text-field>
                                 <v-text-field v-model="loginPassword" label="Password" variant="outlined" single-line
